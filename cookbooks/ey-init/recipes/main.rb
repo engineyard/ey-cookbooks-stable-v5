@@ -15,11 +15,15 @@ include_recipe 'ey-base::chef_patches'
 include_recipe 'ey-base::resin_gems'
 include_recipe 'ey-core'
 
+Chef::Log.info("Calling custom recipes hook: before-main")
 include_recipe 'ey-custom::before-main'
+Chef::Log.info("Finished custom recipes hook: before-main")
 
 include_recipe 'ey-base::bootstrap' # common things that are installed in all the instances
 node.engineyard.instance.roles.each { |role| include_recipe "#{role}::prep" }
 node.engineyard.instance.roles.each { |role| include_recipe "#{role}::build" }
 include_recipe 'ey-base::post_bootstrap' # common things that we want to install setting up the instance
 
+Chef::Log.info("Calling custom recipes hook: after-main")
 include_recipe 'ey-custom::after-main'
+Chef::Log.info("Finished custom recipes hook: after-main")
