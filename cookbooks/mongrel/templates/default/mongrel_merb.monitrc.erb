@@ -1,0 +1,5 @@
+check process merb_<%= @app_name %>_master
+  with pidfile /var/log/engineyard/<%= @app_name %>/<%= @app_name %>-<%= @framework_env %>-merb.main.pid
+  start program = "/engineyard/bin/monit_merb_mpc <%= @app_name %> start_master -c<%= @mongrel_instance_count %> -n<%= @mongrel_base_port %> -e <%= @framework_env %>"
+  stop program = "/engineyard/bin/monit_merb_mpc <%= @app_name %> stop_master -e <%= @framework_env %>"
+  group <%= @app_name %>

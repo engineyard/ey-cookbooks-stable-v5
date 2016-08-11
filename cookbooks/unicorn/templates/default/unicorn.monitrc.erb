@@ -1,0 +1,19 @@
+check process unicorn_master_<%= @app %>
+  with pidfile /var/run/engineyard/unicorn_<%= @app %>.pid
+  start program = "/bin/bash -c '/engineyard/bin/app_<%= @app %> start'"
+    as uid <%= @user %> and gid <%= @user %>
+    stop program = "/bin/bash -c '/engineyard/bin/app_<%= @app %> stop'"
+    as uid <%= @user %> and gid <%= @user %>
+  if mem > <%= @master_memory_size %> MB for <%= @master_cycle_count %> cycles then restart
+  if cpu > 100% for 2 cycles then restart
+  group unicorn_<%= @app %>
+
+<% (0..(@unicorn_worker_count - 1)).each do |i| %>
+check process unicorn_<%= @app %>_worker<%= i %>
+  with pidfile /var/run/engineyard/unicorn_worker_<%= @app %>_<%= i %>.pid
+  <% @worker_mem_cycle_checks.each do |mem,cycles,sig| %>
+  if mem > <%= "%0.1f" % mem %> MB for <%= cycles %> cycles then exec "/bin/bash -c '/bin/kill -<%= sig.upcase %> `cat /var/run/engineyard/unicorn_worker_<%= @app %>_<%= i %>.pid` && sleep 1'"
+  <% end %>    
+  group unicorn_<%= @app %>
+
+<% end %>

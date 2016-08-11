@@ -1,0 +1,13 @@
+[mysql]
+user=<%= @username %>
+password=<%= @password %>
+
+[mysqldump]
+user=<%= @username %>
+password=<%= @password %>
+
+<% if @username == 'root' %>
+[mysqladmin]
+user=<%= @username %>
+password=<%= @password %>
+<% end %>

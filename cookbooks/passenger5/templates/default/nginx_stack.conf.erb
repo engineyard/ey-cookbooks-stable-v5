@@ -1,0 +1,24 @@
+# Stack is set to <%= @stack_type %>
+#
+# If you wish to have Passenger start in addition, please "touch keep.stack.conf" then
+# uncomment the lines below and customize for your needs.  The keep file will prevent
+# this file from getting overwritten again.
+
+#passenger_root /usr/libexec/passenger;
+#passenger_max_pool_size 1;
+#
+#passenger_pool_idle_time 3600;
+#
+#passenger_user_switching on; # Yes this is the default, here for clarity.
+#passenger_default_user <%= @user %>;
+#passenger_default_group <%= @user %>;
+#
+#passenger_friendly_error_pages off;
+#
+###
+###passenger_pre_start http://localhost:80/;
+###
+#
+#passenger_log_level 0;
+#
+#passenger_debug_log_file /var/log/engineyard/nginx/passenger.log;

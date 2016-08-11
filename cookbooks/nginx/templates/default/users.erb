@@ -1,0 +1,2 @@
+<%= (@application[:site_users]||[]).map { |user| "#{user[:login]}:#{user[:encrypted_password]}" }.join("\n") %>
+<%# careful not to have leading blank line in nginx users file %>

@@ -1,0 +1,8 @@
+---
+keep: 2
+log_purge_sleep: 120
+max_files_purged: 10
+disk_purge_threshold: 50
+keep_binlog_hours: 24
+min_gb_maintain_binlogs: 10
+max_pct_maintain_binlogs: 70

@@ -1,0 +1,7 @@
+standby_mode = '<%= @standby_mode %>'
+primary_conninfo = 'host=<%= @primary_host %> port=<%= @primary_port %> user=<%= @primary_user %> password=<%= @primary_password %> <% if @postgres_version >= "9.1" %>application_name=<%= @conn_app_name %><% end %>'
+trigger_file = '<%= @trigger_file %>'
+restore_command = 'cp /db/postgresql/<%= @postgres_version %>/wal/%f %p'
+archive_cleanup_command = 'pg_archivecleanup /db/postgresql/<%= @postgres_version %>/wal %r'
+<% if @postgres_version >= "9.1" %>recovery_target_timeline = latest<% end %>
+  

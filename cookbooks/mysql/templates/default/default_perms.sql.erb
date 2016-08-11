@@ -1,0 +1,9 @@
+GRANT ALL PRIVILEGES 
+ON *.*
+TO root@'%'
+IDENTIFIED BY '<%= @dbpass %>';
+
+GRANT REPLICATION SLAVE 
+ON *.*
+TO 'replication'@'%' 
+IDENTIFIED BY '<%= @dbpass %>';

@@ -1,0 +1,183 @@
+#!/bin/bash
+
+ACTION=$1
+WARN=$2
+CRIT=$3
+INTERVAL=$4
+
+STATUS_DIR="/tmp/check_${ACTION}_status"
+mkdir -p ${STATUS_DIR}
+
+function alert() {
+    SEVERITY="$1"
+    MESSAGE="$2"
+    CHECK_TYPE="$3"
+    STATUS_FILE="$(ls ${STATUS_DIR}/${ACTION}_* 2> /dev/null)"
+    timestamp=$(date '+%s')
+
+    if [[ "${STATUS_FILE}" =~ [0-9]+$ ]]
+    then
+        ALERT_COUNT="${BASH_REMATCH[0]}"
+        ALERT_COUNT=$(( ${ALERT_COUNT} + 1))
+    elif [ "${SEVERITY}" != "OKAY" ]
+    then
+        ALERT_COUNT=1
+    fi
+
+    # alert in 3 cases
+    # no status file for the ACTION exists
+    # SEVERITY is not OKAY and ALERT_COUNT is greater than 1
+    # SEVERITY is OKAY but an WARN/FAIL alert fired on the last check (ALERT_COUNT will now be > 2)
+    if [[ (! -e "${STATUS_FILE}") || ("${SEVERITY}" != "OKAY" && "${ALERT_COUNT}" > 1) || ("${SEVERITY}" = "OKAY" && "${ALERT_COUNT}" > 2) ]]
+    then
+        echo "PUTNOTIF Time=${timestamp} TYPE=${CHECK_TYPE}-${ACTION} severity=${SEVERITY} message=\"raw_message: $(date +'%T') ${MESSAGE}\""
+    fi
+
+    rm -f ${STATUS_FILE} > /dev/null 2>&1
+
+    # write fresh status file
+    STATUS_FILE="${STATUS_DIR}/${ACTION}_OKAY"
+    if [ "${SEVERITY}" != "OKAY" ]
+    then
+        STATUS_FILE="${STATUS_DIR}/${ACTION}_${SEVERITY}_${ALERT_COUNT}"
+    fi
+    echo -e "Time: $(date)\nStatus: ${SEVERITY}\nType: ${CHECK_TYPE}-${ACTION}\nMessage: ${MESSAGE}" > $STATUS_FILE
+
+    exit
+}
+
+# This function is not appropriate for checks that need to run every minute or need to run
+#  at the top of the hour (0 minutes). This was necessary since 0 % {anything} is 0
+function check_interval {
+    if [[ ! $(( $(date +"%M") % ${INTERVAL} )) -eq 0 ]] || [[ $(date +"%M") -eq 0 ]]
+    then
+      exit 0
+    fi
+}
+
+function check_ntpd {
+    [[ -z ${WARN} ]] && WARN=1
+    [[ -z ${CRIT} ]] && CRIT=2
+    [[ -z ${INTERVAL} ]] && INTERVAL=45
+    check_interval
+    # We want to check seconds rather than minutes of delay
+    WARN=$(($WARN * 60))
+    CRIT=$(($CRIT * 60))
+    
+    # Note: there is an overflow issue with offset such that if the time is off more than 2 hours 
+    #  these times will no longer be that reliable. The ntpd process appears to crash when the
+    #  host is that far out of sync, and we do check for that.
+    
+    check_type='process'
+    ORIGINAL_OUTPUT="$(/usr/bin/ntpq -pn 2>&1)"
+    count=0
+    total=0
+    for host in $(echo "${ORIGINAL_OUTPUT}" | tail -n +3| awk '{print $1}' | sed 's/[+*x#o\\\-]//')
+    do
+      offset=$(/usr/sbin/ntpdate -p 1 -q ${host}|head -n 1| awk -F, '{print $3}' |awk '{print $2}')
+      if [[ ! -z $offset ]]
+      then
+        total=$(echo $total '+' $offset | bc)
+        count=$(($count + 1))
+      fi
+    done
+    if [[ $count -eq 0 ]]
+    then
+      alert "FAILURE" "ntpd check failed, unable to determine offset from time server." "${check_type}"
+    fi
+    
+    SKEW_SECONDS=$(echo $total '/' $count | bc)
+    SKEW_MINUTES=$(awk -v m=$SKEW_SECONDS 'BEGIN { print m / 60}')
+    # get absolute value of skew to account for negative clock skew
+    SKEW_ABS=$(echo $SKEW_SECONDS | awk '{if ($1 >= 0) {print $1} else {print $1*-1}}')
+    regex='^[0-9]+([.][0-9]+)?$'
+    if [ $(echo "${ORIGINAL_OUTPUT}" |wc -l) -lt 5 ]
+    then
+      alert "FAILURE" "ntpd check failed, encountered an unexpected result of '${ORIGINAL_OUTPUT}'." "${check_type}"
+    elif [[ $SKEW_ABS =~ $regex ]]
+    then
+      if [ "$(echo ${SKEW_ABS} '>=' ${WARN} | bc -l)" -eq 1 ]
+      then
+        if [ "$(echo ${SKEW_ABS} '>=' ${CRIT}| bc -l)" -eq 1 ]
+        then
+          alert "FAILURE" "ntpd check failed, clock skew is greater than ${SKEW_MINUTES} minutes." "${check_type}"
+        fi
+        alert "WARNING" "ntpd check warning, clock skew is greater than ${SKEW_MINUTES} minutes." "${check_type}"
+      fi
+    else
+      ### this catches scientific notation since the value is extremely small
+      sci_regex='^[0-9]+([.][0-9]+e-*[0-9]+)?$'
+      if [[ $SKEW_ABS =~ $sci_regex ]]
+      then
+        # Convert the scientific notation to a format `bc` understands
+        SKEW_ABS=`echo ${SKEW_ABS}| sed -e 's/[eE]+*/\\*10\\^/'`
+        if [ "$(echo ${SKEW_ABS} '<' ${WARN}|bc -l)" -eq 1 ]
+        then
+          alert "OKAY" "ntpd check succeeded and clock skew is ${SKEW_ABS} seconds." "${check_type}"
+        fi  
+      fi
+      alert "FAILURE" "ntpd check failed, encountered an unexpected result of '${ORIGINAL_OUTPUT}'." "${check_type}"      
+    fi
+    alert "OKAY" "ntpd check succeeded and clock skew is ${SKEW_ABS} seconds." "${check_type}"
+}
+
+function check_fs-type {
+  [[ -z ${WARN} ]] && WARN=10
+  INTERVAL=${WARN}
+  check_interval
+  failure=0
+  warning=0
+  check_type='device'
+  message=''
+  mounts=$(mount)
+  sudo /sbin/blkid -o list -c /dev/null | tail -n +3 | egrep -v 'rootfs|swap'|
+  {
+    while read item
+    do
+      device=$(echo "${item}" | awk '{print $1}')
+      fs_type_real=$(echo ${item} | awk '{print $2}')
+      fs_type_mount=$(echo "${mounts}" |grep ${device} | awk -Ftype '{print $2}'|awk '{print $1}' | head -n 1)
+      
+      # Skip filesystems that are not mounted.
+      if [[ "${fs_type_mount}" == "" ]]
+      then
+        continue
+      fi
+      
+      # Skip filesystems that have been filtered: first line of file should be space separated list of devices to ignore (e.g. '/dev/xvdb /dev/xvdz2')
+      ignorefile='/etc/engineyard/fs_type_check_ignore'
+      if [ -f ${ignorefile} ]
+      then
+        list=$(head -n1 ${ignorefile})
+        if [[ ${list} =~ ${device} ]]
+        then
+          continue
+        fi
+      fi
+      
+      if [[ "${fs_type_mount}" != "${fs_type_real}" ]]
+      then
+        if [[ "${fs_type_mount}" == "ext4" ]] && [[ "${fs_type_real}" == "ext3" ]]
+        then
+          warning=1
+          message="${message} Warning; Device: ${device} is of filesystem '${fs_type_real}' and is mounted as '${fs_type_mount}'."
+        else
+          failure=1
+          message="${message} Failure; Device: ${device} is of filesystem '${fs_type_real}' and is mounted as '${fs_type_mount}'."
+        fi
+      fi
+    done
+    
+    if [[ $failure -eq 1 ]]
+    then
+      alert "FAILURE" "FileSystem checks failed, ${message}" "${check_type}"
+    elif [[ $warning -eq 1 ]]
+    then
+      alert "WARNING" "FileSystem checks warnings, ${message}" "${check_type}"
+    fi
+    alert "OKAY" "FileSystem checks OK." "${check_type}"
+  }
+  
+}
+
+eval "check_${ACTION}"

@@ -1,0 +1,97 @@
+<% if @unicorn %>
+# This directive describes a set of servers, which can be used in directives proxy_pass and fastcgi_pass as a single entity. They can listen to server on different ports and furthermore, it is possible to simultaneously use a server that listens on both TCP and Unix sockets.
+# Review http://wiki.nginx.org/HttpUpstreamModule for more Documentation
+  upstream upstream_<%= @app_name %>ssl {
+  server unix:/var/run/engineyard/unicorn_<%= @app_name %>.sock fail_timeout=0;
+}
+<% else %>
+  <% unless @mongrel_base_port.nil? %>
+# This directive describes a set of servers, which can be used in directives proxy_pass and fastcgi_pass as a single entity. They can listen to server on different ports and furthermore, it is possible to simultaneously use a server that listens on both TCP and Unix sockets.
+# Review http://wiki.nginx.org/HttpUpstreamModule for more Documentation
+upstream upstream_<%= @app_name %>ssl {
+  <% (@mongrel_base_port).upto(@mongrel_base_port + (@mongrel_instance_count - 1)) do |port| %>
+   server 127.0.0.1:<%= port %>;
+  <% end %>
+}
+  <% end %>
+<% end %>
+
+# Directive assigns configuration for the virtual server.
+server {
+# The listen directive specifies the address and port accepted by the enclosing server {...} block. It is possible to specify only an address, only a port, or a server name as the address.
+  listen 8082;
+
+  #
+  # Server Names
+  #
+  # This is the list of IP's and/or domain names with any wildcards or
+  # subdomains. The special value '_' is used to match all domains and IPs and
+  # generally denotes the default server for the entire Nginx process.
+  #
+  # Note that if you specify any domains with wild cards, the very first domain
+  # listed must be without a wild card. For example:
+  #
+  # server_name www.mydomain.org *.mydomain.org;
+  #
+  # It is good practice to include wildcard subdomains so that Nginx will not
+  # require a restart when new services are added for an application.
+  #
+  <% if @server_names and !@server_names.empty? %>
+  <%= "server_name #{@server_names.join(" ")};" %>
+  <% else %>
+  server_name _;
+  <% end %>
+
+  # SSL Certificates
+  #
+  # If you need to customize SSL please refer to
+  # /etc/nginx/servers/<%= @app_name %>/customer.ssl_cert and customer.ssl_cipher
+
+  include /etc/nginx/servers/<%= @app_name %>/ssl_cert;
+  include /etc/nginx/servers/<%= @app_name %>/ssl_cipher;
+
+  #
+  # The application root which is inherited for all location blocks below.
+  #
+  root /data/<%= @app_name %>/current/public;
+
+  access_log /var/log/engineyard/nginx/<%= @app_name %>.access.ssl.log main;
+
+  error_log /var/log/engineyard/nginx/<%= @app_name %>.error.log notice;
+  # error_log /dev/null notice;
+
+  include /etc/nginx/common/servers.conf;
+
+  # Location for the Upstream (a/k/a Unicorn or Mongrel)
+  location @app_<%= @app_name %>ssl {
+    include /etc/nginx/common/proxy.conf;
+    proxy_set_header        X-Forwarded-Proto https;
+    proxy_pass http://upstream_<%= @app_name %>ssl;
+  }
+
+  location = /system/maintenance.html { }
+
+  # set Expire header on assets: see http://developer.yahoo.com/performance/rules.html#expires
+  location ~ ^/(images|assets|javascripts|stylesheets)/ {
+  try_files  $uri $uri/index.html /last_assets/$uri /last_assets/$uri.html @app_<%= @app_name %>ssl;
+  expires 10y;
+  }
+
+  location / {
+  if (-f $document_root/system/maintenance.html) { return 503; }
+  <% if @application[:auth][:active] == "true" && @application[:auth][:path] == "/" ? true : false %>
+    auth_basic            "Restricted";
+    auth_basic_user_file  /etc/nginx/servers/<%= @app_name %>.users;
+  <% else %>
+    # auth is disabled for this server
+    # auth_basic            "Restricted";
+    # auth_basic_user_file  /etc/nginx/servers/<%= @app_name %>.users;
+  <% end %>
+  try_files  $uri $uri/index.html $uri.html @app_<%= @app_name %>ssl;
+  }
+
+  location = /500.html {
+     root /data/<%= @app_name %>/current/public;
+  }
+  include /etc/nginx/servers/<%= @app_name %>/custom.ssl.conf;
+}

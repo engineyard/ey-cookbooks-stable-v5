@@ -1,0 +1,10 @@
+check process php-fpm
+  with pidfile /var/run/engineyard/php-fpm.pid
+  group php-fpm
+  start program = "/bin/bash -c '/etc/init.d/php-fpm start'"
+    as uid <%= @user %> and gid <%= @user %>
+  stop program = "/bin/bash -c '/etc/init.d/php-fpm stop'"
+    as uid <%= @user %> and gid <%= @user %>
+<% @apps.each do |app| %>
+if failed unixsocket /var/run/engineyard/php-fpm_<%= app %>.sock then restart
+<% end %>

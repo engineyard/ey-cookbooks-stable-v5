@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+for f in <%= @datadir %>/master-bin*;
+do
+    ionice -c3 rm -f $f;
+    sleep 30;
+done
+
+rm $0

@@ -1,0 +1,59 @@
+working_directory "<%= @app_root %>"
+worker_processes 8
+timeout 60
+
+# Based on http://gist.github.com/206253
+
+pid "<%= @pid %>"
+
+logout = Logger.new("<%= @app_root %>/log/unicorn.log")
+logger logout
+
+# Load the app into the master before forking workers for super-fast worker spawn times
+preload_app true
+
+# some applications/frameworks log to stderr or stdout, so prevent
+# them from going to /dev/null when daemonized here:
+stderr_path "<%= @app_root %>/log/unicorn.stderr.log"
+stdout_path "<%= @app_root %>/log/unicorn.stdout.log"
+
+# REE - http://www.rubyenterpriseedition.com/faq.html#adapt_apps_for_cow
+if GC.respond_to?(:copy_on_write_friendly=)
+  GC.copy_on_write_friendly = true
+end
+
+before_fork do |server, worker|
+  ##
+  # When sent a USR2, Unicorn will suffix its pidfile with .oldbin and
+  # immediately start loading up a new version of itself (loaded with a new
+  # version of our app). When this new Unicorn is completely loaded
+  # it will begin spawning workers. The first worker spawned will check to
+  # see if an .oldbin pidfile exists. If so, this means we've just booted up
+  # a new Unicorn and need to tell the old one that it can now die. To do so
+  # we send it a QUIT.
+  #
+  # Using this method we get 0 downtime deploys.
+  old_pid = "#{server.config[:pid]}.oldbin"
+  logout.info "server.pid: #{server.pid.inspect}"
+  logout.info "old_pid: #{old_pid.inspect}"
+
+  if File.exists?(old_pid) && server.pid != old_pid
+    logout.info "workers: #{server.worker_processes.inspect}"
+    logout.info "worker.nr: #{worker.nr.inspect}"
+    if (worker.nr + 1) >= server.worker_processes
+      old_master_pid = File.read(old_pid).to_i
+      logout.info "sending term to #{old_master_pid.inspect}"
+      begin
+        Process.kill(:TERM, old_master_pid)
+      rescue Errno::ENOENT, Errno::ESRCH
+        # someone else did our job for us
+      end
+    end
+  end
+end
+
+after_fork do |server, worker|
+  # TODO dry this shit up
+  worker_pid = File.join("<%= @app_root %>", "tmp", "pids", "#{worker.nr}.pid")
+  File.open(worker_pid, "w") { |f| f.puts Process.pid }
+end

@@ -1,0 +1,5 @@
+#!/bin/sh
+# This file is obsolete! If your /etc/nginx/nginx.conf references this
+# file, please fix it. This file only exists to work around a bug in
+# an old version of Passenger. It is no longer useful.
+exec ruby -r stringio -r yaml -r pathname $*

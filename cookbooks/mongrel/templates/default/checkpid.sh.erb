@@ -1,0 +1,23 @@
+checkpid() {
+  pidfile="<%= @pid_prefix %>.$1.pid"
+  lsofpid=`lsof -t -i tcp:$1`
+
+  if [ -f $pidfile ] ; then
+    pid=`cat $pidfile`
+    psname=`cat /proc/$pid/status | grep Name | awk '{print $2}'`
+    appname=`ls -l /proc/$pid/cwd | awk '{print $11}' | cut -d '/' -f 3`
+    callname=`$0 | cut -d '/' -f 4 | awk '{print $1}'`
+
+    echo "Mongrel for port $1 is running with a pidfile at PID: $pid /proc/$pid/status = $psname /proc/$pid/cwd = $appname"
+  elif [ ! -z $lsofpid ] ; then
+    psname=`cat /proc/$lsofpid/status | grep Name | awk '{print $2}'`
+    appname=`ls -l /proc/$lsofpid/cwd | awk '{print $11}' | cut -d '/' -f 3`
+    callname=`$0 | cut -d '/' -f 4 | awk '{print $1}'`
+
+    echo "Mongrel for port $1 is running WITHOUT A PIDFILE at PID: $lsofpid /proc/$lsofpid/status = $psname /proc/$lsofpid/cwd = $appname"
+    exit 1
+  else
+    echo "Mongrel for port $1 is not running!"
+    exit 1
+  fi
+}

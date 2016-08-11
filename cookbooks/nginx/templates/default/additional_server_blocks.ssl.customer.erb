@@ -1,0 +1,55 @@
+###############################################################################################################
+#### Template for adding additional server blocks for you app
+#### Please see 
+####   https://support.cloud.engineyard.com/entries/9999999-How-to-customize-your-Nginx-configuration
+#### for additional details including how to update them via deploy hooks
+#### 
+#### Revision 1.0
+###############################################################################################################
+#
+##  Sample server blocks:
+##  Note:  If you have an SSL terminating Load-Balancer selected, it may set X-Forwarded-Proto and 
+##         pass the traffic via port 81 which would use additional_server_blocks.customer
+#
+#	server {
+#	  include /etc/nginx/listen_http.port;  # Replaces listen 80 line.
+#	  port_in_redirect off;
+#	  server_name beta_domain.com www.beta_domain.com;
+#
+#	  ssl                         on;
+#	  ssl_certificate             /data/nginx/ssl/<%= @app_name %>.crt;
+#	  ssl_certificate_key         /data/nginx/ssl/<%= @app_name %>.key;
+#	  ssl_protocols               TLSv1;
+#	  ssl_ciphers                 ECDHE-RSA-AES256-SHA384:AES256-SHA256:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM;
+#	  ssl_prefer_server_ciphers   on;
+#     # or
+#     include /etc/nginx/servers/<%= @app_name %>/ssl_cert;
+#     include /etc/nginx/servers/<%= @app_name %>/ssl_cipher;
+#
+#	  # Redirect from old domain name to new domain name and preserve URI
+#	  rewrite ^ $scheme://www.example.com$request_uri? permanent;
+#
+#	  # Redirect from old domain name to root of new domain name, dropping URI
+#	  rewrite ^ $scheme://www.example.com ;
+#	}
+#
+#	server {
+#	  include /etc/nginx/listen_http.port;  # Replaces listen 80 line.
+#	  port_in_redirect off;
+#	  server_name _;
+#
+#	  ssl                         on;
+#	  ssl_certificate             /data/nginx/ssl/<%= @app_name %>.crt;
+#	  ssl_certificate_key         /data/nginx/ssl/<%= @app_name %>.key;
+#	  ssl_protocols               TLSv1;
+#	  ssl_ciphers                 ECDHE-RSA-AES256-SHA384:AES256-SHA256:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM;
+#	  ssl_prefer_server_ciphers   on;
+#     # or
+#     include /etc/nginx/servers/<%= @app_name %>/ssl_cert;
+#     include /etc/nginx/servers/<%= @app_name %>/ssl_cipher;
+#
+#	  # Catches request going to hostnames like ec2-123-45-67-891.compute-1.amazonaws.com and redirects
+#	  # them to the domain name set in
+#	  rewrite ^ $scheme://<%= @server_name %>$request_uri? permanent;
+#	}
+#

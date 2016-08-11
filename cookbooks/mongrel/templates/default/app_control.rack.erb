@@ -1,0 +1,72 @@
+#!/bin/bash
+
+rackup() {
+  pidfile="/var/run/mongrel/<%= @app_name %>/mongrel.$1.pid"
+  /usr/bin/env HOME=<%= @home %> RACK_ENV=<%= @framework_env %> RAILS_ENV=<%= @framework_env %> MERB_ENV=<%= @framework_env %> /usr/bin/rackup -s mongrel -p $1 -E <%= @framework_env %> -P $pidfile -D /data/<%= @app_name %>/current/config.ru
+}
+
+rackup_stop() {
+  pidfile="/var/run/mongrel/<%= @app_name %>/mongrel.$1.pid"
+  /engineyard/bin/rackup_stop $pidfile
+}
+
+<%= @checkpid_body %>
+
+  case "$1" in
+
+  deploy)
+    if [ ! -z "$PORT" ] ; then
+      rackup_stop $PORT
+      rackup $PORT
+    else
+      for port in `seq <%= @low_port %> <%= @high_port %>`; do
+        rackup_stop $port
+        rackup $port
+      done
+    fi
+  ;;
+  stop)
+    if [ ! -z "$PORT" ] ; then
+      rackup_stop $PORT
+    else
+      for port in `seq <%= @low_port %> <%= @high_port %>`; do
+        rackup_stop $port
+      done
+    fi
+  ;;
+  start)
+    if [ ! -z "$PORT" ] ; then
+      rackup $PORT
+    else
+      for port in `seq <%= @low_port %> <%= @high_port %>`; do
+        rackup $port
+      done
+    fi
+  ;;
+  restart)
+    if [ ! -z "$PORT" ] ; then
+      rackup_stop $PORT
+      rackup $PORT
+    else
+      for port in `seq <%= @low_port %> <%= @high_port %>`; do
+        rackup_stop $port
+        rackup $port
+      done
+    fi
+  ;;
+  status)
+    if [ ! -z "$PORT" ] ; then
+      checkpid $PORT
+    else
+      for port in `seq <%= @low_port %> <%= @high_port %>`; do
+        checkpid $port
+      done
+    fi
+  ;;
+  *)
+  echo "Usage: $0 {status|start|stop|restart|deploy}"
+  exit 1
+  ;;
+esac
+
+exit 0

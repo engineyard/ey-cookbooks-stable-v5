@@ -1,0 +1,21 @@
+###############################################################################################################
+#### Template for adding additional location blocks for you app
+#### Please see 
+####   https://support.cloud.engineyard.com/entries/9999999-How-to-customize-your-Nginx-configuration
+#### for additional details including how to update them via deploy hooks
+#### 
+#### Revision 1.0
+###############################################################################################################
+#
+## Sample rewrites and location blocks
+#
+## Drop requests to non-rails/php requests
+#  if ($request_filename ~* \.(aspx|jsp|cgi)$) {
+#    return 410;
+#  }
+#
+## Since location blocks are usually preferred to "if"'s, this is a little better
+# location ~ \.(aspx|jsp|cgi)$ {
+#   return 410;
+# }
+#

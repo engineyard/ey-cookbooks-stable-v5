@@ -1,0 +1,90 @@
+# This file is managed by Chef and will be overwritten on the
+# next rebuild.
+#
+# DO NOT MODIFY
+#
+
+user <%= @user %> <%= @user %>;
+worker_processes 1;
+
+worker_rlimit_nofile 1024;
+pid /var/run/collectd-httpd.pid;
+
+events {
+  worker_connections 1024;
+  use epoll;
+}
+
+http {
+  include /etc/nginx/mime.types;
+
+  default_type application/octet-stream;
+
+  log_format main '$remote_addr - $remote_user [$time_local] '
+                  '"$request" $status $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+  sendfile on;
+
+  tcp_nopush        on;
+
+  server_names_hash_bucket_size  128;
+
+  if_modified_since before;
+  gzip              on;
+  gzip_http_version 1.0;
+  gzip_comp_level   2;
+  gzip_proxied      any;
+  gzip_buffers      16 8k;
+  gzip_types        application/json text/plain text/css application/x-javascript text/xml application/xml application/rss+xml text/javascript;
+  # gzip_disable      "MSIE [1-6]\.(?!.*SV1)";
+
+  server_tokens off;
+
+  # Allow custom settings to be added to the http block
+#  include /etc/nginx/http-custom.conf;
+#  include /etc/nginx/stack.conf;
+#  include /etc/nginx/servers/*.conf;
+
+  server {
+    listen 8989 default;
+    server_name _;
+    
+    root /var/www/localhost/htdocs;
+        
+    access_log /var/log/nginx/collectd-httpd.access.log main;
+    error_log /var/log/nginx/collectd-httpd.error.log notice;
+
+    auth_basic            "Restricted";
+    auth_basic_user_file  /etc/collectd-httpd/collectd-httpd.users;
+
+    location / {
+      root /var/www/localhost/htdocs;
+    }
+    
+    location ~ \.cgi$ {
+      root /var/www/localhost/htdocs;
+
+      fastcgi_param  QUERY_STRING       $query_string;
+      fastcgi_param  REQUEST_METHOD     $request_method;
+      fastcgi_param  CONTENT_TYPE       $content_type;
+      fastcgi_param  CONTENT_LENGTH     $content_length;
+      fastcgi_param  SCRIPT_NAME        $fastcgi_script_name;
+      fastcgi_param  REQUEST_URI        $request_uri;
+      fastcgi_param  DOCUMENT_URI       $document_uri;
+      fastcgi_param  DOCUMENT_ROOT      $document_root;
+      fastcgi_param  SERVER_PROTOCOL    $server_protocol;
+      fastcgi_param  GATEWAY_INTERFACE  CGI/1.1;
+      fastcgi_param  SERVER_SOFTWARE    nginx;
+      fastcgi_param  REMOTE_ADDR        $remote_addr;
+      fastcgi_param  REMOTE_PORT        $remote_port;
+      fastcgi_param  SERVER_ADDR        $server_addr;
+      fastcgi_param  SERVER_PORT        $server_port;
+      fastcgi_param  SERVER_NAME        $server_name;
+      fastcgi_param  REMOTE_USER        $remote_user;
+
+      fastcgi_param  SCRIPT_FILENAME  /var/www/localhost/htdocs$fastcgi_script_name;
+      fastcgi_pass localhost:8988;
+    }
+  }
+}

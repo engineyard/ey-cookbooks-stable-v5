@@ -1,0 +1,71 @@
+upstream <%= @app_name %>_https {
+  server 127.0.0.1:<%= @port %> fail_timeout=0;
+}
+
+server {
+  listen 8082;
+
+<% if @server_names and !@server_names.empty? %>
+  <%= "server_name #{@server_names.join(" ")};" %>
+<% else %>
+  server_name _;
+<% end %>
+
+  root /data/<%= @app_name %>/current/public;
+
+  access_log /var/log/engineyard/nginx/<%= @app_name %>.access.ssl.log main;
+  error_log /var/log/engineyard/nginx/<%= @app_name %>.error.log notice;
+
+  index index.html index.htm;
+
+  # SSL Certificates
+  #
+  # If you need to customize SSL please refer to
+  # /etc/nginx/servers/<%= @app_name %>/customer.ssl_cert and customer.ssl_cipher
+
+  include /etc/nginx/servers/<%= @app_name %>/ssl_cert;
+  include /etc/nginx/servers/<%= @app_name %>/ssl_cipher;
+
+  # Location for the Upstream Node.js
+  location @app_<%= @app_name %>_https {
+    proxy_set_header  X-Real-IP         $remote_addr;
+    proxy_set_header  X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header  Host              $http_host;
+    proxy_set_header  X-Forwarded-Proto https;
+    <% if @use_msec %>
+    proxy_set_header  X-Queue-Start     't=${msec}000';
+    <% else %>
+    proxy_set_header  X-Queue-Start     't=$start_time';
+    <% end %>
+
+    proxy_redirect off;
+    proxy_max_temp_file_size 0;
+
+    proxy_pass http://<%= @app_name %>_https;
+  }
+
+  # set Expire header on assets
+  location ~ ^/(images|assets|javascripts|stylesheets|css|js)/ {
+    try_files  $uri $uri/index.html /last_assets/$uri /last_assets/$uri.html @app_<%= @app_name %>_https;
+    expires 10y;
+  }
+
+  location / {
+    if (-f $document_root/system/maintenance.html) { return 503; }
+  <% if @application[:auth] && @application[:auth][:active] == "true" && @application[:auth][:path] == "/" ? true : false %>
+    auth_basic            "Restricted";
+    auth_basic_user_file  /etc/nginx/servers/<%= @app_name %>.users;
+  <% else %>
+    # auth is disabled for this server
+    # auth_basic            "Restricted";
+    # auth_basic_user_file  /etc/nginx/servers/<%=@app_name %>.users;
+  <% end %>
+    try_files  $uri $uri/index.html $uri.html @app_<%= @app_name %>_https;
+  }
+
+  location = /500.html {
+    root /data/<%= @app_name %>/current/public;
+  }
+
+  include /etc/nginx/servers/<%= @app_name %>/custom.ssl.conf;
+}

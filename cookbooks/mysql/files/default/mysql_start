@@ -1,0 +1,159 @@
+#!/usr/local/ey_resin/ruby/bin/ruby
+
+require 'optparse'
+
+VERSION = 1.0
+
+class MysqlStart
+  def self.run(argv = ARGV, options = {})
+    options = parse(argv, options)
+    new(options).run
+  end
+  
+  attr_accessor :password, :check, :start_timeout, :stop_timeout
+  
+  def initialize(options = {})
+    @password      = options[:password]      || abort("ERROR: You must provide a password.")
+    @check         = options[:check]         || abort("ERROR: You must a check interval.")
+    @start_timeout = options[:start_timeout] || abort("ERROR: You must provide a start timeout.")
+    @stop_timeout  = options[:stop_timeout]  || 1200
+  
+    abort("ERROR: You must be root.") unless Process.euid == 0
+  end
+  
+  def run
+    count = 0
+    if system('/etc/init.d/mysql restart')
+      mysql_started()
+    else
+      log_mysql_event("MySQL did not start within the startup timeout")
+      loop {
+        # test to make sure mysql is running
+        if mysql_running()
+          log_mysql_event("MySQL did start and is working through crash recovery")
+          slept = 0
+          loop {
+            if system("mysqladmin -p#{password} status") # mysql is accessible
+              log_mysql_event("MySQL completed crash recovery, performing clean restart")
+              system('killall -TERM mysqld')          # safe shutdown of mysql
+              termslept = 0
+              termlimit = stop_timeout
+              loop {
+                break if not mysql_running()
+                sleep(check)
+                termslept = termslept + check
+                if termslept > termlimit
+                  log_mysql_event("MySQL did not shut down cleanly within the time limit, killing")
+                  system('killall -9 mysqld')
+                end
+              }
+              system('/etc/init.d/mysql zap')         # clear files
+              if system('/etc/init.d/mysql restart')  # clean start
+                mysql_started()
+              end
+            else
+              log_mysql_event("MySQL has been starting for #{slept/60} minutes and is still attempting to start") if slept % 120 == 0
+              sleep(check)
+            end
+          break if not mysql_running()
+          slept = slept + check
+          if slept > start_timeout
+            log_mysql_event("MySQL was not able to start after #{slept/60} minutes and was forcibly killed")
+            system("killall -9 mysqld")
+          end
+          }
+        else
+          log_mysql_event("MySQL did not start, zapping")
+          begin
+            pidfile = '/var/run/mysqld/mysqld.pid'
+            if File.exists?(pidfile)
+              File.open('/var/run/mysqld/mysqld.pid', 'r') do |f|
+                pid = f.read.to_i
+                Process.kill("TERM", pid)
+  
+                mysqld_is_dead = false
+                started_at = Time.now
+                # /etc/init.d/mysql has 120 as STOPTIMEOUT, so we should
+                # wait at least that long
+                until mysqld_is_dead || ((Time.now - started_at) > 120)
+                  begin
+                    Process.kill(0, pid)
+                    sleep 1
+                  rescue Errno::ESRCH      # no such process
+                    mysqld_is_dead = true
+                  end
+                end
+              end
+            end
+          rescue Exception => e
+            File.open('/root/chef-mysql.log', 'a') do |f|
+              f.write("Blew up: \n")
+              f.write(e.message)
+              f.write("\n")
+              f.write(e.backtrace.join("\t\n"))
+            end
+          end
+          system('/etc/init.d/mysql zap')
+          if system('/etc/init.d/mysql restart')
+            mysql_started()
+          end
+        end
+      count += 1
+      if count > 10
+        log_mysql_event("Failed to start mysql after 10 attempts, raising error.")
+        exit(1)
+      end
+      sleep 1
+      }
+    end
+  end
+  
+  def log_mysql_event(message)
+  `echo #{message} >> /root/chef-mysql.log`
+  end
+  
+  def mysql_started()
+    log_mysql_event("MySQL restarted successfully")
+    exit 0
+  end
+  
+  def mysql_running()
+    system("ps -u mysql | grep '[m]ysqld'")
+  end
+  
+  def self.parse(argv, options = {})
+    opts = OptionParser.new do |opts|
+      opts.version = VERSION
+  
+      opts.banner = "Usage: mysql_start [-flag]"
+      opts.define_head "mysql_start: start, recover, zap, or otherwise pound mysql into submission."
+      opts.separator '*'*80
+  
+      opts.on("-p", "--password PASSWORD", "Root password for mysqladmin.") do |password|
+        options[:password] = password
+      end
+  
+      opts.on("-c", "--check NUMBER", "Check mysql interval in seconds.") do |check|
+        options[:check] = check.to_i
+      end
+  
+      opts.on("-t", "--timeout NUMBER", "Maximum wait time in seconds. (DEPRECATED)") do |start_timeout|
+        options[:start_timeout] = start_timeout.to_i
+      end
+  
+      opts.on("-a", "--start NUMBER", "Startup timeout in seconds.") do |start_timeout|
+        options[:start_timeout] = start_timeout.to_i
+      end
+  
+      opts.on("-o", "--stop NUMBER", "Graceful termination timeout in seconds.") do |stop_timeout|
+        options[:stop_timeout] = stop_timeout.to_i
+      end
+    end
+  
+    opts.parse!(argv)
+  
+    options
+  end
+end
+
+MysqlStart.run(ARGV)

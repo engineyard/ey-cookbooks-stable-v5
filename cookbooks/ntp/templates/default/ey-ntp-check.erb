@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# field 5 is the time since we last spoke to a peer
+# the first two lines of ntpq are a header with labels for the various fields
+# skipping the first two lines gives us just peers, independent of how many there are
+
+if ntpq -pn | tail -n+3 | awk '{print $5}' | grep '\([2-9][0-9]h\|[0-9]\+d\)' || ! /etc/init.d/ntpd -q status ; then
+    logger -t 'ntp_check' "EY: ntpd crashed or stale NTP peers detected; restarting NTP"
+    /etc/init.d/ntpd restart
+fi

@@ -1,0 +1,12 @@
+#!/bin/bash
+# Engine Yard, Inc.
+# Tyler Poland
+# Modifies oom_score_adj for specified services
+
+<% @service_scores.each do |service, score| -%>
+  <%= service %>_pid=$(pgrep -ox <%= service %>)
+  if [[ $(cat /proc/${<%= service %>_pid}/oom_score_adj) == 0 ]]
+  then 
+    echo <%= score %> > /proc/${<%= service %>_pid}/oom_score_adj
+  fi
+<% end -%>

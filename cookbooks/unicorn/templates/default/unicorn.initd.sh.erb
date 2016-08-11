@@ -1,0 +1,580 @@
+#!/bin/bash
+# Authors and/or Credits: Ben Burkert && Wayne E. Seguin && Glenn Davy && Kevin Rutten && Scott M. Likens
+# Version 2.0.1
+
+# Ensure that we are running as the root user.
+# If not, error exit while notifying the user.
+
+if (( ! $UID )) 
+then
+  echo "ERROR: This script must be run as a user, not as root." 2>&1
+	exit 1
+fi
+
+application="<%= @app %>"
+
+# can be overridden in env/env.custom but this provides a default
+controller_pidfile="/var/run/engineyard/unicorn_controller_${application}.pid"
+hot_time_max=480  # Default, used to tell if this script stalled
+hot_time_padding=30 # Add this to hot_time_max (default, one monit interval)
+
+# load environment variables
+source "/data/${application}/shared/config/env"
+source "/data/${application}/shared/config/env.custom"
+
+# Declare bash arrays
+# Positions array is to keep track of the starting
+# positions (think line count) of the log files.
+positions=()
+
+# Array of the unicorn log files.
+log_files=(
+${shared_path}/log/unicorn.log
+${shared_path}/log/unicorn.stderr.log
+${shared_path}/log/unicorn.stdout.log
+)
+
+# work from the app directory
+cd "${current_path}"
+
+unicorn_is_in_gemfile()
+{
+	if [[ -s "${current_path}/Gemfile" ]] 
+	then
+		if ! test -f "${current_path}/ey_bundler_binstubs/unicorn" ## This is bundle exec
+		then
+			printf "\nWarning:
+			Unicorn gem was not present in your bundled gems; deploy action will
+			fail.  Please add the Unicorn gem to your Gemfile like below:
+			gem 'unicorn', '4.6.0'\n"
+			return 1
+		fi
+	fi
+
+	return 0
+}
+
+unicorn_is_running()
+{
+	if [[ -f ${pidfile} ]]
+	then
+		fetch_current_pid
+		if [[ -d "/proc/${master_pid}" ]] 
+		then
+			process_name="$( awk '/Name/{print $2}' /proc/$master_pid/status )"
+			application_name="$(readlink /proc/$master_pid/cwd |  cut -d '/' -f 3)"
+
+			if [[ "$application_name" = "" ]] 
+			then  # Secondary check if readlink failed
+				printf "\nWarning: Could not get application name from /proc. Trying with ps\n"
+				application_name="$(ps awx |grep $master_pid |grep -v grep|awk '{print $10}'|cut -d '/' -f 3)"
+			fi
+
+			if [[ "$application_name" = "$application" ]] 
+			then
+				return 0 # The only valid case, the process is indeed running.
+			fi
+
+		fi
+	fi
+
+	echo "PID seems invalid. Removing stale PID ($pidfile)"
+	rm -f "$pidfile" # cleanup, aisle 3
+	return 1
+}
+
+drop_controller_pid()
+{
+#	echo "Dropping controller PID ($controller_pidfile)"
+  echo $$ > ${controller_pidfile}
+}
+
+clean_controller_pid()
+{
+#	echo "Removing controller PID ($controller_pidfile)"
+	rm -f "$controller_pidfile"
+}
+
+controller_pidfile_exists()
+{
+	if [[ -f "$controller_pidfile" ]]
+	then
+		return 0
+	else
+		return 1
+	fi
+}
+
+controller_is_running()
+{
+	if controller_pidfile_exists
+	then
+		fetch_controller_pid
+		if [[ -d "/proc/${controller_pid}" ]]
+		then
+		  # TODO - check this is the script, not just any process
+		  if found_stalled_controller
+		  then
+		    return 1
+		  fi
+		  return 0;
+		fi
+	fi
+
+	return 1
+}
+
+ensure_controller_is_not_running_already()
+{
+	if controller_is_running
+	then
+		printf "Unicorn Controller Detected already running"
+		printf "\n  pid: $controller_pid"
+		printf "\n  cwd: $(readlink /proc/${controller_pid}/cwd)"
+		printf "\n  exe: $(readlink /proc/${controller_pid}/exe)"
+		printf "\n  cmdline: $(cat /proc/${controller_pid}/cmdline)"
+		printf "\nAllowing existing command to finish (sleeping ${hot_time_padding} seconds then exiting)\n"
+		sleep ${hot_time_padding}
+		return 1
+	else
+		echo "No other Unicorn Controller Detected - Continuing"
+	fi
+	return 0
+}
+
+# We need to handle if a command gets stuck for some reason
+found_stalled_controller()
+{
+	if controller_pidfile_exists
+	then
+		controller_age=$[ ( $(date "+%s") - $(stat -c "%Y" $controller_pidfile) ) ]
+		max_controller_age=$[ $hot_time_max + $hot_time_padding ]
+		if [[ $controller_age -gt $max_controller_age ]]
+		then
+			# Taking too long, we need to clean up and restart
+			fetch_controller_pid
+			echo "Old Controller taking over $controller_age seconds to run, more then $max_controller_age seconds - killing PID: ${controller_pid}"
+			kill -9 $controller_pid && sleep 1
+			
+			return 0
+		fi
+	fi
+	return 1
+}
+
+cleanup_old_master_failures()
+{
+	## TODO - If there is no controller running but a oldpid and no new pid.
+	if ! unicorn_is_running
+	then
+		if old_pidfile_exists
+		then
+			fetch_oldpid
+			if [[ $master_oldpid -gt 0 ]]
+			then
+				echo "Unicorn seemed to have failed the previous hot restart"
+				echo "Force killing unicorn (old) master pid.oldbin ( $master_oldpid )."
+
+				kill -9 $master_oldpid && sleep 1
+
+				echo "Thinning the herd."
+
+				if [[ -s "$current_path/config.ru" ]] 
+				then
+					pkill -9 -f 'unicorn' && sleep 1
+				else
+					pkill -9 -f 'unicorn_rails' && sleep 1
+				fi
+			fi
+		fi
+	fi
+}
+
+fix_permissions()
+{
+	find "${shared_path}/log/" -exec sudo chown -R "${user}:${group}" {} \;
+}
+
+# Loop over the unicorn log files array
+# ensuring the file exists and
+# record the file length into the positions
+# array.
+record_logfile_positions()
+{
+	local file
+
+	positions=()
+	for file in "${log_files[@]}"
+	do
+		[[ -f "$file" ]] || touch "$file"
+		positions+=($(stat -c%s "${file}"))
+	done
+}
+
+# Loop over the unicorn log files array
+# and output all changes since the
+# starting log positions (length) recorded
+# at the beginning of this script.
+display_logs()
+{
+	for (( index=0 ; index < ${#log_files[@]} ; index++ ))
+	do
+		tail -c +${positions[${index}]} "${log_files[${index}]}"
+	done
+}
+
+fetch_controller_pid()
+{
+	if [[ -s "$controller_pidfile" ]] 
+	then
+		controller_pid=$(cat "$controller_pidfile")
+	else
+		controller_pid=0
+	fi
+	return 0
+}
+
+fetch_current_pid()
+{
+	if [[ -s "$pidfile" ]] 
+	then
+		master_pid=$(cat "$pidfile")
+	else
+		master_pid=0
+	fi
+	return 0
+}
+
+fetch_new_pid()
+{
+	if [[ -s "$pidfile" ]] 
+	then
+		new_pid=$(cat "$pidfile")
+	else
+		new_pid=0
+	fi
+	return 0
+}
+
+fetch_oldpid()
+{
+	if [[ -s "$old_pidfile" ]] 
+	then
+		master_oldpid=$(cat "$old_pidfile")
+	else
+		master_oldpid=0
+	fi
+	return 0
+}
+
+old_pidfile_exists()
+{
+	if [[ -f "$old_pidfile" ]] 
+	then
+		return 0
+	else
+		return 1
+	fi
+}
+
+old_master_is_alive()
+{
+	if old_pidfile_exists 
+	then
+		return 0
+	else
+		return 1
+	fi
+}
+
+wait_for_old_master_to_die()
+{
+	while old_master_is_alive 
+	do
+		sleep .25
+		let "hot_restart_time+=1"
+
+		if (( $hot_restart_time >= $hot_time_max ))
+		then
+			echo "ERROR: restarting the old unicorn master ($old_master_pid) timed out"
+			echo "ERROR: Unicorn has failed to reload properly after $((hot_time_max/4)) seconds."
+			echo "original pid: $old_master_pid - new pid: $new_pid"
+			return 1
+		fi
+
+		fetch_new_pid
+
+		printf '.'
+	done
+
+	return 0
+}
+
+one_last_check() {
+	fetch_new_pid
+
+	# if new master is old master
+	if [[ $new_pid -eq $old_master_pid ]] 
+	then
+		display_logs
+		echo ""
+		echo "ERROR: Unicorn has failed to reload properly."
+		echo "original pid: $old_master_pid - new pid: $new_pid"
+		return 1
+	else
+		echo "Completed!"
+		return 0
+	fi
+}
+
+extra_checks() {
+	# Let's wait for the old master pid to exit.
+	sleep 2
+	# It should take more than 2 seconds to start a new process to start and have the pid files swap.
+	if old_pidfile_exists 
+	then
+		old_master_pid=$(cat "$old_pidfile")
+
+		if wait_for_old_master_to_die 
+		then
+			sleep $extra_quick_sleep
+			one_last_check
+			return $?
+		else
+			return 1
+		fi
+	else
+		# Restart happened too quickly, so it probably failed, or the new master is still the old master.
+		echo "NOTICE: Unicorn appears to have reloaded faster than this script expected which was 2 seconds."
+		return 0
+	fi
+}
+
+graceful_restart_allowed() {
+	if [[ -f "${shared_path}/config/disable_unicorn_graceful_restart" ]]
+	then return 1
+	else return 0
+	fi
+}
+
+force_restart_unicorn() {
+		unicorn_terminate
+		sleep 2
+		unicorn_start
+}
+
+deploy_action() {
+	# Determine if we have a Gemfile, do we have Unicorn in it.  If so we can do a hot restart.
+	if unicorn_is_in_gemfile && graceful_restart_allowed
+	then
+		fetch_current_pid
+		echo "Signaling Unicorn master (${master_pid}) an hot restart."
+		kill -USR2 $master_pid
+		# Signal the Unicorn master to do an hot restart by sending the USR2 signal.
+
+		if [[ $QUICKMODE = 'false' ]]
+		then
+			extra_checks
+			return $?
+		else
+			# extra checks disabled
+			echo "NOTICE: extra unicorn checks are not running."
+			return 0
+		fi
+	else
+		# Customer has a Gemfile but it does not include the Unicorn gem in it, so we cannot hot restart, we will now manually restart unicorn.
+		if ! graceful_restart_allowed
+		then
+			echo "NOTICE: Graceful restart is disabled, force restarting!"
+		else
+			echo "ERROR/NOTICE: Unicorn is not in the Gemfile thus we cannot hot restart Unicorn, manually restarting!"
+		fi
+		force_restart_unicorn
+		return 0
+	fi
+}
+
+unicorn_start() {
+	if ! unicorn_is_running 
+	then
+		echo "Unicorn Starting, Type: ${APP_TYPE} interface, App Name: ${application}"
+
+		if [[ $APP_TYPE == "rails" ]] 
+		then
+			$UNICORN_EXEC -E $RAILS_ENV -c $UNICORN_CONF -D
+			unicorn_status=$?
+		else
+			$UNICORN_EXEC -E $RACK_ENV -c $UNICORN_CONF -D /data/${application}/current/config.ru
+			unicorn_status=$?
+		fi
+
+		if [[ ${unicorn_status} == "1" ]]
+		then
+			display_logs
+			echo "There was a problem starting unicorn displaying log files:"
+			exit 1
+		fi
+	else
+		printf "\nUnicorn master is already running with:"
+		printf "\n  pid: $master_pid"
+		printf "\n  name: $process_name "
+		printf "\n  cwd: $application_name"
+
+		return 0
+	fi
+}
+
+unicorn_status()
+{
+	if unicorn_is_running 
+	then
+		printf "\nUnicorn master is running with:"
+		printf "\n  pid: $master_pid"
+		printf "\n  name: $process_name "
+		printf "\n  cwd: $application_name"
+	else
+		printf "\nUnicorn master is not running."
+	fi
+}
+
+unicorn_terminate()
+{
+	if unicorn_is_running 
+	then
+		echo "Stopping Unicorn for $application with pid $master_pid."
+
+		kill -TERM "$master_pid"
+	else
+		printf "Unicorn master is not running."
+	fi
+
+	return 0
+}
+
+unicorn_genocide()
+{
+	if unicorn_is_running 
+	then
+		echo "WARNING: This is about to kill the master pid with a -9 signal, "
+		echo "and then attempt to clean up /all/ unicorn_rails workers."
+		echo "If you have multiple applications this may have impacting results."
+		echo "This is your final warning, you have 5 seconds before I do damage."
+
+		sleep 5
+
+		echo "Force killing unicorn master $master_pid."
+
+		kill -9 $master_pid && sleep 1
+
+		echo "Thinning the herd."
+
+		if [[ -s "$current_path/config.ru" ]] 
+		then
+			pkill -9 -f 'unicorn' && sleep 1
+		else
+			pkill -9 -f 'unicorn_rails' && sleep 1
+		fi
+
+		rm -f "$pidfile"
+	else
+		printf "\nUnicorn master not found, nothing to do."
+	fi
+
+	return 0
+}
+
+record_logfile_positions
+
+case "$1" in
+	(status)
+		unicorn_status
+		;;
+	(start)
+		if ensure_controller_is_not_running_already
+		then
+			drop_controller_pid
+			cleanup_old_master_failures
+			fix_permissions
+			unicorn_start
+			RESULT=$?
+			clean_controller_pid
+			exit $RESULT
+		fi
+		;;
+	(stop)
+		if ensure_controller_is_not_running_already
+		then
+			drop_controller_pid
+			unicorn_terminate
+			RESULT=$?
+			clean_controller_pid
+			exit $RESULT
+		fi
+		;;
+	(kill)
+		unicorn_genocide
+		;;
+	(reload)
+		if ensure_controller_is_not_running_already
+		then
+			drop_controller_pid
+			cleanup_old_master_failures
+			if unicorn_is_running 
+			then
+				fix_permissions
+				unicorn_terminate
+				sleep 2
+				unicorn_start
+			else
+				echo "Unicorn master not found, starting unicorn."
+				unicorn_start
+			fi
+			RESULT=$?
+			clean_controller_pid
+			exit $RESULT
+		fi
+		;;
+	(deploy)
+		if ensure_controller_is_not_running_already
+		then
+			drop_controller_pid
+			cleanup_old_master_failures
+			if unicorn_is_running 
+			then
+				fix_permissions
+				deploy_action
+			else
+				unicorn_start
+			fi
+			RESULT=$?
+			clean_controller_pid
+			exit $RESULT
+		fi
+		;;
+	(restart)
+		if ensure_controller_is_not_running_already
+		then
+			drop_controller_pid
+			cleanup_old_master_failures
+			if unicorn_is_running 
+			then
+				fix_permissions
+				unicorn_terminate
+				sleep 2
+				unicorn_start
+			else
+				unicorn_start
+			fi
+			RESULT=$?
+			clean_controller_pid
+			exit $RESULT
+		fi
+		;;
+	(*)
+		echo "Usage: $0 {status|start|stop|kill|restart|reload|deploy}"
+		echo "          Running a second command while another is already running will print a message and be ignored"
+		exit 1
+		;;
+esac
+
+exit $?

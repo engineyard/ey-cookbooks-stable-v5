@@ -1,0 +1,44 @@
+#!/bin/bash
+SCRIPT=`basename $0`
+VERSION="0.1"
+USAGE="(v$VERSION) $SCRIPT [-d] [-w warn_count] [-n email_addr] [-i instance_name] appname"
+# Fewer than this and we notify:
+WARN_COUNT=3
+# If notification email is specified ...
+NOTIFY=''
+# ... we run this in the appdir:
+NOTIFY_SCRIPT='script/3notify'
+DEBUG=0
+INSTANCE=`hostname`
+while getopts "w:n:i:\?hd" opt; do
+    if [ "$opt" = "?" ] ; then
+        opt="h"
+    fi
+    case $opt in
+        w) WARN_COUNT=$OPTARG ;;
+        n) NOTIFY=$OPTARG ;;
+        i) INSTANCE=$OPTARG ;;
+        d) DEBUG=1 ;;
+        h) echo "$USAGE"; exit 0;;
+        *) echo "$USAGE"; exit 1;;
+    esac
+done
+shift `expr $OPTIND - 1`
+app=$1
+[ -n "$app" ] || { echo "$USAGE"; exit 1; }
+appdir=/data/$app/current
+nprocs=`ps -efww | egrep "Rack(App)?:.*$app" | grep -v grep | wc -l`
+if [ $nprocs -lt $WARN_COUNT ] ; then
+    msg="Too few Rack processes ($nprocs) for $app"
+    if [ $DEBUG -eq 0 ] ; then
+        logger -t $SCRIPT -s "$msg"
+        if [ -n "$NOTIFY" ] ; then
+            echo "$msg" | $appdir/$NOTIFY_SCRIPT "$NOTIFY" "WARNING: Rack process count low on $INSTANCE"
+        fi
+    else
+        echo "$msg"
+    fi
+elif [ $DEBUG -eq 1 ] ; then
+    echo "Rack processes count ($nprocs) is fine"
+fi
+exit 0

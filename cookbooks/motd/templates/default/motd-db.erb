@@ -1,0 +1,32 @@
+Welcome to Engine Yard Cloud!
+
+SQL database:
+cd /db # your attached DB volume
+
+<% if @db_type =~ /mysql/ %>
+MySQL:
+tail -f <%= @db_logs.join " " %> # logs
+mytop # top for mysql
+
+<% elsif @db_type =~ /postgres/ %>
+PostgreSQL:
+sudo su -
+tail -f <%= @db_logs.join " " %> # logs
+<% @apps_and_recipes.each do |appname, data| %>
+pg_top -d <%= data[:database_name] %>
+<% end %>
+
+<% end %>
+
+<% if @prechef_cmd_account || @prechef_cmd_env || @prechef_cmd_app %>
+PreChef Command set in Metadata.  Please open a ticket if you need these changed or removed.
+<% end %>
+<% if @prechef_cmd_account  %>
+PreChef Account Level Command: <%= @prechef_cmd_account %>
+<% end %>
+<% if @prechef_cmd_env  %>
+PreChef Env Level Command: <%= @prechef_cmd_env %>
+<% end %>
+<% if @prechef_cmd_app  %>
+PreChef App Level Command: <%= @prechef_cmd_app %>
+<% end %>

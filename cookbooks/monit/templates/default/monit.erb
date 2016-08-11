@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# set process limits
+ulimit -n <%= @nofile %>
+
+# launch monit with the arguments passed to us
+exec /usr/bin/monit $@

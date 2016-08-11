@@ -1,0 +1,60 @@
+#!/bin/bash
+#===============================================================================
+# This script monitors passenger application instances and forcibly kills any that
+# have exceeded a *very large* memory limit.  It is based on engineyard's passenger_monitor.
+#===============================================================================
+# Check user is root.
+SCRIPT=`basename $0`
+VERSION="0.1"
+USAGE="(v$VERSION) $SCRIPT [-l memlimitinMB] [-s killsig] [-n email_addr] appname"
+# Check user is root.
+if [ "`whoami`" != "root" ]; then
+  logger -t $SCRIPT -s "Must be run as root"
+  exit 1
+fi
+# In MB
+LIMIT=2000
+SIG=KILL
+# If notification email is specified ...
+NOTIFY=''
+# ... we run this in the appdir:
+NOTIFY_SCRIPT='script/3notify'
+DEBUG=0
+while getopts "l:s:n:\?hd" opt; do
+    if [ "$opt" = "?" ] ; then
+        opt="h"
+    fi
+    case $opt in
+	l) LIMIT=$OPTARG ;;
+	n) NOTIFY=$OPTARG ;;
+	s) SIG=$OPTARG ;;
+	d) DEBUG=1 ;;
+	h) echo "$USAGE"; exit 0;;
+	*) echo "$USAGE"; exit 1;;
+    esac
+done
+shift `expr $OPTIND - 1`
+app=$1
+[ -n "$app" ] || { echo "$USAGE"; exit 1; }
+kills=0
+passenger-memory-stats | egrep -i " Ra(ils|ck)(App)?:.*\\b$app\\b" > /tmp/$$.tmp
+while read app_pid app_total foo app_real bar baz appdir; do
+    app_real=`echo $app_real | sed 's/\..*//'`
+    if [ $app_real -gt $LIMIT ]; then
+	msg="PID $app_pid (app $app) - memory $app_real MB exceeds $LIMIT MB"
+	if [ $DEBUG -eq 0 ] ; then
+	    logger -t $SCRIPT -s "Killing $msg"
+	    kill -$SIG $app_pid
+	    kills=$((kills+1))
+	else
+	    echo "Would kill $msg"
+	fi
+    elif [ $DEBUG -eq 1 ] ; then
+	echo "PID $app_pid (app $app) - memory $app_real is fine"
+    fi
+done < /tmp/$$.tmp
+rm -f /tmp/$$.tmp
+if [ -n "$NOTIFY" -a -n "$appdir" -a $kills -gt 0 ] ; then
+    echo "Killed $kills Huge Rack process" | $appdir/$NOTIFY_SCRIPT "$NOTIFY" "WARNING: Huge Rack Processed Killed."
+fi
+exit 0

@@ -1,0 +1,154 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+
+# Set false to exit non-zero
+success = true
+
+APP_DIR = app_dir = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
+bin_dir     = File.join(app_dir, 'shared/bin')
+config_dir  = File.join(app_dir, 'shared/config')
+pid_dir  = File.join(app_dir, 'shared/pids')
+pid_file  = File.join(pid_dir, 'node.pid')
+current_dir = File.join(app_dir, 'current')
+Dir.chdir current_dir
+
+app_revision_file = File.join(current_dir, 'REVISION')
+bin_revision_file = File.join(bin_dir, 'bin_revision.txt')
+app_revision = File.read(app_revision_file).strip
+
+bin_recipe_revision_file = File.join(bin_dir, 'recipe_revision.txt')
+recipe_revision = File.read('/etc/engineyard/recipe-revision.txt').strip
+
+# no-op if we've already built app scripts for this deploy & recipe
+if File.exist?(bin_revision_file) && File.exist?(bin_recipe_revision_file)
+  bin_app_revision = File.read(bin_revision_file).strip
+  bin_recipe_revision = File.read(bin_recipe_revision_file).strip
+  if app_revision == bin_app_revision && recipe_revision == bin_recipe_revision
+    exit 0
+  end
+end
+
+# remove check files to guarantee script will never be skipped
+# unless last run was successful
+FileUtils.rm_f bin_revision_file
+FileUtils.rm_f bin_recipe_revision_file
+
+def emerge_node_if_not_present(version)
+  return if File.exist?("/opt/nodejs/#{version}")
+  puts "Installing Node.js version #{version} based on #{APP_DIR}/package.json"
+# Packages 0.x.x are build from source, 4.2.1 and higher are packaged binaries
+  if /^0./ =~ version
+    puts `ACCEPT_KEYWORDS='~x86' sudo emerge =net-libs/nodejs-#{version}`
+  else
+    puts `ACCEPT_KEYWORDS='~x86' sudo emerge =net-libs/nodejs-bin-#{version}`
+  end
+end
+
+
+# fail fast if there is no package.json
+`/usr/local/bin/ey_node_app_info check`
+unless $?.exitstatus == 0
+  puts <<-MSG
+
+
+  !> Invalid or missing package.json
+  !> For more details see https://npmjs.org/doc/json.html
+
+
+MSG
+  exit 1
+end
+
+# Trim 0.8.17-r1 down to 0.8.17
+def version_stripper(version)
+  version.sub(/-r\d+\Z/, '')
+end
+
+# fail fast if theres no acceptable node version
+node_version = `/usr/local/bin/ey_node_app_info engine-version`.strip
+
+unless $?.exitstatus == 0
+  # non-zero exit status will contain error message on stdout
+  puts "\n\n\n"
+  puts node_version.lines.map {|line| "  !>" + line }.join
+  puts "\n\n\n"
+  exit 1
+end
+
+# make sure the selected node version is installed
+emerge_node_if_not_present(node_version)
+
+# set proper node path in application's env script
+app_env = File.join config_dir, 'env'
+existing_app_env = File.read(app_env)
+File.open app_env, 'w+' do |app_env|
+  new_path = "export PATH=/opt/nodejs/#{version_stripper(node_version)}/bin:$PATH # from package.json\n"
+
+  existing_app_env.each_line do |line|
+    next if line =~ /export PATH/
+    app_env.write(line)
+  end
+  app_env.write(new_path)
+end
+
+# save available deploy lifecycle scripts
+possible_commands = ['start', 'restart', 'stop', 'predeploy', 'postdeploy']
+unused_commands = []
+possible_commands.each do |command|
+  ey_command_path = File.join(bin_dir, command)
+  File.open ey_command_path, 'w+' do |script|
+    npm_command = `/usr/local/bin/ey_node_app_info command #{command}`
+    if npm_command != ""
+      puts "NPM command '#{command}' available as '#{ey_command_path}'"
+      script.write <<-SCRIPT
+#!/bin/sh
+source #{config_dir}/env
+source #{config_dir}/env.custom
+cd #{current_dir}
+exec #{npm_command}
+      SCRIPT
+    elsif command == "start"
+      # Don't immediately fail if missing a start command
+      puts <<-MSG
+
+
+!> No npm start command found. Define a start script in your package.json
+!> For more details see https://npmjs.org/doc/scripts.html
+
+
+MSG
+      script.write <<-SCRIPT
+#!/bin/sh
+echo "No npm start command found. Define a start script in your package.json"
+exit 1
+SCRIPT
+      success = false
+    else
+      unused_commands << ey_command_path
+    end
+  end
+  FileUtils.chmod 0755, ey_command_path
+end
+
+# clean up old scripts that aren't in use, if present
+unused_commands.each do |command|
+  FileUtils.rm_f command
+end
+
+# save currently deployed revision so we can prevent duplicating work
+File.open(bin_revision_file, 'w+') do |rev|
+  rev.write(app_revision)
+  rev.write("\n")
+end
+
+# save current recipes revision so we can regenerate when cookbooks change
+File.open(bin_recipe_revision_file, 'w+') do |rev|
+  rev.write(recipe_revision)
+  rev.write("\n")
+end
+
+# Make sure our god config is up to date with any changes
+puts `god load /etc/god/config`
+
+exit 1 unless success

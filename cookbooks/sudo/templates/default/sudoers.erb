@@ -1,0 +1,14 @@
+# sudoers file.
+#
+# Distributed by Chef
+#
+# Local changes will be destroyed
+
+# Reset environment by default
+Defaults	env_reset,always_set_home
+
+# User privilege specification
+root	ALL=(ALL) ALL
+
+# Allow owner to sudo
+<%= @node['owner_name'] %> ALL=(ALL) NOPASSWD: ALL

@@ -1,0 +1,6 @@
+check process passenger_<%= @app %>_<%= @port %>
+  with pidfile /data/<%= @app %>/shared/pids/passenger.<%= @port %>.pid
+  start program = "/engineyard/bin/app_<%= @app %> start" as uid <%= @username %> and gid <%= @username %>
+  stop program = "/engineyard/bin/app_<%= @app %> stop" as uid <%= @username %> and gid <%= @username %>
+  if mem > <%= @app_memory_limit %> MB for 2 cycles then restart
+  group <%= @app %>

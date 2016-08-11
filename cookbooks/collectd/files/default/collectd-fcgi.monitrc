@@ -1,0 +1,11 @@
+# This file is managed by Chef and will be overwritten on the
+# next rebuild.
+#
+# DO NOT MODIFY
+#
+
+check process collectd_fcgi
+  with pidfile /var/run/collectd_fcgi.pid
+  start program = "/usr/bin/spawn-fcgi -p 8988 -P /var/run/collectd_fcgi.pid -- /usr/sbin/fcgiwrap"
+  stop program = "/bin/bash -c '/bin/kill -TERM `cat /var/run/collectd_fcgi.pid`'"
+  group collectd_fcgi

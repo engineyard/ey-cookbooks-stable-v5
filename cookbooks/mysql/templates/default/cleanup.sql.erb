@@ -1,0 +1,8 @@
+-- clear out the anonymous and non-localhost root accounts, none of which have passwords
+<% @user_hosts.each do |user,host| -%>
+  GRANT USAGE ON *.* TO '<%= user %>'@'<%= host %>';
+  DROP USER '<%= user %>'@'<%= host %>';
+<% end -%>
+
+-- set the password for root@'localhost'
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('<%= @dbpass %>');

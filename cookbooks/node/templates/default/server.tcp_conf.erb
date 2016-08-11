@@ -1,0 +1,25 @@
+upstream <%= @app_name %>_tcp {
+	server 127.0.0.1:<%= @port %> fail_timeout=1000;
+}
+
+server {
+	listen <%= @http_bind_port || 80 %>;
+
+<% if @server_names and !@server_names.empty? %>
+	<%= "server_name #{@server_names.join(" ")};" %>
+<% else %>
+	server_name _;
+<% end %>
+
+	access_log /var/log/engineyard/nginx/<%= @app_name%>.tcp.access.log;
+
+	location / {
+		tcp_nodelay on;
+		proxy_pass http://<%= @app_name %>_tcp;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+	}
+
+	include /data/nginx/servers/<%= @app_name %>/custom.tcp_conf;
+}

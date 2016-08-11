@@ -1,0 +1,11 @@
+# This file is managed by Chef and will be overwritten on the
+# next rebuild.
+#
+# DO NOT MODIFY
+#
+
+check process collectd_httpd
+  with pidfile /var/run/collectd-httpd.pid
+  start program = "/etc/init.d/collectd-httpd start"
+  stop program = "/etc/init.d/collectd-httpd stop"
+  group collectd_httpd

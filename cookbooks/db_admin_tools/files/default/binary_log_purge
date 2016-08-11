@@ -1,0 +1,389 @@
+#!/usr/local/ey_resin/ruby/bin/ruby
+
+# Filename: binary_log_purge.rb
+# Author: Tyler Poland
+# Version: 0.2
+# Purpose: Script to check current state of all replica databases and
+# 	purge binary logs from the master based on the position of any
+# 	and all replica databases.
+
+# Changelog 0.1 -> 0.2
+# - modified binlog check routine to lookup binary log storage in configuration file instead of relying on
+#   binary logs being stored in the data directory
+
+# Changelog 0.2 -> 0.3
+# - Added ability to purge binary logs for standalone master databases
+
+# Changelog 0.3 -> 0.4
+# - Added support for remote tunneled slave with reverse connection on port 13306
+
+# Changelog 0.4 -> 1.0 
+# - Add automatic create user for master to connect to replica
+
+# Changelog 1.0 -> 1.1
+# - Remove unecessary require of mysql
+# - Remove -N from mysql command line (drops header row) for compatibility with 5.1 and 5.5
+
+# Changelog 1.0 -> 2.0
+# - Modify to purge master-bin.000001 at 50% disk utilized and set as configurable between 0 and 90% utilization
+# - Modify to maintain 24 hours of binary logs if disk isn't constrained more than 70% and at least 10GB of space is available
+# - Add ability to purge binary logs on replica databases
+# - Add ability to ignore a tunneled replica database if it is not accessible
+# - Remove unecessary require for 'mysql'
+# - Remove extra require for 'rubygems'
+
+# Changelog 2.1
+# - modified script to use ey_resin ruby to correct failure to run on PHP instances (#!/usr/bin/env ruby)
+
+# Changelog 2.1 -> 2.1.1
+# - updated detection of binary logs on disk to ignore files with similar names
+
+# Changelog 2.1.1 -> 2.1.2
+# - updated binary log configuration check to search running configuration rather than master my.cnf file for master log filenames
+
+# Changelog 2.1.2 -> 2.1.3
+# - removes parsing of configuration file replaces with --print-defaults option which can account for custom configuration files
+# - modify privileges for adding a user to only add replication specific privileges and not require SUPER access
+
+# Changelog 2.1.3 -> 2.1.4
+# - removes password use from command calls, no longer required due to ~/.my.cnf
+
+# Changelog 2.1.4 -> 2.1.5
+# - enforces the use of utf8 encodings for Ruby - Data-331
+
+# Changelog 2.1.5 -> 2.1.6
+# - enforces the use of utf8 encodings for Ruby including 1.8.6 - Data-331
+
+if defined?(Encoding)
+  Encoding.default_external = Encoding::UTF_8
+  Encoding.default_internal = Encoding::UTF_8
+else
+  $KCODE="UTF8"
+end
+
+require 'rubygems'
+require 'net/smtp'
+require 'yaml'
+require 'open3'
+require 'getoptlong'
+
+# Set up logging functions based on desired verbosity level
+def log_info(message)   # may get redefined below
+  puts message
+end
+
+def log_error(message)
+  STDERR.write(message + "\n")
+end
+
+opts = GetoptLong.new(['--quiet', '-q', GetoptLong::NO_ARGUMENT])
+opts.each do |opt, arg|
+  if opt == '--quiet'
+    def log_info(_) end
+  end
+end
+
+
+log_info Time.now
+# Conditional require for JSON if dna file exists
+chef_file = '/etc/chef/dna.json'
+if File.exists?(chef_file)
+  require 'json'
+end
+
+# Set defaults and modify according to configuration
+keep_logs = 5
+disk_purge_threshold = 50
+log_purge_sleep = 120
+max_files_purged = 10
+
+# Limits the conditions under which older binary log data will be maintained
+min_gb_maintain_binlogs = 10    # Minimum free space required to maintain older binary log data (in GB)
+max_pct_maintain_binlogs = 70   # When disk is utilized beyond this the script will purge logs for the current day
+keep_binlog_hours = 24         # The number of hours old a binary log must be before it can be purged (unless limits are reached)
+
+
+binpurge_config = '/etc/engineyard/binlogpurge.yml'
+if File.exists?(binpurge_config)
+  options = YAML::load(File.read(binpurge_config))
+  if options['keep'] > 0
+    keep_logs = options['keep'] 
+    log_info "Overriding keep logs from configuration file"
+  end
+  if (0..90).include?(options['disk_purge_threshold'])
+    disk_purge_threshold = options['disk_purge_threshold']
+    log_info "Overriding purge threshold from '#{binpurge_config}'"
+  end
+  if (2..200).include?(options['min_gb_maintain_binlogs'])
+    min_gb_maintain_binlogs = options['min_gb_maintain_binlogs']
+    log_info "Overriding minimum disk space size for maintaining binlogs from '#{binpurge_config}'"
+  end
+  if (0..90).include?(options['max_pct_maintain_binlogs'])
+    max_pct_maintain_binlogs = options['max_pct_maintain_binlogs']
+    log_info "Overriding minimum disk space percentage for maintaining binlogs from '#{binpurge_config}'"
+  end
+  if not options['max_files_purged'].nil? and options['max_files_purged'].to_i > 0
+    max_files_purged = options['max_files_purged']
+    log_info "Overriding number of files to purge from '#{binpurge_config}'"
+  end
+  if (1..600).include?(options['log_purge_sleep'])
+    log_purge_sleep = options['log_purge_sleep']
+    log_info "Overriding sleep interval between file purges from '#{binpurge_config}"
+  end
+  if not options['keep_binlog_hours'].nil? and options['keep_binlog_hours'].to_f > 0.0
+    keep_binlog_hours = options['keep_binlog_hours'].to_f
+    log_info "Overriding minimum age of binary logs before they can be purged from '#{binpurge_config}'"
+  end
+  
+  # ensure max_pct_maintain_binlogs is higher than disk_purge_threshold
+  unless max_pct_maintain_binlogs >= disk_purge_threshold
+    log_info "Error: disk_purge_threshold '#{disk_purge_threshold}' must be less or equal to the configured value of max_pct_maintain_binlogs '#{max_pct_maintain_binlogs}'. Exiting!"
+    exit(1)
+  end
+end
+
+# function to send error emails
+def failure_message(message)
+  sender = "Database Team <db@engineyard.com"
+  recipients = "db@engineyard.com"
+  hostname = `hostname`.chomp
+  subject = "An error has occurred while purging binary logs on #{hostname}"
+    mailtext = <<EOF
+From: #{sender}
+To: #{recipients}
+Subject: #{subject}
+#{message}
+EOF
+
+  begin Net::SMTP.start('mail') do |smtp|
+    smtp.sendmail(mailtext, 'root@' + hostname, recipients)
+  end
+  rescue Exception => e
+    log_error "Exception occurred: " + e
+  end
+  
+  exit(1)
+end
+
+# function to retrieve password from .mytop file
+def get_password
+  dbpass = %x{cat /root/.mytop |grep pass |awk -F= '{print $2}'}.chomp
+  failure_message() if dbpass.length < 1
+  dbpass
+end
+
+# function to run query against database
+def run_query(host, user, password, query)
+  options = ''
+  if host == '127.0.0.1'
+    options = options + ' -P13306'
+  end
+  if query == 'show processlist'
+    stdin, stdout, stderr = Open3.popen3("mysql -u#{user} #{options} -h#{host} -N -e\"#{query}\"|grep 'Binlog'")
+  else                                                   
+    stdin, stdout, stderr = Open3.popen3("mysql -u#{user} #{options} -h#{host} -e\"#{query}\"")
+  end
+  query_error = stderr.read
+  if query_error.length > 0
+    if query_error.match(/.*MySQL.*127.0.0.1.*/)
+      stdin.close
+      stdout.close
+      stderr.close
+      return "ext_replica no access"
+    else
+      log_error "Error caught: #{query_error}"
+      test_add_privilege(user, password, query_error)
+      exit 0
+      end
+  end
+  result = stdout.read
+  stdin.close
+  stdout.close
+  stderr.close
+  result
+end
+
+# function to test for user privilege
+def test_add_privilege(user, password, error)
+  full_hostname = %x{hostname --long}.chomp
+  dns_name = %x{hostname -d}.chomp
+  # verify that this is the user privilege error with the root user not having access to the replica
+  if error.match(/ERROR 1045.* Access denied for user 'root'@'.*#{dns_name}' \(using password: YES\)/)
+    # check the master to see if grant based on hostname or IP exists
+    master_ip = %x{hostname -i}.chomp.gsub(/\s+/,'')
+    stdin, stdout, stderr = Open3.popen3("mysql -u#{user} -e\"show grants for 'root'@'#{master_ip}'\"")
+    master_ip_error = stderr.read                         
+                                                          
+    stdin, stdout, stderr = Open3.popen3("mysql -u#{user} -e\"show grants for 'root'@'#{full_hostname}'\"")
+    full_hostname_error = stderr.read
+    
+    regex = 'ERROR 1141.*There is no such grant defined'
+    if master_ip_error.match(/#{regex}/) || full_hostname_error.match(/#{regex}/)
+      # neither grant is defined on the master so go ahead and add it
+      log_info "The user privilege does not exist on the master, the script will now create it."
+      log_info "This privilege must propagate to the replica via replication, the user may not be available for immediate use."
+      stdin, stdout, stderr = Open3.popen3("mysql -u#{user} -e\"grant replication slave, replication client on *.* to 'root'@'#{master_ip}' identified by '#{password}'\"")
+      create_user_error = stderr.read
+      if create_user_error.length > 0
+        log_error "Unable to create user: #{create_user_error}"
+        exit 1
+      end
+    else
+      log_error "The required privilege appears to exist on the master, you may need to wait for replication to process the grant on the Replica"
+      exit 0
+    end
+  end
+end
+
+# function to convert input into yaml
+def yaml_result(file)
+  parse = file.gsub(/^\*.*$/,'').gsub(/^/,' ').gsub(/^\s+/, '  ')
+  yml = YAML.load(parse)
+end
+
+# parse the hostname out of the processlist
+def extract_host(line)
+  line =~ /.+\s+(.+):.+/
+  $1
+end
+
+def volume_space(volume='/db')
+  %x{df | grep '#{volume}'}.split
+end
+
+# function to get replica position from replica host
+def slave_log_file(hostname, user, pass)
+  if hostname == 'localhost'
+    hostname = '127.0.0.1'
+  end
+  
+  q_result = run_query(hostname, user, pass, "show slave status\\G")
+  if q_result.match(/.*Slave_SQL_Running: No.*/)
+    log_error "Slave SQL thread is not running."
+    log_info "The error is: \n#{q_result}"
+    log_error "Unable to continue; exiting!"
+    exit 1
+  end
+  
+  return q_result if q_result.match(/ext_replica no access/)
+   
+  yaml = yaml_result(q_result)
+  yaml["Relay_Master_Log_File"]
+end
+
+def get_mysql_run_options
+  mysql_process = %x{/usr/sbin/mysqld --print-defaults}.split(/\s+/).select{|item| item.match(/^--/)}
+  params = Hash.new
+  mysql_process.each {|i| k, v = i.split('='); params[k]=v}
+  params
+end
+
+dbuser = 'root'
+
+if not dbpassword = get_password
+  failure_message("Password not found for slice, check for /root/.mytop")
+end
+
+# Determine MySQL run options
+mysql_params = get_mysql_run_options
+datadir = mysql_params['--datadir']
+
+# Determine path and naming of binary logs
+binlog_path = mysql_params['--log-bin'].chomp
+binlog_dir = File.dirname(binlog_path)
+binary_log_name = File.basename(binlog_path)
+
+if binary_log_name == ''
+	log_info "log-bin not set in config file, host does not have master role, unable to proceed"
+	exit(0) 
+end
+
+#if binary logging has been turned off we exit here
+result = run_query('localhost', dbuser, dbpassword, "show global variables like 'log_bin'").chomp
+if result.split[1] == "OFF"
+  puts "Binary logging is not currently enabled for this host. Exiting!"
+  exit(0)
+end
+
+
+# If master-bin.000001 exists then only purge logs if disk space is constrained
+if File.exists?(binlog_dir + '/' + binary_log_name + '.000001')
+  if  volume_space('/db')[4].to_i < disk_purge_threshold
+    log_info "The first binary log exists and the purge threshold has not been reached; skipping purge action"
+    exit(0)
+  end
+end
+
+# Check master for all connected replication slaves
+result = run_query('localhost', dbuser, dbpassword, 'show processlist')
+slave_hosts = []
+min_log = 0 
+result.each_line do |line|
+  if line.include? 'Binlog Dump'
+    slave = Hash.new
+    slave["hostname"] = extract_host(line)
+    # If the slave is inaccessible this next line times out. This can happen if a slave is terminated without stopping replication first
+    # the error is caught as "Error caught: ERROR 2003 (HY000): Can't connect to MySQL server on"
+    slave["Relay_Master_Log_File"] = slave_log_file(slave["hostname"], dbuser, dbpassword)
+    if slave["Relay_Master_Log_File"].match(/ext_replica no access/)
+      log_info "Slave Hostname: #{slave["hostname"]} is a non-accessible tunneled host, ignoring!"
+      next
+    end
+    slave["Relay_Master_Log_File"] =~ /\w+.(\d{6})/ and min_log = $1.to_i if $1.to_i < min_log || min_log == 0
+    log_info "Slave Hostname: #{slave["hostname"]}, Relay_Master_log: #{slave["Relay_Master_Log_File"]}"
+    slave_hosts << slave
+  end
+end
+
+# stop log purge #{keep_logs} logs before the current read position
+stop_log = min_log - keep_logs
+
+# if standalone master and no replicas are found we stop purge #{keep_logs} logs before master's current position
+if min_log == 0 and File.exists?(chef_file)
+  chef_config = JSON.parse(File.read(chef_file))
+  if chef_config['db_slaves'].empty? or chef_config['db_slaves'].nil? or chef_config['db_slaves'].include?(%x{hostname -f}.chomp) # chef_config['db_slaves'].grep(/%x{hostname}/)
+    current_master = %x{cd #{binlog_dir} && ls -tr #{binary_log_name}.[0-9][0-9][0-9][0-9][0-9][0-9] | tail  -n 1}
+    current_master =~ /\w+.(\d{6})/ and stop_log = $1.to_i + 1 - keep_logs
+  elsif min_log == 0
+    log_error "Slave(s) are on record as '#{chef_config['db_slaves']}' but replication is not running."
+    exit 1
+  end
+end
+
+# Purge logs based on minimum position of all servers
+min_master_log = %x{cd #{binlog_dir} && ls -tr #{binary_log_name}.[0-9][0-9][0-9][0-9][0-9][0-9] | head -n 1}
+min_master_log =~ /\w+.(\d{6})/ and min_master_num = $1.to_i + 1
+
+# purge up to 10 files as long as the top file is less than the minimum replica log
+min_master_num.upto(min_master_num + max_files_purged) do |i|
+  if stop_log < 0
+    log_error "Could not verify replication status, confirm that replication is running. Exiting!"
+    break
+  elsif i >= stop_log + 1
+    log_info "File number of #{i} exceeds minimum purge file of #{stop_log + 1} based on keeping #{keep_logs} files. Exiting!"
+    break
+  end
+
+  file = "#{binary_log_name}.%06d" % i
+  volume_free = volume_space('/db')
+  if volume_free[3].to_i < (min_gb_maintain_binlogs*1024**2) or volume_free[4].to_i > max_pct_maintain_binlogs
+    log_info "Purging binary logs to #{file}"
+    run_query('localhost', dbuser, dbpassword, "purge master logs to '#{file}'")
+    sleep log_purge_sleep
+  else
+    file_age = %x{stat -c %Z #{binlog_dir}/#{file}}.chomp.to_f
+    now = %x{date +%s}.chomp.to_f
+    
+    # if the last update for the current file was longer ago than keep_binlog_hours then we can purge it
+    if ((now - file_age) / 3600) > keep_binlog_hours.to_f
+      log_info "Purging binary logs to #{file}"
+      run_query('localhost', dbuser, dbpassword, "purge master logs to '#{file}'")
+      sleep log_purge_sleep
+    else
+      log_info "The file #{file} was written less than #{keep_binlog_hours} hours ago so we do not purge past this file unless disk space is constrained. Exiting!"
+      break
+    end
+  end
+end
+
+log_info Time.now

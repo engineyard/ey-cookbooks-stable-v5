@@ -1,0 +1,78 @@
+#!/usr/local/ey_resin/ruby/bin/ruby
+require 'rubygems'
+require 'net/http'
+require 'net/https'
+require 'uri'
+require 'json'
+
+class CollectdAlertParser
+  def self.parse(input)
+    new.parse(input)
+  end
+
+  def alerts(uris)
+    uris.split(' ').each do |url|
+      begin
+        alert(url)
+      rescue => error
+        $stderr.puts(error.message)
+      end
+    end
+  end
+
+  def alert(url)
+    http_retry_delay = 10
+    http_retry_count = 3
+    url = URI.parse(url)
+    http = Net::HTTP.new(url.host, url.port)
+    headers = {}
+    if url.scheme == "https"
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
+    headers["Content-Type"] = 'application/json' if @data
+    req = Net::HTTP::Post.new(url.path, headers)
+    req.body = {:message => 'alert', :data => @data}.to_json if @data
+    res = nil
+
+    begin
+      res = http.request(req) do |response|
+        response.read_body
+        response
+      end
+    rescue Errno::ECONNREFUSED
+      $stderr.puts("Connection refused connecting to #{url.host}:#{url.port} for #{req.path} #{http_retries}/#{http_retry_count}")
+      sleep(http_retry_delay)
+      retry if (http_retries += 1) < http_retry_count
+      raise Errno::ECONNREFUSED, "Connection refused connecting to #{url.host}:#{url.port} for #{req.path}, giving up"
+    rescue Timeout::Error
+      $stderr.puts("Timeout connecting to #{url.host}:#{url.port} for #{req.path}, retry #{http_retries}/#{http_retry_count}")
+      sleep(http_retry_delay)
+      retry if (http_retries += 1) < http_retry_count
+      raise Timeout::Error, "Timeout connecting to #{url.host}:#{url.port} for #{req.path}, giving up"
+    end
+
+    if res.kind_of?(Net::HTTPSuccess)
+      JSON.parse(res.body)
+    else
+      res.error!
+    end
+  end
+
+  def parse(input)
+    @data = {}
+    input.each_line do |line|
+      if line != "\n"
+        if line =~ /^\w+:/
+          key, val = line.split(':', 2).map{|s| s.strip}
+          @data[key] = val
+        else
+          @data['alert_message'] = line.strip.gsub(/(Host.*?,\s)/, '')
+        end
+      end
+    end
+    self
+  end
+end
+
+CollectdAlertParser.parse(STDIN.read).alerts("<%= @url %>")

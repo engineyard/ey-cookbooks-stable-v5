@@ -1,0 +1,27 @@
+# Max size for file uploads
+client_max_body_size 100M;
+
+# HTTP Error handling.
+#
+# 404 - Resource Not found.
+error_page 404 /404.html;
+ 
+# 500 - Internal Error
+# 502 - Bad Gateway
+# 504 - Gateway Timeout
+error_page 500 502 504 /500.html;
+
+# 503 - Service Unavailable
+error_page 503 @503;
+recursive_error_pages on;
+location @503 {
+
+  error_page 405 =503 /system/maintenance.html;
+
+  # Serve static assets if found.
+  if (-f $request_filename) {
+    break;
+  }
+
+  rewrite ^(.*)$ /system/maintenance.html break;
+}

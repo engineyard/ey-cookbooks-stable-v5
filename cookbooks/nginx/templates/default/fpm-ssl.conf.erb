@@ -1,0 +1,92 @@
+upstream upstream_<%= @app_name %>_ssl {
+  server unix:/var/run/engineyard/php-fpm_<%= @app_name %>.sock;
+}
+
+# Include additional server blocks.  File copied in via deploy hooks
+include /etc/nginx/servers/<%= @app_name %>/additional_server_blocks.ssl.customer;
+
+server {
+  listen      8082;
+  server_name <%= @server_names ? @server_names.join(" ") : "_" %>;
+
+  port_in_redirect off;
+
+  # If you need to customize SSL please refer to
+  # /etc/nginx/servers/<%= @app_name %>/customer.ssl_cert and customer.ssl_cipher
+
+  include /etc/nginx/servers/<%= @app_name %>/ssl_cert;
+  include /etc/nginx/servers/<%= @app_name %>/ssl_cipher;
+
+  root  <%= File.join('/data', @app_name, 'current', @webroot).sub(/\/$/,'') %>;
+  index index.php index.html index.htm;
+
+  access_log /var/log/engineyard/nginx/<%= @app_name %>.access.log main;
+  error_log  /var/log/engineyard/nginx/<%= @app_name %>.error.log  notice;
+
+  client_max_body_size 100M;
+  error_page 404 /404.html;
+  error_page 500 502 504 /500.html;
+
+  if (-f /data/<%= @app_name %>/current/public/system/maintenance.html) {
+    return 503;
+  }
+
+  location = /favicon.ico {
+    access_log     off;
+    log_not_found  off;
+  }
+
+	# Include additional location blocks.  File copied in via deploy hooks
+	include /etc/nginx/servers/<%= @app_name %>/additional_location_blocks.ssl.customer;
+
+  location / {
+    try_files $uri $uri/ /index.php$is_args$args;
+  }
+
+  location ~ \.php$ {
+    try_files $uri =404;
+
+    include                     /etc/nginx/common/proxy.conf;
+    include                     /etc/nginx/common/fcgi.conf;
+    fastcgi_pass                upstream_<%= @app_name %>_ssl;
+    fastcgi_index               index.php;
+    fastcgi_intercept_errors    off;
+    fastcgi_param               SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_param               HTTPS on;
+    fastcgi_param               SERVER_NAME $hostname;
+    <% if  File.exists?("/etc/newrelic/newrelic.cfg") %>
+    fastcgi_param               PHP_VALUE "newrelic.appname=<%= @env_name %> / <%= @app_name %>";
+    <% end %>
+  }
+
+  location ~* ^.+\.(jpg|js|jpeg|png|ico|gif|txt|js|css|swf|zip|rar|avi|exe|mpg|mp3|wav|mpeg|asf|wmv)$ {
+    try_files $uri /index.php$is_args$args;
+    expires 24h;
+  }
+
+  <% if @webroot == '/' %>
+  location ~* ^/(tmp|log|config)(/.*|$) {
+    try_files /index.php$is_args$args =404;
+  }
+  location = nginx.conf {
+    try_files /index.php$is_args$args =404;
+  }
+
+  <% end %>
+  <% %w(404 500).each do |error| %>
+  location = /<%= error %>.html {
+    root /data/<%= @app_name %>/current;
+  }
+
+  <% end %>
+  error_page 503 @maint;
+  location @maint {
+    root /data/<%= @app_name %>/current/public/system;
+    if (!-f $request_filename) {
+      rewrite ^(.*)$ /maintenance.html break;
+    }
+    return 200;
+  }
+
+  include /etc/nginx/servers/<%= @app_name %>/custom.ssl.conf;
+}

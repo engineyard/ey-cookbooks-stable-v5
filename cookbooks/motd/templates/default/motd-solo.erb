@@ -1,0 +1,50 @@
+Welcome to Engine Yard Cloud!
+
+Applications:
+<% @apps_and_recipes.each do |appname, data| %>
+<%= appname %>:
+cd /data/<%= appname %>/current # go to the application root folder
+tail -f /data/<%= appname %>/current/log/<%= @framework_env %>.log # production logs
+<% if data[:recipes].include? 'unicorn' %>
+tail -f /data/<%= appname %>/current/log/unicorn.log # unicorn logs
+<% end -%>
+cat /data/nginx/servers/<%= appname %>.conf # current nginx conf
+<% end -%>
+
+
+<% unless @db_type == "no_db" %>
+SQL database:
+cd /db # your attached DB volume
+
+<% if @db_type =~ /mysql/ %>
+MySQL:
+tail -f <%= @db_logs.join " " %> # logs
+mytop # top for mysql
+<% elsif @db_type =~ /postgres/ %>
+PostgreSQL:
+tail -f <%= @db_logs.join " " %> # logs
+<% @apps_and_recipes.each do |appname, data| %>
+pg_top -d <%= data[:database_name] %>
+<% end -%>
+<% end -%>
+<% end -%>
+
+<% if @prechef_cmd_account || @prechef_cmd_env || @prechef_cmd_app %>
+PreChef Command set in Metadata.  Please open a ticket if you need these changed or removed.
+<% end %>
+<% if @prechef_cmd_account  %>
+PreChef Account Level Command: <%= @prechef_cmd_account %>
+<% end %>
+<% if @prechef_cmd_env  %>
+PreChef Env Level Command: <%= @prechef_cmd_env %>
+<% end %>
+<% if @prechef_cmd_app  %>
+PreChef App Level Command: <%= @prechef_cmd_app %>
+<% end %>
+
+Inspect node data passed to chef cookbooks:
+sudo gem install tins -v 1.6.0                               # For Ruby 1.9.3 or older
+sudo gem list --no-installed bundler && gem install bundler  # Install bundler if not installed yet
+sudo gem install jazor
+sudo jazor /etc/chef/dna.json
+sudo jazor /etc/chef/dna.json 'applications.map {|app, data| [app, data.keys]}'

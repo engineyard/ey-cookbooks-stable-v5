@@ -1,0 +1,77 @@
+#!/bin/bash
+
+ACTION=$1
+shift
+OTHER_OPTS="${*}"
+
+STATUS_DIR="/tmp/check_postgres_status"
+mkdir -p ${STATUS_DIR}
+
+function alert() {
+    SEVERITY="$1"
+    MESSAGE="$2"
+    STATUS_FILE="$(ls ${STATUS_DIR}/${ACTION}_* 2> /dev/null)"
+    timestamp=$(date '+%s')
+
+    if [[ "${STATUS_FILE}" =~ [0-9]+$ ]]
+    then
+        ALERT_COUNT="${BASH_REMATCH[0]}"
+        ALERT_COUNT=$(( ${ALERT_COUNT} + 1))
+    elif [ "${SEVERITY}" != "OKAY" ]
+    then
+        ALERT_COUNT=1
+    fi
+
+    # alert in 3 cases
+    # no status file for the ACTION exists
+    # SEVERITY is not OKAY and ALERT_COUNT is greater than 1
+    # SEVERITY is OKAY but an WARN/FAIL alert fired on the last check (ALERT_COUNT will now be > 2)
+    if [[ (! -e "${STATUS_FILE}") || ("${SEVERITY}" != "OKAY" && "${ALERT_COUNT}" > 1) || ("${SEVERITY}" = "OKAY" && "${ALERT_COUNT}" > 2) ]]
+    then
+        echo "PUTNOTIF time=${timestamp} TYPE=process-postgresql-${ACTION} severity=${SEVERITY} message=\"raw_message: ${MESSAGE}\""
+    fi
+
+    rm -f ${STATUS_FILE} > /dev/null 2>&1
+
+    # write new status file
+    STATUS_FILE="${STATUS_DIR}/${ACTION}_OKAY"
+    if [ "${SEVERITY}" != "OKAY" ]
+    then
+        STATUS_FILE="${STATUS_DIR}/${ACTION}_${SEVERITY}_${ALERT_COUNT}"
+    fi
+    echo -e "Time: $(date)\nStatus: ${SEVERITY}\nMessage: ${MESSAGE}" > $STATUS_FILE
+
+    exit
+}
+
+function in_recovery() {
+    psql -t -c "SELECT pg_is_in_recovery();" | grep -q t
+    echo $?
+}
+
+function run_check() {
+    if [ "${ACTION}" = "checkpoint" -a "$(in_recovery)" -eq "0" -a -n "$(ps aux | grep [p]g_dump)" ]
+    then
+        alert "OKAY" "POSTGRES_CHECKPOINT OK: Replication is running. Not checking checkpointing because a backup is running."
+        return
+    fi
+
+    out=$(export PGPASSWORD=<%= @dbpass %>  ; <%= @postgres_check_bin %> --exclude='postgres,template1' --showperf=0 --action=${ACTION} ${OTHER_OPTS}) 
+    res=$?
+    
+    if [ "${res}" = "0" ]
+    then
+        SEVERITY='OKAY'
+    elif [ "${res}" = "1" ]
+    then
+        SEVERITY='WARNING'
+    elif [ "${res}" -ge "2" ]
+    then
+        SEVERITY='FAILURE'
+    fi
+    
+    out="$(echo ${out} | sed "s/\"/'/g")"
+    alert ${SEVERITY} "${out}"
+}
+
+run_check

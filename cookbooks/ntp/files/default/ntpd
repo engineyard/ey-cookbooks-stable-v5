@@ -1,0 +1,5 @@
+# /etc/conf.d/ntpd
+
+# Options to pass to the ntpd process
+# This file is managed by EY Cloud; changes will be overwritten
+NTPD_OPTS="-u ntp:ntp -l /var/log/ntp.log"

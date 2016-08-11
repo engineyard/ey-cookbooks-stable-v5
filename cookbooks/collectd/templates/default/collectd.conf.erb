@@ -1,0 +1,277 @@
+#
+# Config file for collectd(1).
+# Please read collectd.conf(5) for a list of options.
+# http://collectd.org/
+#
+# This file is managed by Chef and will be overwritten on the
+# next rebuild.
+#
+# DO NOT MODIFY
+#
+
+FQDNLookup   true
+BaseDir     "/var/lib/collectd"
+PIDFile     "/var/run/collectd.pid"
+PluginDir   "/usr/lib/collectd"
+Interval     30
+
+# LOAD THESE PLUGINS
+
+LoadPlugin logfile
+LoadPlugin processes
+LoadPlugin syslog
+LoadPlugin cpu
+LoadPlugin df
+LoadPlugin disk
+LoadPlugin interface
+LoadPlugin load
+LoadPlugin memcached
+LoadPlugin memory
+<% if @has_db && @db_type[/mysql/] %>
+  LoadPlugin mysql
+<% end %>
+LoadPlugin rrdtool
+<% if @swap_warning_total >= 1 %>
+LoadPlugin swap
+<% end %>
+LoadPlugin exec
+LoadPlugin filecount
+LoadPlugin threshold
+
+# PLUGIN CONFIG
+
+# Ignore (don't monitor) /dev, /dev/shm, /var/log (it's really /mnt/log)
+# Report the reserved disk space as being used, instead of free ... 'cause it's not
+<Plugin "df">
+  ReportReserved true
+  FSType "ext3"
+  FSType "ext4"
+</Plugin>
+
+<% if @memcached %>
+<Plugin memcached>
+  Host "127.0.0.1"
+  Port "11211"
+</Plugin>
+<% end %>
+<% if @has_db %>
+    # The role of this machine implies a db should be running,
+    # so let's monitor it
+  <% if @db_type[/mysql/] %>
+    <Plugin mysql>
+    <% @databases.each do |db| %>
+      <%= "<Database \"#{db}\">" %>
+      Host "localhost"
+      User "root"
+      Password "<%= @node.dna[:owner_pass] %>"
+      <% if @role == 'db_master' && @db_slaves.length > 0 %>
+        MasterStats true
+      <% end %>
+      <% if @role == 'db_slave' %>
+        SlaveStats true
+      <% end %>
+      </Database>
+    <% end %>
+    </Plugin>
+
+    # Watch mysqld process
+    <Plugin processes>
+    Process mysqld
+    </Plugin>
+  <% end %>
+  <% if @db_type[/postgres/] %>
+    <Plugin processes>
+    Process postgres
+    </Plugin>
+  <% end %>
+<% end %>
+#Get some more stats about cron
+<Plugin processes>
+  Process cron
+</Plugin>
+
+<Plugin processes>
+  Process collectd
+</Plugin>
+
+#Make sure cron is updating the check file
+#The check file is touched by cron every minute
+#cron_nanny is used to make sure cron is running
+#This is a fall back alert.
+<Plugin filecount>
+  <Directory "/tmp">
+    Instance "cron-check"
+    Name "cron-check"
+    MTime 300
+  </Directory>
+</Plugin>
+
+# RRD configuration
+<Plugin rrdtool>
+  DataDir "/var/lib/collectd/rrd"
+  CacheTimeout 120
+  CacheFlush   900
+</Plugin>
+
+# This script get's fired off for Thresholds
+# It's written dynamically by chef
+<% if @has_db %>
+  <% if @db_type[/mysql|postgres9/] %>
+    <Plugin exec>
+    <% if @db_type[/postgres9/] %>
+      Exec "postgres" "/engineyard/bin/check_postgres_wrapper.sh" "connection"
+      Exec "postgres" "/engineyard/bin/check_postgres_wrapper.sh" "backends"
+      Exec "postgres" "/engineyard/bin/check_postgres_wrapper.sh" "checkpoint" "--warn=20m" "--crit=30m" "--datadir /db/postgresql/<%= @short_version %>/data"
+      Exec "postgres" "/engineyard/bin/check_postgres_wrapper.sh" "txn_idle" "--warn=15m" "--crit=30m"
+      <% if @role == 'db_master' %>
+        Exec "postgres" "/engineyard/bin/check_postgres_wrapper.sh" "autovac_freeze"
+      <% end %>
+    <% end %>
+    <% if @db_type[/mysql/] %>
+      Exec "mysql" "/engineyard/bin/check_mysql.sh" "connections"
+      <% if @role == 'db_slave' %>
+        Exec "mysql" "/engineyard/bin/check_mysql.sh" "replication" "8000" "40000"
+      <% end %>
+    <% end%>
+    </Plugin>
+  <% end %>
+<% end %>
+
+<Plugin exec>
+  Exec "<%= @user %>" "/engineyard/bin/check_readonly.sh"
+  Exec "<%= @user %>" "/engineyard/bin/check_health_for" "ntpd"
+  Exec "<%= @user %>" "/engineyard/bin/check_health_for" "fs-type"
+</Plugin>
+<Plugin exec>
+  NotificationExec "<%= @user %>" "<%= @alert_script %>"
+</Plugin>
+
+# THRESHHOLD CONFIG
+# These are the things we alert on
+<Plugin threshold>
+  <Plugin "load">
+    <Type "load">
+      WarningMin    0.00
+      WarningMax    <%= "%0.2f" % @load_warning %>
+      FailureMin    0.00
+      FailureMax    <%= "%0.2f" % @load_failure %>
+      DataSource "shortterm"
+    </Type>
+  </Plugin>
+
+  <Plugin "filecount-cron-check">
+    <Type "files">
+      FailureMin 0.00
+      DataSource "value"
+    </Type>
+  </Plugin>
+
+  <% if @has_db %>
+    <% if @db_type[/mysql/]  %>
+  # let's monitor to make sure it's running.
+  # This is kind of a hack, let's see if it works well.
+  <Plugin "processes-mysqld">
+    <Type "ps_count">
+      FailureMin 1.00
+      FailureMax 100.00
+      DataSource "processes"
+    </Type>
+  </Plugin>
+<% end %>
+<% end %>
+<% if @has_db %>
+  <% if @db_type[/postgres9/] %>
+    <Plugin "process-postgres">
+      <Type "ps_count">
+        FailureMin 1.00
+        FailureMax 612.00
+        DataSource "processes"
+      </Type>
+    </Plugin>
+  <% end %>
+<% end %>
+
+  #Alert if cron process count > 100 || < 1
+  <Plugin "processes-cron">
+    <Type "ps_count">
+      FailureMin 1.00
+      FailureMax 100.00
+      DataSource "processes"
+    </Type>
+  </Plugin>
+
+  #Alert if collectd process count > 10 || < 1
+  <Plugin "processes-collectd">
+    <Type "ps_count">
+      FailureMin 1.00
+      FailureMax 10.00
+      DataSource "processes"
+    </Type>
+  </Plugin>
+
+  <% if @swap_warning_total >= 1 %>
+  <Plugin "swap">
+    <Type "swap-used">
+      WarningMin    0.00
+      WarningMax    <%= @swap_warning_total %>
+      FailureMin    0.00
+      FailureMax    <%= @swap_critical_total %>
+      DataSource "value"
+    </Type>
+  </Plugin>
+  <% end %>
+
+  # Disk space alerts
+  # Thresholds are pulled from a library
+  <Plugin "df-root">
+    <Type "df_complex">
+      Instance "free"
+      Invert true
+      WarningMin    0.00
+      WarningMax    <%= @disk_thresholds.warning_for('/') %>
+      FailureMin    0.00
+      FailureMax    <%= @disk_thresholds.failure_for('/') %>
+      DataSource "value"
+    </Type>
+    </Plugin>
+
+
+  <% if @has_db %>
+  <Plugin "df-db">
+    <Type "df_complex">
+      Instance "free"
+      Invert true
+      WarningMin    0.00
+      WarningMax    <%= @disk_thresholds.warning_for('/db') %>
+      FailureMin    0.00
+      FailureMax    <%= @disk_thresholds.failure_for('/db') %>
+      DataSource "value"
+    </Type>
+    </Plugin>
+  <% end %>
+
+  <Plugin "df-data">
+  <Type "df_complex">
+      Instance "free"
+      Invert true
+      WarningMin    0.00
+      WarningMax    <%= @disk_thresholds.warning_for('/data') %>
+      FailureMin    0.00
+      FailureMax    <%= @disk_thresholds.failure_for('/data') %>
+      DataSource "value"
+    </Type>
+    </Plugin>
+
+  <Plugin "df-mnt">
+    <Type "df_complex">
+      Instance "free"
+      Invert true
+      WarningMin    0.00
+      WarningMax    <%= @disk_thresholds.warning_for('/mnt') %>
+      FailureMin    0.00
+      FailureMax    <%= @disk_thresholds.failure_for('/mnt') %>
+      DataSource "value"
+    </Type>
+  </Plugin>
+
+</Plugin>

@@ -1,0 +1,1 @@
+echo "PUTVAL: `hostname -f`/postgresql/connections interval=60 N:`/usr/bin/check_postgres_backends --simple -H $1`"

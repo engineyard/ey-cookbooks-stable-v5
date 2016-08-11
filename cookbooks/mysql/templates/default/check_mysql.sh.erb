@@ -1,0 +1,143 @@
+#!/bin/bash
+
+ACTION=$1
+WARN=$2
+CRIT=$3
+
+DBPASS="<%= @dbpass %>"
+STATUS_DIR="/tmp/check_mysql_status"
+TIMEOUT=60
+mkdir -p ${STATUS_DIR}
+
+function alert() {
+    SEVERITY="$1"
+    MESSAGE="$2"
+    STATUS_FILE="$(ls ${STATUS_DIR}/${ACTION}_* 2> /dev/null)"
+    timestamp=$(date '+%s')
+
+    if [[ "${STATUS_FILE}" =~ [0-9]+$ ]]
+    then
+        ALERT_COUNT="${BASH_REMATCH[0]}"
+        ALERT_COUNT=$(( ${ALERT_COUNT} + 1))
+    elif [ "${SEVERITY}" != "OKAY" ]
+    then
+        ALERT_COUNT=1
+    fi
+
+    # alert in 3 cases
+    # no status file for the ACTION exists
+    # SEVERITY is not OKAY and ALERT_COUNT is greater than 1
+    # SEVERITY is OKAY but an WARN/FAIL alert fired on the last check (ALERT_COUNT will now be > 2)
+    if [[ (! -e "${STATUS_FILE}") || ("${SEVERITY}" != "OKAY" && "${ALERT_COUNT}" > 1) || ("${SEVERITY}" = "OKAY" && "${ALERT_COUNT}" > 2) ]]
+    then
+        echo "PUTNOTIF time=${timestamp} TYPE=process-mysql-${ACTION} severity=${SEVERITY} message=\"raw_message: ${MESSAGE}\""
+    fi
+
+    rm -f ${STATUS_FILE} > /dev/null 2>&1
+
+    # write fresh status file
+    STATUS_FILE="${STATUS_DIR}/${ACTION}_OKAY"
+    if [ "${SEVERITY}" != "OKAY" ]
+    then
+        STATUS_FILE="${STATUS_DIR}/${ACTION}_${SEVERITY}_${ALERT_COUNT}"
+    fi
+    echo -e "Time: $(date)\nStatus: ${SEVERITY}\nMessage: ${MESSAGE}" > $STATUS_FILE
+
+    exit
+}
+
+function get_val() {
+    get_var=$1
+    TYPE=$2
+  
+    query_db "show ${TYPE} like '${get_var}'\G"
+    if [ "${error_status}" != "0" ]
+    then
+        alert "FAILURE" "MySQL ${ACTION}: Error checking value of ${get_var}: ${res}."
+    fi
+
+    eval $get_var="$(echo ${res} | tail -1 | awk '{print $NF}')"
+}
+
+function query_db() {
+    QUERY=$1
+    res=$(export MYSQL_PWD=${DBPASS}; timeout ${TIMEOUT} mysql -u root -e "${QUERY}" 2>&1)
+    error_status=$?
+    if [ "${error_status}" == "124" ]
+    then
+        alert "FAILURE" "MySQL Timeout hit: Unable to connect to db server within ${TIMEOUT}"
+    fi
+}
+
+function check_connections {
+    [[ -z ${WARN} ]] && WARN=90                                                                                 
+    [[ -z ${CRIT} ]] && CRIT=95
+    
+    get_val 'max_connections' 'variables'
+    get_val 'threads_connected' 'status'
+    
+    # WARN & CRIT vals here are percent values of the max
+    if [ "$(echo "${threads_connected} > (${max_connections} * ${CRIT} * .01)" | bc)" == "1" ]
+    then
+        alert "FAILURE" "MySQL Connections: ${threads_connected} threads_connected is greater than ${CRIT}% of the configured value of max_connections (${max_connections})."
+    fi
+    
+    if [ "$(echo "${threads_connected} > (${max_connections} * ${WARN} * .01)" | bc)" == "1" ]
+    then
+        alert "WARNING" "MySQL Connections: ${threads_connected} threads_connected is greater than ${WARN}% of the configured value of max_connections (${max_connections})."
+    fi
+    
+    alert "OKAY" "MySQL Connections: ${threads_connected} is less than ${WARN}% of the configured value of max_connections (${max_connections})."
+}
+
+function check_connect {
+    query_db "select 1;" > /dev/null 2>&1
+    if [ "$?" != "0" ]
+    then
+        alert "FAILURE" "MySQL Connect: Could not connect to MySQL server."
+    fi
+    
+    alert "OKAY" "MySQL Connect: Connection to MySQL server successful."
+}
+
+function check_replication {
+    [[ -z ${WARN} ]] && WARN=5
+    [[ -z ${CRIT} ]] && CRIT=10
+    
+    query_db "show slave status\G"
+    SLAVE_STATUS="${res}"
+    read SLAVE_IO_RUNNING SLAVE_SQL_RUNNING SECONDS_BEHIND_MASTER <<<$(echo "${SLAVE_STATUS}" | grep -v WARNING | egrep "Slave_IO_Running:|Slave_SQL_Running:|Seconds_Behind_Master:" | awk '{print $2}' 2>&1)
+    
+    if [ "${SLAVE_SQL_RUNNING}" != "Yes" ]
+    then
+        alert "FAILURE" "MySQL Replication: Slave SQL Thread is not running."
+    fi
+    
+    if [ "${SLAVE_IO_RUNNING}" != "Yes" ]
+    then
+        alert "FAILURE" "MySQL Replication: Slave IO Thread is not running."
+    fi
+
+    if [ -n "$(ps aux | grep [m]ysqldump | grep -v single-transaction)" ]
+    then
+        alert "OKAY" "MySQL Replication: Replication is running. Not checking lag because a locking backup is running."
+        return
+    fi
+
+    if [ "${SECONDS_BEHIND_MASTER}" -gt "${WARN}" ]
+    then
+        if [ "${SECONDS_BEHIND_MASTER}" -gt "${CRIT}" ]
+        then
+            alert "FAILURE" "MySQL Replication: Seconds_Behind_Master ${SECONDS_BEHIND_MASTER} is above ${CRIT}."
+        fi
+        alert "WARNING" "MySQL Replication: Seconds_Behind_Master ${SECONDS_BEHIND_MASTER} is above ${WARN}."
+    fi
+    
+    alert "OKAY" "MySQL Replication: Replication is running and Seconds_Behind_Master of ${SECONDS_BEHIND_MASTER} is below ${WARN}."
+}
+
+function check_timeout {
+    query_db "select sleep (${TIMEOUT})"
+}
+
+eval "check_${ACTION}"

@@ -1,0 +1,62 @@
+#!/bin/bash
+
+<%= @checkpid_body %>
+
+case "$1" in
+
+  deploy)
+    if [ ! -z "$PORT" ] ; then
+      sudo /engineyard/bin/monit_mongrel <%= @app_name %> stop $PORT
+      sudo /engineyard/bin/monit_mongrel <%= @app_name %> start $PORT
+    else
+      for port in `seq <%= @low_port %> <%= @high_port %>`; do
+        sudo /engineyard/bin/monit_mongrel <%= @app_name %> stop $port
+        sudo /engineyard/bin/monit_mongrel <%= @app_name %> start $port
+      done
+    fi
+  ;;
+  stop)
+    if [ ! -z "$PORT" ] ; then
+      sudo /engineyard/bin/monit_mongrel <%= @app_name %> stop $PORT
+    else
+      for port in `seq <%= @low_port %> <%= @high_port %>`; do
+        sudo /engineyard/bin/monit_mongrel <%= @app_name %> stop $port
+      done
+    fi
+  ;;
+  start)
+    if [ ! -z "$PORT" ] ; then
+      sudo /engineyard/bin/monit_mongrel <%= @app_name %> start $PORT
+    else
+      for port in `seq <%= @low_port %> <%= @high_port %>`; do
+        sudo /engineyard/bin/monit_mongrel <%= @app_name %> start $port
+      done
+    fi
+  ;;
+  restart)
+    if [ ! -z "$PORT" ] ; then
+      sudo /engineyard/bin/monit_mongrel <%= @app_name %> stop $PORT
+      sudo /engineyard/bin/monit_mongrel <%= @app_name %> start $PORT
+    else
+      for port in `seq <%= @low_port %> <%= @high_port %>`; do
+        sudo /engineyard/bin/monit_mongrel <%= @app_name %> stop $port
+        sudo /engineyard/bin/monit_mongrel <%= @app_name %> start $port
+      done
+    fi
+  ;;
+  status)
+    if [ ! -z "$PORT" ] ; then
+      checkpid $PORT
+    else
+      for port in `seq <%= @low_port %> <%= @high_port %>`; do
+        checkpid $port
+      done
+    fi
+  ;;
+  *)
+  echo "Usage: $0 {status|start|stop|restart|deploy}"
+  exit 1
+  ;;
+esac
+
+exit 0

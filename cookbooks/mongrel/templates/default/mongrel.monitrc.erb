@@ -1,0 +1,8 @@
+<% (@mongrel_base_port).upto(@mongrel_base_port + (@mongrel_instance_count - 1)) do |i| %>
+check process mongrel_<%= @app_name %>_<%= i %>
+  with pidfile /var/run/mongrel/<%= @app_name %>/mongrel.<%= i %>.pid
+  start program = "/usr/bin/env PORT=<%= i %> /engineyard/bin/app_<%= @app_name %> start" as uid <%= @user %> and gid <%= @user %>
+  stop program = "/usr/bin/env PORT=<%= i %> /engineyard/bin/app_<%= @app_name %> stop" as uid <%= @user %> and gid <%= @user %>
+  if totalmem is greater than <%= @mongrel_mem_limit %> MB for 2 cycles then restart      # eating up memory?
+  group <%= @app_name %>
+<% end %>

@@ -1,0 +1,19 @@
+# TYPE  DATABASE        USER            CIDR-ADDRESS            METHOD
+
+<% if not @custom_contents.nil? %>
+# entries from <%= @custom_file %>
+<%= @custom_contents %>
+<% end %>
+
+# "local" is for Unix domain socket connections only
+local   all             all                                     trust
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            trust
+# IPv4 deploy user 10.x:
+host    all             <%= @dbuser %>  <%= @cidr %>              md5
+# IPv4 postgres replication for 10.x:
+host    replication     postgres        <%= @cidr %>              md5
+# IPv4 postgres user for 10.x with md5:
+host    all             postgres        <%= @cidr %>              md5
+# IPv6 local connections:
+host    all             all             ::1/128                 md5

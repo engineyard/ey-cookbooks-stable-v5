@@ -1,0 +1,1 @@
+echo "PUTVAL: `hostname -f`/postgresql/autovac interval=60 N:`/usr/bin/check_postgres_autovac_freeze -H $1 --warning="97%" --output mrtg --include $2 | head -1`"

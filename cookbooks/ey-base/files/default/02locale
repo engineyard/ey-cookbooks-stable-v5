@@ -1,0 +1,9 @@
+# LANG sets your global default system locale.
+# Reference: YT-GD-834
+# OS default: en_US.UTF-8
+LANG="en_US.UTF-8"
+# LC_COLLATE must remain "C" or "POSIX".
+# Setting this to anything else is potentially dangerous
+# for the system and not supported by Engine Yard.
+# Reference: YT-GD-834
+LC_COLLATE="POSIX"

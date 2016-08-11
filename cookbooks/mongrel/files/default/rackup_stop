@@ -1,0 +1,3 @@
+#!/bin/bash
+/bin/kill -9 `cat $1`
+rm $1

@@ -1,0 +1,6 @@
+# SSH config for EY git deploys
+StrictHostKeyChecking no
+CheckHostIP no
+PasswordAuthentication no
+
+IdentityFile ~/.ssh/<%= @app_name %>-deploy-key

@@ -1,0 +1,128 @@
+#!/bin/bash
+
+# This script is intended to ensure that vixie-cron is restarted if,
+#
+# * the cron pid file doesn't exist
+# * the cron pid file exists but /proc/$pid does not exist
+# * the cron pid file exists but /proc/$pid/exe doesn't point to cron
+# * the last cron-check is 'too old'
+#
+# This script when run relieves any previously running cron nannies of their
+# duties
+#
+typeset cron_pidfile lastcheck_file result pid self
+
+cron_pidfile="/var/run/cron.pid"
+lastcheck_file="/tmp/cron-check"
+result=0
+pid=0
+self=$$
+
+log() {
+  /usr/bin/logger -p local3.warn -t "cron_nanny[$PPID>$self]" "$*"
+}
+
+restart() {
+  if /etc/init.d/vixie-cron zap start
+  then result=0 ; else result=$? ; fi
+  log "Restarted vixie-cron (zap and start); exit code: ${result}"
+
+  if touch "$lastcheck_file"
+  then result=0 ; else result=$? ; fi
+  log "Touched $lastcheck_file; exit code: ${result}"
+}
+
+kill_and_restart()
+{
+  local _message="$1"
+
+  if (( pid ))
+  then
+    if kill $pid
+    then result=0 ; else result=$? ; fi
+    log "killed vixie-cron with pid ${pid}; ${_message} ; exit code: ${result}"
+  fi
+
+  restart
+}
+
+relieve_cron_nanny()
+{
+  local _nanny_pid
+
+  for proc in /proc/[0-9]*
+  do
+    if command grep -q '/engineyard/bin/[c]ron_nanny' $proc/cmdline
+    then
+      if [[ ${proc##*/} == $self ]]
+      then
+        continue
+      else
+        _nanny_pid=${proc##*/}
+        break
+      fi
+    fi
+  done
+
+  if (( _nanny_pid > 0 ))
+  then
+    log "Relieving old cron nanny of her duties (${_nanny_pid})"
+    kill -9 ${_nanny_pid}
+  fi
+}
+
+find_cron_pid()
+{
+  log "Searching /proc for cron, son of init."
+
+  for proc in /proc/[0-9]*
+  do
+    if grep -q '/usr/sbin/[c]ron' $proc/cmdline
+    then
+      pid=${proc##*/}
+      break
+    fi
+  done
+}
+
+relieve_cron_nanny
+
+log "Starting"
+
+while true
+do
+  sleep 60
+
+  if [[ -s "$cron_pidfile" ]]
+  then # cron_pidfile exists and is nonempty
+    read -r pid < "$cron_pidfile" # Read the pid from the cron_pidfile into variable pid
+
+    if (( pid < 1 ))
+    then
+      log "pid is invalid, removing the cron_pidfile and restarting"
+      rm -f "$cron_pidfile"
+      restart
+      continue
+    fi
+  else
+    find_cron_pid
+    kill_and_restart "cron pidfile ($cron_pidfile) is missing or empty"
+    continue
+  fi
+
+  if [[ "$(readlink "/proc/$pid/exe")" != "/usr/sbin/cron" ]]
+  then
+    log "either /proc/$pid does not exist or is not /usr/sbin/cron, restarting"
+    restart
+    continue
+  fi
+
+  if (( $(stat -c "%Y" "$lastcheck_file") <  $(expr $(date +"%s") - 120) ))
+  then
+    kill_and_restart "It has been too long since the last check"
+    continue
+  fi
+done
+
+log "Exiting"
+

@@ -1,0 +1,18 @@
+upstream minihttpd_upstream {
+  server 127.0.0.1:<%= @minihttpd_port %>;
+}
+
+server {
+  listen <%= @port %>;
+  server_name _;
+  ssl on;
+  ssl_certificate /data/nginx/ssl/minihttpd.crt;
+  ssl_certificate_key /data/nginx/ssl/minihttpd.key;
+  
+  location / {
+    proxy_set_header        X-Forwarded-Proto https;
+    proxy_pass http://minihttpd_upstream;
+    break;
+  }
+
+}

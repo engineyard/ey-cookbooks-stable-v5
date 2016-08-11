@@ -1,0 +1,4 @@
+#!/bin/bash
+# $1 = master
+# $2 = slave
+echo "PUTVAL: `hostname -f`/postgresql/hot_standby_delay interval=60 N:`/usr/bin/check_postgres_hot_standby_delay --host2=$2 --port=5432 --host=$1 --port=5432 --simple --warning=20 --critical=30`"

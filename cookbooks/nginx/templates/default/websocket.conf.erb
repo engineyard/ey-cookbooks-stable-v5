@@ -1,0 +1,9 @@
+http {
+  ## status check page for websockets
+  server {
+    listen 9000;
+    location /nginx_websocket_status {
+      check_status;
+    }
+  }
+}

@@ -1,0 +1,7 @@
+set daemon  30
+set logfile syslog facility log_daemon
+set httpd port 9111
+    allow localhost
+    # This is to keep monit from complaining, port 9111 isn't open to the world
+    allow engine:yard 
+include /etc/monit.d/*.monitrc

@@ -1,0 +1,14 @@
+index index.html index.htm;
+
+# needed to forward user's IP address to rails
+proxy_set_header  X-Real-IP         $remote_addr;
+proxy_set_header  X-Forwarded-For   $proxy_add_x_forwarded_for;
+proxy_set_header  Host              $http_host;
+<% if @use_msec %>
+proxy_set_header  X-Queue-Start     't=${msec}000';
+<% else %>
+proxy_set_header  X-Queue-Start     't=$start_time';
+<% end %>
+
+proxy_redirect off;
+proxy_max_temp_file_size 0;

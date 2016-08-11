@@ -1,0 +1,13 @@
+--- 
+port: <%= @mongrel_base_port %>
+servers: <%= @mongrel_instance_count %>
+docroot: public    
+environment: <%= @node.engineyard.environment[:framework_env] %> 
+cwd: /data/<%= @app_name %>/current
+log_file: /var/log/engineyard/apps/<%= @app_name %>/mongrel.log
+pid_file: /var/run/mongrel/<%= @app_name %>/mongrel.pid
+user: <%= @node['owner_name'] %>
+group: <%= @node['owner_name'] %>
+
+
+

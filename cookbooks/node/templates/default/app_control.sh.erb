@@ -1,0 +1,51 @@
+#!/bin/bash
+# Current Author: Jim Lindley
+# Addtional Authors and/or Credits:
+# Scott M. Likens, Ben Burkert && Wayne E. Seguin && Glenn Davy
+# Worker Count: <%= @worker_count %>
+
+
+# Immediately exit non-zero if any run command fails
+set -e
+
+/data/<%= @app_name %>/shared/bin/build_node_app_environment
+
+source /data/<%= @app_name %>/shared/config/env
+source /data/<%= @app_name %>/shared/config/env.custom
+
+node_restart_app() {
+  sudo god restart ${application}
+}
+node_start_app() {
+  sudo god start ${application}
+}
+node_stop_app() {
+  sudo god stop ${application}
+}
+
+cd /data/${application}/current
+
+case "$1" in
+  status)
+    sudo god status
+  ;;
+start)
+  node_start_app
+  ;;
+stop)
+  node_stop_app
+  ;;
+reload)
+  node_restart_app
+  ;;
+deploy)
+  node_restart_app
+  ;;
+restart)
+  node_restart_app
+  ;;
+  *)
+  echo "Usage: $0 {status|start|stop|kill|restart|reload|deploy}"
+  exit 1
+  ;;
+esac

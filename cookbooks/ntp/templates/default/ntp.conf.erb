@@ -1,0 +1,26 @@
+# Drift file location to allow ntp to learn and compensate for the system's
+# inherent clock error rate
+driftfile <%= @driftfile %>
+
+# Name of the servers ntpd should sync with
+# Please respect the access policy as stated by the responsible person.
+#server		ntp.example.tld		iburst
+
+##
+# A list of available servers can be found here:
+# http://www.pool.ntp.org/
+# http://www.pool.ntp.org/#use
+# A good way to get servers for your machine is:
+# netselect -s 3 pool.ntp.org
+##
+
+<% @servers.each do |s| -%>
+server <%= s %> iburst
+<% end %>
+
+# Warning: Using default NTP settings will leave your NTP
+# server accessible to all hosts on the Internet.
+
+restrict default nomodify nopeer noquery limited kod
+restrict 127.0.0.1
+restrict [::1]

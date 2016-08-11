@@ -1,0 +1,31 @@
+###############################################################################################################
+#### Template for adding additional server blocks for you app
+#### Please see 
+####   https://support.cloud.engineyard.com/entries/9999999-How-to-customize-your-Nginx-configuration
+#### for additional details including how to update them via deploy hooks
+#### 
+#### Revision 1.0
+###############################################################################################################
+#
+##  Sample server blocks:
+#
+#	server {
+#	  include /etc/nginx/listen_http.port;  # Replaces listen 80 line.
+#	  server_name beta_domain.com www.beta_domain.com;
+#
+#	  # Redirect from old domain name to new domain name and preserve URI
+#	  rewrite ^ $scheme://www.example.com$request_uri? permanent;
+#
+#	  # Redirect from old domain name to root of new domain name, dropping URI
+#	  rewrite ^ $scheme://www.example.com ;
+#	}
+#
+#	server {
+#	  include /etc/nginx/listen_http.port;  # Replaces listen 80 line.
+#	  server_name _;
+#
+#	  # Catches request going to hostnames like ec2-123-45-67-891.compute-1.amazonaws.com and redirects
+#	  # them to the domain name set in
+#	  rewrite ^ $scheme://<%= @server_name %>$request_uri? permanent;
+#	}
+#
