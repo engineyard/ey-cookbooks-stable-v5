@@ -94,22 +94,6 @@ applications_to_deploy.each do |app, data|
       })
   end
 
-  ey_deploy "/data/#{app}" do
-    git_ssh_wrapper "/tmp/deploy-#{app}-git-ssh"
-    repo data[:repository_name]
-    branch data[:branch]
-    role node.dna['instance_role']
-    environment node.dna['environment']['framework_env']
-    user node["owner_name"]
-    restart_command cmd
-    revision data[:revision]
-    enable_submodules true
-    migrate (data[:run_migrations] && ['solo', 'app_master'].include?(node.dna['instance_role']))
-    migration_command data[:migration_command]
-    action data[:deploy_action]
-  end
-
-
   execute "ensure-permissions-for-#{app}" do
     command "chown -R #{node["owner_name"]}:#{node["owner_name"]} /data/#{app}"
   end
