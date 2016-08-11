@@ -231,7 +231,9 @@ LoadPlugin threshold
       WarningMax    <%= @disk_thresholds.warning_for('/') %>
       FailureMin    0.00
       FailureMax    <%= @disk_thresholds.failure_for('/') %>
-      DataSource "value"
+      DataSource    "value"
+      Persist       true
+      Hits          10
     </Type>
     </Plugin>
 
@@ -245,7 +247,9 @@ LoadPlugin threshold
       WarningMax    <%= @disk_thresholds.warning_for('/db') %>
       FailureMin    0.00
       FailureMax    <%= @disk_thresholds.failure_for('/db') %>
-      DataSource "value"
+      DataSource    "value"
+      Persist       true
+      Hits          10
     </Type>
     </Plugin>
   <% end %>
@@ -258,7 +262,9 @@ LoadPlugin threshold
       WarningMax    <%= @disk_thresholds.warning_for('/data') %>
       FailureMin    0.00
       FailureMax    <%= @disk_thresholds.failure_for('/data') %>
-      DataSource "value"
+      DataSource    "value"
+      Persist       true
+      Hits          10
     </Type>
     </Plugin>
 
@@ -270,7 +276,9 @@ LoadPlugin threshold
       WarningMax    <%= @disk_thresholds.warning_for('/mnt') %>
       FailureMin    0.00
       FailureMax    <%= @disk_thresholds.failure_for('/mnt') %>
-      DataSource "value"
+      DataSource    "value"
+      Persist       true
+      Hits          10
     </Type>
   </Plugin>
 
