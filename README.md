@@ -49,7 +49,7 @@ Additionally, this design allows for 2 major ways of customizing chef without ov
 
 ### hooks ###
 
-Hooks are empty files such as `cookbooks/ey-custom/recipes/before-main.rb` which `cookbooks/ey-custom/recipes/after-main.rb` are guaranteed to always be empty files in the main chef repository (or contain only comments). A blank file is a perfectly valid ruby file, thus these files are included via `include_recipe` at appropriate places in the main run. Adding to these files allow you to add cookbooks with recipes to be run directly before or directly after the rest of the main cookbooks.
+Hooks are empty files such as `cookbooks/ey-custom/recipes/before-main.rb` and `cookbooks/ey-custom/recipes/after-main.rb` which are guaranteed to always be empty files in the main chef repository (or contain only comments). A blank file is a perfectly valid ruby file, thus these files are included via `include_recipe` at appropriate places in the main run. Adding to these files allow you to add cookbooks with recipes to be run directly before or directly after the rest of the main cookbooks.
 
 If you find yourself wanting your custom cookbook to run somewhere specific in the middle of run, you can submit a Pull Request to add the hook you need for inclusion into the next stack release (Submit against the branch `next-release`).
 
