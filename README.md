@@ -5,13 +5,14 @@ This codebase and it's cookbooks represent the latest version of Engine Yard's *
 Please use this repository:
 
 ### 1. To track [Issues](https://github.com/engineyard/ey-cookbooks-stable-v5/issues) with the Engine Yard software stack ###
-  * Both Bugs and Feature requests.
+  * Bug reports and Feature requests encouraged.
 
 ### 2. As a reference for what software is setup by default. (and how) ###
   * Hint: It all starts from the `ey-init` cookbook.
 
 ### 3. As a reference for implementing custom cookbooks ###
  * [Customizing your environment with Chef](#customize-your-environment-with-custom-chef)
+ * Use the [redis](examples/redis) or [hello_world](examples/hello_world) examples for a quick reference.
 
 ### 4. As a way to contribute back. ###
  * Bugs fixes, New features, or basic hooks to simplify your own customizations are all welcome.
@@ -35,13 +36,15 @@ Throw out your existing understanding of how it works! Previous versions (and th
 
 Engine Yard's Chef stack provides the platform upon which your applications run. Based on the configuration options you choose when creating your environment, Chef will do the work of setting up things like: haproxy, nginx, mysql, and unicorn. We call this setup an "Apply". Whenever you make a configuration change such as adding an SSL certificate, you must "Apply" those changes into reality on your instances. The Chef run may create or modify files and install or upgrade software packages as a result.
 
-The file `/etc/dna.json` is the main input to the Chef run, telling the cookbooks what kind of instance they are running on (such as app or DB), and what other servers and services are connected, and all the details. This repository, and specifically the `cookbooks` folder is the main program that.
-
-For example, in the file `nginx/recipes/default.rb` a command that begins `template "/data/nginx/ssl/#{app.name}.key"` creates a a key file using data pulled from the DNA file (`app[:vhosts][1][:key]`).
+The file `/etc/dna.json` is the main input to the Chef run, telling the cookbooks what kind of instance they are running on (such as app or DB), and what other servers and services are connected. This repository, and specifically the `cookbooks` folder comprise the main program passed to `chef-solo`.
 
 ## Customize your environment with Custom Chef ##
 
-Each environment managed by Engine Yard supports the ability to upload a folder of custom cookbooks. When you run "Apply", before the chef run begins, the process pulls down both the exact cookbooks version your environment is running (e.g. `stable-v5-3.0.11`), and (if they exist) the latest custom cookbooks for that environment. The custom cookbooks folder is extracted on top of the main cookbooks folder. If a file exists in both folders, the custom one will overwrite the main one. This means you could literally replace the entire cookbooks run with your own code, or just customize 1 file.
+Each environment managed by Engine Yard supports the ability to upload a folder of custom cookbooks. When you run "Apply", before the chef run begins, the process pulls down both the exact cookbooks version your environment is running (e.g. `stable-v5-3.0.11`), and (if they exist) the latest custom cookbooks for that environment.
+
+See also: example custom cookbooks in [/examples](/examples).
+
+The custom cookbooks folder is extracted on top of the main cookbooks folder. If a file exists in both folders, the custom one will overwrite the main one. This means you could literally replace the entire cookbooks run with your own code, or just customize 1 file.
 
 With the great power to fork this whole repository and change just 1 files, comes the responsibility to scope your changes down to the bare minimum for the benefit of future upgrades.
 
@@ -71,5 +74,4 @@ If your pull request is purely a documentation change, it may be OK to just subm
 2. Pull Requests accumulate against the `next-release` branch (and merged as deemed appropriate)
 3. Once a week, our QA team will cut a release from the `next-release` branch and run through test plan. During this time now new PRs should be merged unless they are addressing issues found in the QA review.
 4. After QA completes, a release will be pushed to production, `next-release` will be merged into `master`, and PRs will again be accepted.
-
 
