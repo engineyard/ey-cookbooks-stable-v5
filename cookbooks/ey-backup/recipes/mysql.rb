@@ -42,7 +42,7 @@ end
 
 if node.dna['backup_window'] != 0 && ['db_master','solo'].include?(node.dna['instance_role'])
   encryption_command = @encryption_command
-  backup_command = "eybackup -e mysql #{encryption_command} >> /var/log/eybackup.log"
+  backup_command = "eybackup -e mysql #{encryption_command} >> /var/log/eybackup.log 2>&1"
 
   cron "mysql" do
     command backup_command

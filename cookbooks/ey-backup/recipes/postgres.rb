@@ -46,7 +46,7 @@ if node.dna['db_slaves'].empty? && node.dna['backup_window'] != 0
     encryption_command = @encryption_command
 
     backup_cron "postgresql" do
-      command "eybackup -e postgresql #{encryption_command} >> /var/log/eybackup.log"
+      command "eybackup -e postgresql #{encryption_command} >> /var/log/eybackup.log 2>&1"
       month   '*'
       weekday '*'
       day     '*'
@@ -64,7 +64,7 @@ else
     hostname.run_command
 
     cron "postgresql" do
-      command "eybackup -e postgresql #{encryption_command} >> /var/log/eybackup.log"
+      command "eybackup -e postgresql #{encryption_command} >> /var/log/eybackup.log 2>&1"
       month   '*'
       weekday '*'
       day     '*'
