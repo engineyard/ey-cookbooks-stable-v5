@@ -47,6 +47,7 @@ execute "do-init-mysql" do
     mysqld --initialize-insecure
   }
   not_if {node['mysql']['short_version'] == "5.6" }
+end
 
 include_recipe "mysql::startup"
 
