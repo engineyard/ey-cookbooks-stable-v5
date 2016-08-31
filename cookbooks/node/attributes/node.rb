@@ -8,7 +8,8 @@ default['nodejs']['available_versions'] = [
   '4.4.5', # net-libs/nodejs-4.4.5
   '5.9.1', # net-libs/nodejs-5.9.1
   '5.10.1', # net-libs/nodejs-5.10.1
-  '5.11.0' # net-libs/nodejs-5.11.0
+  '5.11.0', # net-libs/nodejs-5.11.0
+  '6.4.0' # net-libs/nodejs-6.4.0
 ]
 
 if (node.engineyard.metadata('openssl_ebuild_version','1.0.1') =~ /1\.0\.1/)
@@ -21,7 +22,8 @@ if (node.engineyard.metadata('openssl_ebuild_version','1.0.1') =~ /1\.0\.1/)
     '4.4.5', # net-libs/nodejs-4.4.5
     '5.9.1', # net-libs/nodejs-5.9.1
     '5.10.1', # net-libs/nodejs-5.10.1
-    '5.11.0' # net-libs/nodejs-5.11.0
+    '5.11.0', # net-libs/nodejs-5.11.0
+    '6.4.0' # net-libs/nodejs-6.4.0
 
   ])
 end
