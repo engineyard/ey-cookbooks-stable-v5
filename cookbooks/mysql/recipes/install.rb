@@ -4,7 +4,7 @@ lock_version_file = '/db/.lock_db_version'
 db_running = %x{mysql -N -e "select 1;" 2> /dev/null}.strip == '1'
 
 known_versions = {
-  'dev-db/percona-server' => ['5.6.28.76.1', '5.6.29.76.2-r1']
+  'dev-db/percona-server' => ['5.6.28.76.1', '5.6.29.76.2-r1', '5.7.13.6']
 }
 
 execute "dropping lock version file" do
@@ -25,6 +25,11 @@ end
 
 enable_package "virtual/mysql" do
   version node['mysql']['virtual']
+end
+
+enable_package "virtual/libmysqlclient" do
+  version '20'
+  only_if { node['mysql']['short_version'] == "5.7" }
 end
 
 ey_cloud_report "mysql" do
@@ -63,7 +68,7 @@ ruby_block "getting full version and doing install" do    # ~FC014
   end
 end
 
-include_recipe "mysql::relink_mysql" unless node['mysql']['short_version'] == "5.6"
+include_recipe "mysql::relink_mysql" unless node['mysql']['short_version'] == "5.6" # we don't do this for the version that is base for the AMI
 
 if node.dna['instance_role'][/^db/]    # ~FC023
   # FoodCritic note: Ignore becuase this custom resource doesn't offer only_if
