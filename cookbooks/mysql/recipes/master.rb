@@ -46,7 +46,7 @@ execute "do-init-mysql" do
   command %Q{
     mysqld --initialize-insecure --user=mysql
   }
-  not_if {node['mysql']['short_version'] == "5.6" }
+  not_if { node['mysql']['short_version'] == "5.6" or File.directory?("#{node['mysql']['datadir']}/mysql") }
 end
 
 include_recipe "mysql::startup"

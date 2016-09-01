@@ -7,7 +7,7 @@ managed_template "/etc/.mysql.backups.yml" do
   source "backups.yml.erb"
   variables({
     :dbuser => 'root',
-    :dbpass => node.dna['owner_pass'],
+    :dbpass => node['owner_pass'],
     :keep   => node.dna['backup_window'] || 14,
     :id     => node.dna['aws_secret_id'],
     :key    => node.dna['aws_secret_key'],
