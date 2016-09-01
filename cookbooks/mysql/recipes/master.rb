@@ -44,7 +44,7 @@ end
 
 execute "do-init-mysql" do
   command %Q{
-    mysqld --initialize-insecure
+    mysqld --initialize-insecure --user=mysql
   }
   not_if {node['mysql']['short_version'] == "5.6" }
 end
@@ -57,7 +57,7 @@ execute "set-root-mysql-pass" do
   }
 end
 
-include_recipe "mysql::cleanup"
+include_recipe "mysql::cleanup" if node['mysql']['short_version'] == '5.6' # MySQL 5.7 doesn't include extra users/databases by default
 
 node.engineyard.environment['apps'].each do |app|
 
