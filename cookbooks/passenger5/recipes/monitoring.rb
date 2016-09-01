@@ -87,7 +87,7 @@ if ['app_master', 'app', 'solo'].include?(node[:instance_role])
       day '*'
       weekday '*'
       month '*'
-      command "/usr/local/bin/passenger_killer -n 'wookie@3playmedia.com' -l #{huge_megabytes} #{app_name} >/dev/null 2>&1"
+      command "/usr/local/bin/passenger_killer -l #{huge_megabytes} #{app_name} >/dev/null 2>&1"
       action :create  # this actually replaces a cron entry if it already exists
     end
 
@@ -98,7 +98,7 @@ if ['app_master', 'app', 'solo'].include?(node[:instance_role])
       day '*'
       weekday '*'
       month '*'
-      command "/usr/local/bin/rack_counter -n 'wookie@3playmedia.com' -i '#{node[:environment][:framework_env]} #{node[:instance_role]}'  -w #{min_rack_processes} #{app_name} >/dev/null 2>&1"
+      command "/usr/local/bin/rack_counter -i '#{node[:environment][:framework_env]} #{node[:instance_role]}'  -w #{min_rack_processes} #{app_name} >/dev/null 2>&1"
       action :create  # this actually replaces a cron entry if it already exists
     end
   end
