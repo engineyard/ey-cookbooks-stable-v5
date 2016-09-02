@@ -14,8 +14,8 @@ file "#{link_path}.system.sphinx.re-linked" do
   action :nothing
 end
 
-dbd_opts = "=" + %x{cd /var/db/pkg && ls -d dev-perl/DBD-mysql-*}.chomp
-dbd_opts = "dev-perl/DBD-mysql" if dbd_opts == "="
+# always install latest available DBD-mysql when this runs
+dbd_opts = "dev-perl/DBD-mysql"
 
 execute "re-link-dbd" do
   command "emerge --ignore-default-opts #{dbd_opts}"
@@ -23,6 +23,7 @@ execute "re-link-dbd" do
   not_if { File.exists?("#{link_path}.system.dbd-re-linked") }
 end
 
+# only install the current sphinx version during re-link, we don't want to inadvertently upgrade this
 sphinx_opts = "=" + %x{cd /var/db/pkg && ls -d app-misc/sphinx-*}.chomp
 sphinx_opts = "app-misc/sphinx" if sphinx_opts == "="
 

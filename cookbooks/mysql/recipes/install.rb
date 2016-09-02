@@ -68,7 +68,7 @@ ruby_block "getting full version and doing install" do    # ~FC014
   end
 end
 
-include_recipe "mysql::relink_mysql" unless node['mysql']['short_version'] == "5.6" or node['mysql']['short_version'] == "5.7" # we don't do this for the version that is base for the AMI
+include_recipe "mysql::relink_mysql" unless node['mysql']['short_version'] == "5.6"
 
 if node.dna['instance_role'][/^db/]    # ~FC023
   # FoodCritic note: Ignore becuase this custom resource doesn't offer only_if
