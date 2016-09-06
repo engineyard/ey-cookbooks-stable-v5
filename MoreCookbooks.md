@@ -5,6 +5,7 @@ Included in this repository are a number of cookbooks that are not included by d
 ### List of Supported Optional Cookbooks:
 
 * [redis](cookbooks/redis) (also has an [example](examples/redis))
+* [sequelizejs](cookbooks/sequelizejs)
 
 # Experimental Cookbooks
 
