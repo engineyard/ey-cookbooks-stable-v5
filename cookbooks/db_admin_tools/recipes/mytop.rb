@@ -1,5 +1,5 @@
 package "dev-db/mytop" do
-  version '1.6-r4'
+  version '1.6-r5'
   action :install
 end
 
@@ -9,6 +9,7 @@ template "/root/.mytop" do
   variables ({
     :username => 'root',
     :password => node['owner_pass'],
+    :database => 'mysql',
     :host => node.dna['instance_role'][/^(db|solo)/] ? 'localhost' : node.dna['db_host'],
   })
   source "mytop.erb"
@@ -20,6 +21,7 @@ template "/home/#{node["owner_name"]}/.mytop" do
   variables ({
     :username => node["owner_name"],
     :password => node['owner_pass'],
+    :database => node.engineyard.apps.map {|app| app.database_name }.first, 
     :host => node.dna['instance_role'][/^(db|solo)/] ? 'localhost' : node.dna['db_host'],
   })
   source "mytop.erb"

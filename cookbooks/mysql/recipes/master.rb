@@ -26,11 +26,27 @@ directory node['mysql']['logbase'] do
   recursive true
 end
 
+link "/usr/bin/mysql_install_db" do
+  to "/usr/share/mysql/scripts/mysql_install_db"
+  owner 'root'
+  group 'root'
+  only_if { ! File.exists?("/usr/bin/mysql_install_db") and File.exists?("/usr/share/mysql/scripts/mysql_install_db") } 
+  
+end
+
 execute "do-init-mysql" do
   command %Q{
-    /usr/share/mysql/scripts/mysql_install_db --basedir=/usr/
+    mysql_install_db --basedir=/usr/
   }
   not_if { File.directory?("#{node['mysql']['datadir']}/mysql")  }
+  only_if { node['mysql']['short_version'] == "5.6" }
+end
+
+execute "do-init-mysql" do
+  command %Q{
+    mysqld --initialize-insecure --user=mysql
+  }
+  not_if { node['mysql']['short_version'] == "5.6" or File.directory?("#{node['mysql']['datadir']}/mysql") }
 end
 
 include_recipe "mysql::startup"
@@ -41,7 +57,7 @@ execute "set-root-mysql-pass" do
   }
 end
 
-include_recipe "mysql::cleanup"
+include_recipe "mysql::cleanup" if node['mysql']['short_version'] == '5.6' # MySQL 5.7 doesn't include extra users/databases by default
 
 node.engineyard.environment['apps'].each do |app|
 
