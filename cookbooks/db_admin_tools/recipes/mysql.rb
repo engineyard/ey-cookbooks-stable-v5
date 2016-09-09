@@ -4,6 +4,7 @@ include_recipe 'db_admin_tools::mytop'
 if node.dna['instance_role'][/^(db|solo)/]
   include_recipe 'db_admin_tools::innotop'
   include_recipe 'db_admin_tools::percona_toolkit'
+  include_recipe 'db_admin_tools::pwgen'
 end
 
 # Adding 'db_replica' attribute for future compatibility
