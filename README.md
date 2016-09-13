@@ -1,6 +1,6 @@
 # How to use this repository #
 
-This codebase and it's cookbooks represent the latest version of Engine Yard's **`stable-v5-3.0`** stack.
+This codebase and its cookbooks represent the latest version of Engine Yard's **`stable-v5-3.0`** stack.
 
 Please use this repository:
 
