@@ -122,11 +122,6 @@ directory "/var/log/engineyard/nginx" do
   mode 0755
 end
 
-directory "/var/lib/nginx/tmp"
-  owner 'deploy'
-  group 'nginx'
-  mode 0755
-end
 
 logrotate "nginx" do
   files "/var/log/engineyard/nginx/*log"
