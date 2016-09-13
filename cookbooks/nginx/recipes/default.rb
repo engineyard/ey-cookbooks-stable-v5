@@ -156,7 +156,7 @@ node.engineyard.apps.each_with_index do |app, index|
     mode 0775
   end
 
-  directory "/var/lib/nginx/tmp"
+  directory "/var/lib/nginx/tmp" do
     owner node['owner_name']
     group 'nginx'
     mode 0755
