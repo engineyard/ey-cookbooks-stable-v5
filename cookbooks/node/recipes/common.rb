@@ -8,6 +8,10 @@ unmask_package "dev-libs/libuv" do
   unmaskfile "libuv"
 end
 
+enable_package 'dev-libs/libuv' do
+  version node['nodejs']['libuv']['version']
+end
+
 directory "/mnt/node/tmp" do
   action :delete
   recursive true
