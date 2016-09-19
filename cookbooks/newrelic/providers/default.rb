@@ -44,8 +44,8 @@ def install_php_rpm
     recursive true
   end
 
-  remote_file "/opt/php_rpm/newrelic-php5-#{node.dna['newrelic']['php_rpm_version']}-linux.tar.gz" do
-    source "http://download.newrelic.com/php_agent/archive/#{node.dna['newrelic']['php_rpm_version']}/newrelic-php5-#{node.dna['newrelic']['php_rpm_version']}-linux.tar.gz"
+  remote_file "/opt/php_rpm/newrelic-php5-#{node['newrelic']['php_rpm_version']}-linux.tar.gz" do
+    source "http://download.newrelic.com/php_agent/archive/#{node['newrelic']['php_rpm_version']}/newrelic-php5-#{node['newrelic']['php_rpm_version']}-linux.tar.gz"
     action :create_if_missing
   end
 
@@ -56,8 +56,8 @@ def install_php_rpm
     code <<-EOH
       export NR_INSTALL_SILENT='true'
       export NR_INSTALL_KEY="#{newrelic_license_key}"
-      gzip -dc newrelic-php5-#{node.dna['newrelic']['php_rpm_version']}-linux.tar.gz | tar xf -
-      cd newrelic-php5-#{node.dna['newrelic']['php_rpm_version']}-linux
+      gzip -dc newrelic-php5-#{node['newrelic']['php_rpm_version']}-linux.tar.gz | tar xf -
+      cd newrelic-php5-#{node['newrelic']['php_rpm_version']}-linux
       ./newrelic-install install
     EOH
     action :run
