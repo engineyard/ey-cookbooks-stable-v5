@@ -28,6 +28,9 @@ if (node.engineyard.metadata('openssl_ebuild_version','1.0.1') =~ /1\.0\.1/)
   ])
 end
 
+#Note Libuv is required for newer nodejs versions
+default['nodejs']['libuv']['version'] = '1.9.1'
+
 # Note: see cookbooks/node/recipes/common.rb to set the package for any new versions
 
 default['coffeescript']['version'] = node.engineyard.metadata('coffeescript_version','1.9.3')
