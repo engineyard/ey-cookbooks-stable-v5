@@ -22,6 +22,7 @@ if ['solo', 'app_master', 'app', 'util'].include?(node['dna']['instance_role'])
       mode 0644
       source 'config.json.erb'
       variables({
+        :environment => node[:dna][:environment][:framework_env],
         :dialect => node[:sequelizejs][:dialect],
         :database => database_name,
         :username => node['dna']['engineyard']['environment']['ssh_username'],
