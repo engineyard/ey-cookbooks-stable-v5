@@ -1,4 +1,5 @@
 lock_major_version = %x{[[ -f "/db/.lock_db_version" ]] && grep -E -o '^[0-9]+\.[0-9]+' /db/.lock_db_version }
+full_version =  %x{[[ -f "/db/.lock_db_version" ]] && grep -E -o '^[0-9]+\.[0-9]+\.[0-9]+' /db/.lock_db_version }
 db_stack = lock_major_version == '' ? attribute.dna['engineyard']['environment']['db_stack_name'] :  "mysql#{lock_major_version.gsub(/\./, '_').strip}"
 
 default['latest_version_56'] = '5.6.29'
@@ -16,7 +17,7 @@ when 'mysql5_7', 'aurora5_7', 'mariadb10_1'
 
 end
 
-
+default['mysql']['full_version'] = full_version == '' ? node['mysql']['latest_version'] : full_version
 default['mysql']['virtual'] = major_version
 default['mysql']['short_version'] = major_version
 default['mysql']['logbase'] = "/db/mysql/#{major_version}/log/"

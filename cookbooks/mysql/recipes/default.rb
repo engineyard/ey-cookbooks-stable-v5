@@ -35,6 +35,7 @@ managed_template "/etc/mysql/my.cnf" do
     :mysql_version => Gem::Version.new(node['mysql']['short_version']),
     :mysql_5_5 => Gem::Version.new('5.5'),
     :mysql_5_6 => Gem::Version.new('5.6'),
+    :mysql_full_version => Gem::Version.new(node['mysql']['full_version']),
     :logbase => node['mysql']['logbase'],
     :innodb_buff => innodb_buff,
     :replication_master => node.dna['instance_role'] == 'db_master',
