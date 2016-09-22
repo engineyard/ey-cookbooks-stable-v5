@@ -8,12 +8,33 @@ vary based on the size of the instance running Delayed Job.
 
 ## Installation
 
-To install this, you will need to add the following to cookbooks/main/recipes/default.rb:
+For simplicity, we recommend that you create the cookbooks directory at the root of your application. If you have prefer to keep the infrastructure code separate from application code, you can create a new repository.
 
-    include_recipe "delayed_job4"
+1. Edit cookbooks/ey-custom/recipes/after-main.rb and add
 
-Make sure this and any customizations to the recipe are committed to your own fork of this
-repository.
+      ```
+      include_recipe 'custom-delayed_job4'
+      ```
+
+2. Edit cookbooks/ey-custom/metadata.rb and add
+
+      ```
+      depends 'custom-delayed_job4'
+      ```
+
+3. Copy examples/delayed_job4/cookbooks/custom-delayed_job4 to cookbooks/
+
+      ```
+      cd ~ # Change this to your preferred directory. Anywhere but inside the application
+
+      git clone https://github.com/engineyard/ey-cookbooks-stable-v5
+      cd ey-cookbooks-stable-v5
+      cp examples/delayed_job4/cookbooks/custom-delayed_job4 /path/to/app/cookbooks/
+      ```
+
+## Customizations
+
+Customizations are done on cookbooks/custom-delayed_job4/attributes/default.rb. Check the file for examples.
 
 ## Restarting your workers
 
@@ -21,7 +42,7 @@ This recipe does NOT restart your workers. The reason for this is that shipping 
 rebuilding your instances (i.e. running chef) are not always done at the same time. It is best to
 restart your Delayed Job workers when you ship (deploy) your application code.
 
-If you're running DelayedJob on a solo instance or on your app_master, add a deploy hook similar to:
+If you're running Delayed Job on a solo instance or on your app master, add a deploy hook similar to:
 
 ```
 on_app_master do
@@ -29,7 +50,7 @@ on_app_master do
 end
 ```
 
-On the other hand, if you'r running DelayedJob on a dedicated utility instance, the deploy hook should be like:
+On the other hand, if you'r running Delayed Job on a dedicated utility instance, the deploy hook should be like:
 
 ```
 on_utilities :delayed_job do
@@ -37,6 +58,8 @@ on_utilities :delayed_job do
 end
 ```
 
-Make sure to replace <app_name> with the name of your application. You likely want to use the after_restart hook for this.
+where delayed_job is the name of the utility instance.
+
+You likely want to use the after_restart hook for this. Put the code above in deploy/after_restart.rb.
 
 See our [Deploy Hook](https://engineyard.zendesk.com/entries/21016568-use-deploy-hooks) documentation for more information on using deploy hooks.

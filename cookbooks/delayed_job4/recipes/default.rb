@@ -3,7 +3,7 @@
 # Recipe:: default
 #
 
-if node[:dna][:instance_role] == "solo" || (node[:dna][:instance_role] == "util" && node[:dna][:name] !~ /^(mongodb|redis|memcache)/)
+if node['delayed_job4']['is_dj_instance']
   directory "/engineyard/custom" do
     owner "root"
     group "root"
@@ -17,22 +17,8 @@ if node[:dna][:instance_role] == "solo" || (node[:dna][:instance_role] == "util"
     mode 0755
   end
 
-  node[:dna][:applications].each do |app_name,data|
-  
-    # determine the number of workers to run based on instance size
-    if node[:dna][:instance_role] == 'solo'
-      worker_count = 1
-    else
-      case node[:ec2][:instance_type]
-      when 'm1.small' then worker_count = 2
-      when 'c1.medium' then worker_count = 4
-      when 'c1.xlarge' then worker_count = 8
-      else 
-        worker_count = 2
-      end
-    end
-    
-    worker_count.times do |count|
+  node['delayed_job4']['applications'].each do |app_name|
+    node['delayed_job4']['worker_count'].times do |count|
       template "/etc/monit.d/delayed_job#{count+1}.#{app_name}.monitrc" do
         source "dj.monitrc.erb"
         owner "root"
@@ -46,7 +32,7 @@ if node[:dna][:instance_role] == "solo" || (node[:dna][:instance_role] == "util"
         })
       end
     end
-    
+      
     execute "monit reload" do
        action :run
        epic_fail true
