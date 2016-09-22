@@ -4,7 +4,7 @@ lock_version_file = '/db/.lock_db_version'
 db_running = %x{mysql -N -e "select 1;" 2> /dev/null}.strip == '1'
 
 known_versions = {
-  'dev-db/percona-server' => ['5.6.28.76.1', '5.6.29.76.2-r1', '5.6.32-78.0', '5.7.13.6', '5.7.14-7']
+  'dev-db/percona-server' => ['5.6.28.76.1', '5.6.29.76.2-r1', '5.6.32.78.0', '5.7.13.6', '5.7.14.7']
 }
 
 execute "dropping lock version file" do
