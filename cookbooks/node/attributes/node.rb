@@ -1,12 +1,12 @@
 if node.engineyard.environment.metadata('nodejs_version')
   default['nodejs']['version'] = node.engineyard.environment.metadata('nodejs_version')
-elsif attribute['dna']['engineyard']['environment']['components'].find{|c| c['key'] == 'nodejs_6'}
+elsif attribute['dna']['engineyard']['environment']['components'][0].first.include?("nodejs_6")
   default['nodejs']['version'] = '6.4.0'
-elsif attribute['dna']['engineyard']['environment']['components'].find{|c| c['key'] == 'nodejs_5'}
+elsif attribute['dna']['engineyard']['environment']['components'][0].first.include?("nodejs_5")
   default['nodejs']['version'] = '5.11.0'
-elsif attribute['dna']['engineyard']['environment']['components'].find{|c| c['key'] == 'nodejs_4'}
+elsif attribute['dna']['engineyard']['environment']['components'][0].first.include?("nodejs_04")
   default['nodejs']['version'] = '4.4.5'
-elsif attribute['dna']['engineyard']['environment']['components'].find{|c| c['key'] == 'nodejs_012'}
+elsif attribute['dna']['engineyard']['environment']['components'][0].first.include?("nodejs_012")
   default['nodejs']['version'] = '0.12.10'
 else
   default['nodejs']['version'] = '4.4.5'
