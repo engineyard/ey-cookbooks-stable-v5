@@ -1,4 +1,4 @@
-cookbook_file "/etc/php/cli-php5.6/php.ini" do
+cookbook_file "/etc/php/cli-php#{node["php"]["minor_version"]}/php.ini" do
   source "php.ini"
   owner "root"
   group "root"

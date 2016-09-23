@@ -4,11 +4,11 @@ end
 
 # Report to Cloud dashboard
 ey_cloud_report "processing php" do
-  message "processing php - php-fpm"
+  message "processing php - php-fpm #{node["php"]["minor_version"]}"
 end
 
 # Overwrite default php config
-cookbook_file "/etc/php/fpm-php5.6/php.ini" do
+cookbook_file "/etc/php/fpm-php#{node["php"]["minor_version"]}/php.ini" do
   source "php.ini"
   owner "root"
   group "root"
@@ -40,6 +40,11 @@ directory "/var/run/engineyard" do
   mode "0755"
   action :create
 end
+
+execute 'eslect php fpm version' do
+  command "eselect php set fpm php#{node["php"]["minor_version"]}"
+end
+
 
 # get all applications with type PHP
 apps = node.dna['applications'].select{ |app, data| data['recipes'].detect{ |r| r == 'php' } }
