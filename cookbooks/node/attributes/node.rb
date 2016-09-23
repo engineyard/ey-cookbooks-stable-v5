@@ -1,10 +1,10 @@
-if attribute.dna[:engineyard][:environment][:components].find{|c| c['key'] == 'nodejs_6'}[:value]
+if attribute['dna']['engineyard']['environment']['components'].find{|c| c['key'] == 'nodejs_6'}
   stack_nodejs_version = '6.4.0'
-elsif attribute.dna[:engineyard][:environment][:components].find{|c| c['key'] == 'nodejs_5'}[:value]
+elsif attribute['dna']['engineyard']['environment']['components'].find{|c| c['key'] == 'nodejs_5'}
   stack_nodejs_version = '5.11.0'
-elsif attribute.dna[:engineyard][:environment][:components].find{|c| c['key'] == 'nodejs_4'}[:value]
+elsif attribute['dna']['engineyard']['environment']['components'].find{|c| c['key'] == 'nodejs_4'}
   stack_nodejs_version = '4.4.5'
-elsif attribute.dna[:engineyard][:environment][:components].find{|c| c['key'] == 'nodejs_012'}[:value]
+elsif attribute['dna']['engineyard']['environment']['components'].find{|c| c['key'] == 'nodejs_012'}
   stack_nodejs_version = '0.12.10'
 else
   stack_nodejs_version = '4.4.5'
