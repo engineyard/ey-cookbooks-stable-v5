@@ -9,7 +9,7 @@ elsif attribute['dna']['engineyard']['environment']['components'].find{|c| c['ke
 elsif attribute['dna']['engineyard']['environment']['components'].find{|c| c['key'] == 'nodejs_012'}
   default['nodejs']['version'] = '0.12.10'
 else
-  stack_nodejs_version = '4.4.5'
+  default['nodejs']['version'] = '4.4.5'
 end
 
 default['nodejs']['available_versions'] = [
