@@ -120,7 +120,7 @@ available_nodejs_versions = node['nodejs']['available_versions'].sort {|x,y| Eng
    enable_package get_package_name[nodejs_version] do
      version nodejs_version
    end
-# end
+ end
 
 # 0.12.x needs extra packages enabled
 if (available_nodejs_versions & %w(0.12.6 0.12.7 0.12.10)).length > 0
