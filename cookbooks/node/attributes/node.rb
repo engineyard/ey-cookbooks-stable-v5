@@ -1,4 +1,17 @@
-default['nodejs']['version'] = node.engineyard.environment.metadata('nodejs_version','4.4.5')
+if attribute.dna[:engineyard][:environment][:components].find{|c| c['key'] == 'nodejs_6'}[:value]
+  stack_nodejs_version = '6.4.0'
+elsif attribute.dna[:engineyard][:environment][:components].find{|c| c['key'] == 'nodejs_5'}[:value]
+  stack_nodejs_version = '5.11.0'
+elsif attribute.dna[:engineyard][:environment][:components].find{|c| c['key'] == 'nodejs_4'}[:value]
+  stack_nodejs_version = '4.4.5'
+elsif attribute.dna[:engineyard][:environment][:components].find{|c| c['key'] == 'nodejs_012'}[:value]
+  stack_nodejs_version = '0.12.10'
+else
+  stack_nodejs_version = '4.4.5'
+end
+
+
+default['nodejs']['version'] = node.engineyard.environment.metadata('nodejs_version',"stack_nodejs_version")
 default['nodejs']['available_versions'] = [
   '0.12.6',  # net-libs/nodejs-0.12.6
   '0.12.7',  # net-libs/nodejs-0.12.7
