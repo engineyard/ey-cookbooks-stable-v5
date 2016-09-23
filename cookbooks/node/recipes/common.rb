@@ -139,8 +139,8 @@ end
  end
 
 # # Update the attributes
-# node['nodejs']['version'] = nodejs_version_to_install_and_eselect
-# node['nodejs']['available_versions'] = available_nodejs_versions
+ node.normal['nodejs']['version'] = nodejs_version_to_install_and_eselect
+ node.normal['nodejs']['available_versions'] = available_nodejs_versions
 
 
  package get_package_name[nodejs_version_to_install_and_eselect] do
