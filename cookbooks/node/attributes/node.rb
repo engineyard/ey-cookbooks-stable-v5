@@ -1,4 +1,4 @@
-if node.engineyard.environment.metadata('nodejs_version')
+if attribute['dna']['engineyard']['environment']['components'][5].include?('nodejs_version')
   default['nodejs']['version'] = node.engineyard.environment.metadata('nodejs_version')
 elsif attribute['dna']['engineyard']['environment']['components'][0].first.include?("nodejs_6")
   default['nodejs']['version'] = '6.4.0'
