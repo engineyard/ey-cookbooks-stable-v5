@@ -6,8 +6,6 @@ elsif attribute['dna']['engineyard']['environment']['components'][0].first.inclu
   default['nodejs']['version'] = '5.11.0'
 elsif attribute['dna']['engineyard']['environment']['components'][0].first.include?("nodejs_04")
   default['nodejs']['version'] = '4.4.5'
-elsif attribute['dna']['engineyard']['environment']['components'][0].first.include?("nodejs_012")
-  default['nodejs']['version'] = '0.12.10'
 else
   default['nodejs']['version'] = '4.4.5'
 end
