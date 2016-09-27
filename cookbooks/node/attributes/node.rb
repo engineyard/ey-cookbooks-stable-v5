@@ -1,4 +1,5 @@
-fallback_nodejs_version = case attribute['dna']['engineyard']['environment']['components'].map(&:values).flatten.find(/nodejs/).first
+fallback_nodejs_version = case attribute['dna']['engineyard']['environment']
+  ['components'].map(&:values).flatten.find(/^nodejs_/).first
                            when 'nodejs_6'
                              '6.4.0'
                            when 'nodejs_5'
