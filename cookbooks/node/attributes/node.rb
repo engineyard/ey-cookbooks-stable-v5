@@ -1,14 +1,17 @@
-if attribute['dna']['engineyard']['environment']['components'][5].include?('nodejs_version')
-  default['nodejs']['version'] = node.engineyard.environment.metadata('nodejs_version')
-elsif attribute['dna']['engineyard']['environment']['components'][0].first.include?("nodejs_6")
-  default['nodejs']['version'] = '6.4.0'
-elsif attribute['dna']['engineyard']['environment']['components'][0].first.include?("nodejs_5")
-  default['nodejs']['version'] = '5.11.0'
-elsif attribute['dna']['engineyard']['environment']['components'][0].first.include?("nodejs_4")
-  default['nodejs']['version'] = '4.4.5'
-else
-  default['nodejs']['version'] = '4.4.5'
-end
+nodejs_runtime_version = if attribute['dna']['engineyard']['environment']['components'][5].include?('nodejs_version')
+                           node.engineyard.environment.metadata('nodejs_version')
+                         end
+
+nodejs_runtime_version ||= case attribute['dna']['engineyard']['environment']['components'].map(&:values).flatten.find(/nodejs/).first
+                           when 'nodejs_6'
+                             '6.4.0'
+                           when 'nodejs_5'
+                             '5.11.0'
+                           else
+                             '4.4.5'
+                           end
+
+default['nodejs']['version'] = nodejs_runtime_version
 
 default['nodejs']['available_versions'] = [
   '0.12.6',  # net-libs/nodejs-0.12.6
