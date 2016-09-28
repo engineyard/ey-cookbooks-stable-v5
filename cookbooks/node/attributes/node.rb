@@ -1,5 +1,4 @@
-fallback_nodejs_version = case attribute['dna']['engineyard']['environment']
-  ['components'].map(&:values).flatten.find(/^nodejs_/).first
+fallback_nodejs_version = case attribute['dna']['engineyard']['environment']['components'].map(&:values).flatten.find(/^nodejs_/).first
                            when 'nodejs_6'
                              '6.4.0'
                            when 'nodejs_5'
@@ -8,9 +7,7 @@ fallback_nodejs_version = case attribute['dna']['engineyard']['environment']
                              '4.4.5'
                            end
 
-default['nodejs']['version'] = node.engineyard.environment.metadata(
-'nodejs_version', fallback_nodejs_version
-)
+default['nodejs']['version'] = node.engineyard.environment.metadata('nodejs_version', fallback_nodejs_version)
 
 default['nodejs']['available_versions'] = [
   '0.12.6',  # net-libs/nodejs-0.12.6
