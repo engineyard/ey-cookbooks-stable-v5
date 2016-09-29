@@ -127,3 +127,4 @@ where delayed_job is the name of the utility instance.
 
 You likely want to use the after_restart hook for this. Put the code above in `deploy/after_restart.rb`.
 
+See our [Deploy Hook](https://engineyard.zendesk.com/entries/21016568-use-deploy-hooks) documentation for more information on using deploy hooks.
