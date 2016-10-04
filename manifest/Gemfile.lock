@@ -3,6 +3,10 @@ GEM
   remote: https://nextgem.engineyard.com/
   specs:
     addressable (2.4.0)
+    aws-s3 (0.6.3)
+      builder
+      mime-types
+      xml-simple
     builder (3.2.2)
     chef (12.10.24)
       bundler (>= 1.10)
@@ -45,15 +49,43 @@ GEM
       unf (>= 0.0.5, < 1.0.0)
     engineyard-serverside (2.6.6)
     erubis (2.7.0)
+    excon (0.52.0)
+    ey_cloud_server (1.4.51)
+      aws-s3 (~> 0.6.3)
+      ey_enzyme (>= 1.1.7)
+      ey_instance_api_client (~> 0.1.11)
+      fog-aws (>= 0.3.0)
+      json (>= 1.8.3)
+      nokogiri (>= 1.6.6.2)
+      open4 (~> 1.3.0)
     ey_enzyme (2.0.5)
       json (~> 1.8, >= 1.8.3)
       rest-client (~> 1.8, >= 1.8.0)
+    ey_instance_api_client (0.1.11)
+      json
+      rest-client
     ey_snaplock (2.0.3)
       addressable (~> 2.3)
       rack
     ffi (1.9.10)
     ffi-yajl (2.2.3)
       libyajl2 (~> 1.2)
+    fog-aws (0.11.0)
+      fog-core (~> 1.38)
+      fog-json (~> 1.0)
+      fog-xml (~> 0.1)
+      ipaddress (~> 0.8)
+    fog-core (1.42.0)
+      builder
+      excon (~> 0.49)
+      formatador (~> 0.2)
+    fog-json (1.0.2)
+      fog-core (~> 1.0)
+      multi_json (~> 1.10)
+    fog-xml (0.1.2)
+      fog-core
+      nokogiri (~> 1.5, >= 1.5.11)
+    formatador (0.2.5)
     fuzzyurl (0.8.0)
     hashie (3.4.4)
     highline (1.7.8)
@@ -63,6 +95,7 @@ GEM
     json (1.8.3)
     libyajl2 (1.2.0)
     mime-types (2.99.2)
+    mini_portile2 (2.1.0)
     mixlib-authentication (1.4.0)
       mixlib-log
       rspec-core (~> 3.2)
@@ -85,6 +118,9 @@ GEM
       net-ssh-gateway (>= 1.2.0)
     net-telnet (0.1.1)
     netrc (0.11.0)
+    nokogiri (1.6.8)
+      mini_portile2 (~> 2.1.0)
+      pkg-config (~> 1.1.7)
     ohai (8.16.0)
       chef-config (>= 12.5.0.alpha.1, < 13)
       ffi (~> 1.9)
@@ -97,6 +133,8 @@ GEM
       plist (~> 3.1)
       systemu (~> 2.6.4)
       wmi-lite (~> 1.0)
+    open4 (1.3.4)
+    pkg-config (1.1.7)
     plist (3.2.0)
     proxifier (1.0.3)
     rack (1.6.4)
@@ -144,6 +182,7 @@ GEM
     unf_ext (0.0.7.2)
     uuidtools (2.1.5)
     wmi-lite (1.0.0)
+    xml-simple (1.1.5)
 
 PLATFORMS
   ruby
@@ -151,6 +190,7 @@ PLATFORMS
 DEPENDENCIES
   chef (~> 12.7)!
   engineyard-serverside (~> 2.6.6)!
+  ey_cloud_server (= 1.4.51)!
   ey_enzyme (= 2.0.5)!
   ey_snaplock (= 2.0.3)!
   right_aws (~> 3.1.0)!

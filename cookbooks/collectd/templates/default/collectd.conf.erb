@@ -63,7 +63,7 @@ LoadPlugin threshold
       <%= "<Database \"#{db}\">" %>
       Host "localhost"
       User "root"
-      Password "<%= @node.dna[:owner_pass] %>"
+      Password "<%= @node[:owner_pass] %>"
       <% if @role == 'db_master' && @db_slaves.length > 0 %>
         MasterStats true
       <% end %>

@@ -54,6 +54,9 @@
 # Changelog 2.1.5 -> 2.1.6
 # - enforces the use of utf8 encodings for Ruby including 1.8.6 - Data-331
 
+# Changelog 2.1.7
+# - revise for proper syntax under Ruby 2.2.3
+
 if defined?(Encoding)
   Encoding.default_external = Encoding::UTF_8
   Encoding.default_internal = Encoding::UTF_8
@@ -341,7 +344,7 @@ stop_log = min_log - keep_logs
 # if standalone master and no replicas are found we stop purge #{keep_logs} logs before master's current position
 if min_log == 0 and File.exists?(chef_file)
   chef_config = JSON.parse(File.read(chef_file))
-  if chef_config['db_slaves'].empty? or chef_config['db_slaves'].nil? or chef_config['db_slaves'].include?(%x{hostname -f}.chomp) # chef_config['db_slaves'].grep(/%x{hostname}/)
+  if chef_config['db_slaves'].nil? or chef_config['db_slaves'].empty? or chef_config['db_slaves'].include?(%x{hostname -f}.chomp) # chef_config['db_slaves'].grep(/%x{hostname}/)
     current_master = %x{cd #{binlog_dir} && ls -tr #{binary_log_name}.[0-9][0-9][0-9][0-9][0-9][0-9] | tail  -n 1}
     current_master =~ /\w+.(\d{6})/ and stop_log = $1.to_i + 1 - keep_logs
   elsif min_log == 0

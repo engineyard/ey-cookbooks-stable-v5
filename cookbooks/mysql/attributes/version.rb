@@ -2,21 +2,22 @@ lock_major_version = %x{[[ -f "/db/.lock_db_version" ]] && grep -E -o '^[0-9]+\.
 db_stack = lock_major_version == '' ? attribute.dna['engineyard']['environment']['db_stack_name'] :  "mysql#{lock_major_version.gsub(/\./, '_').strip}"
 
 default['latest_version_56'] = '5.6.29'
+default['latest_version_57'] = '5.7.13'
+major_version=''
 
 case db_stack
-when 'mysql5_6', 'aurora5_6'
+when 'mysql5_6', 'aurora5_6', 'mariadb10_0'
   default['mysql']['latest_version'] = node['latest_version_56']
-  default['mysql']['virtual'] = "5.6"
-  default['mysql']['short_version'] = '5.6'
-  default['mysql']['logbase'] = '/db/mysql/5.6/log/'
-  default['mysql']['datadir'] =  '/db/mysql/5.6/data/'
+  major_version = '5.6'
+  
+when 'mysql5_7', 'aurora5_7', 'mariadb10_1'
+  default['mysql']['latest_version'] = node['latest_version_57']
+  major_version = '5.7'
 
-# Keeping this split out in case it makes sense to add a MariaDB stack to AppCloud
-when  'mariadb10_0'
-  default['mysql']['latest_version'] = node['latest_version_56']
-  default['mysql']['virtual'] = "5.6"
-  default['mysql']['short_version'] = '5.6'
-  # If we add a stack later these paths will have to be changed, along with several other changes.
-  default['mysql']['logbase'] = '/db/mysql/5.6/log/'
-  default['mysql']['datadir'] = '/db/mysql/5.6/data/'
 end
+
+
+default['mysql']['virtual'] = major_version
+default['mysql']['short_version'] = major_version
+default['mysql']['logbase'] = "/db/mysql/#{major_version}/log/"
+default['mysql']['datadir'] = "/db/mysql/#{major_version}/data/"

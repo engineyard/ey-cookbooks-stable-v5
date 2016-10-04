@@ -3,6 +3,15 @@ get_package_name = {
 }
 get_package_name.default = 'net-libs/nodejs'
 
+unmask_package "dev-libs/libuv" do
+  version node['nodejs']['libuv']['version']
+  unmaskfile "libuv"
+end
+
+enable_package 'dev-libs/libuv' do
+  version node['nodejs']['libuv']['version']
+end
+
 directory "/mnt/node/tmp" do
   action :delete
   recursive true

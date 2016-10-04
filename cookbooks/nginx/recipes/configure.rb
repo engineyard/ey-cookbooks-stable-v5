@@ -122,6 +122,7 @@ directory "/var/log/engineyard/nginx" do
   mode 0755
 end
 
+
 logrotate "nginx" do
   files "/var/log/engineyard/nginx/*log"
   copy_then_truncate true
