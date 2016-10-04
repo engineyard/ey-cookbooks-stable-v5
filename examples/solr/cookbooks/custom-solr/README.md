@@ -1,6 +1,6 @@
 ## DESCRIPTION
 
-This is a wrapper cookbook for the [Solr cookbook](../solr). This is designed to help you customize how Solr is setup on your environment without having to modify the Solr recipe. If you find you're unable to modify the way Solr runs just by modifying this recipe, please open a Github issue.
+This is a wrapper cookbook for Solr. This is designed to help you customize how Solr is setup on your environment without having to modify the Solr recipe. If you find you're unable to modify the way Solr runs just by modifying this recipe, please open a Github issue.
 
 <a name="usage"></a>
 ## USAGE
@@ -42,7 +42,8 @@ Running `bundle exec rake sunspot:reindex` on an empty index fails. After instal
 
 ## CREDITS
 
-Radamanthus Batnag (update to Solr 6 and add Sunspot 2.2.5 support)
+* Radamanthus Batnag (update to Solr 6 and add Sunspot 2.2.5 support)
+* Allan Espinosa for reviewing the recipe
 
 Original V4 Solr recipe:
 

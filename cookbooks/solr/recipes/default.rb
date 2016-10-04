@@ -15,8 +15,7 @@ core_name = node['solr']['core_name']
 username = node['dna']['users'].first['username']
 
 # Install Solr
-if ('solo' == node['dna']['instance_role'])  ||
-  ( ('util' == node['dna']['instance_role']) && ('solr' == node['dna']['name']) )
+if node['solr']['is_solr_instance']
 
   unless use_default_java
     Chef::Log.info "Updating Java JDK"
@@ -74,11 +73,12 @@ if ('solo' == node['dna']['instance_role'])  ||
     group username
     mode 0644
     backup 0
-    not_if { FileTest.exists?("/data/#{solr_file}") }
+    action :create_if_missing
   end
 
   execute "unarchive solr-to-install" do
-    command "cd /data && tar zxf #{solr_file} && sync"
+    cwd "/data"
+    command "tar zxf #{solr_file} && sync"
     not_if { FileTest.directory?("/data/solr") }
   end
 
@@ -120,7 +120,7 @@ end
 solr_instance = if ('solo' == node['dna']['instance_role'])
   node
 else
-  node['dna']['utility_instances'].find{ |instance| instance['name'] == 'solr' }
+  node['dna']['utility_instances'].find{ |instance| instance['name'] == node['solr']['solr_instance_name'] }
 end
 
 if solr_instance && ['app_master', 'app', 'solo', 'util'].include?(node['dna']['instance_role'])
