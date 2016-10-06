@@ -17,7 +17,7 @@ if util_or_app_server?(node['sidekiq']['utility_name'])
 
   if app_server? || util?
     # loop through applications
-    node['applications'].each do |app_name, _|
+    node.dna['applications'].each do |app_name, _|
       # monit
       file "/etc/monit.d/sidekiq_#{app_name}.monitrc" do
         action :delete

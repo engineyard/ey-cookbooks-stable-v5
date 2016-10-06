@@ -17,7 +17,7 @@ if util_or_app_server?(node['sidekiq']['utility_name'])
   end
 
   # loop through applications
-  node['applications'].each do |app_name, _|
+  node.dna['applications'].each do |app_name, _|
     # reload monit
     execute "restart-sidekiq-for-#{app_name}" do
       command "monit reload && sleep 10 && monit restart all -g #{app_name}_sidekiq"
@@ -32,7 +32,7 @@ if util_or_app_server?(node['sidekiq']['utility_name'])
       variables({ 
         :app_name => app_name, 
         :workers => node['sidekiq']['workers'],
-        :rails_env => node['environment']['framework_env'],
+        :rails_env => node.dna['environment']['framework_env'],
         :memory_limit => 400 # MB
       })
       notifies :run, "execute[restart-sidekiq-for-#{app_name}]"
