@@ -1,0 +1,3 @@
+== README
+
+Bare minimal Rails app
