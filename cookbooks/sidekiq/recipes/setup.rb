@@ -35,7 +35,7 @@ if util_or_app_server?(node['sidekiq']['utility_name'])
         :rails_env => node['environment']['framework_env'],
         :memory_limit => 400 # MB
       })
-      notifies :run, resources(:execute => "restart-sidekiq-for-#{app_name}")
+      notifies :run, "execute[restart-sidekiq-for-#{app_name}]"
     end
     
     # database.yml
@@ -44,7 +44,7 @@ if util_or_app_server?(node['sidekiq']['utility_name'])
       command "sed -ibak --follow-symlinks 's/reconnect/pool:      #{node['sidekiq']['concurrency']}\\\n  reconnect/g' #{db_yaml_file}"
       action :run
       only_if "test -f #{db_yaml_file} && ! grep 'pool: *#{node['sidekiq']['concurrency']}' #{db_yaml_file}"
-      notifies :run, resources(:execute => "restart-sidekiq-for-#{app_name}")
+      notifies :run, "execute[restart-sidekiq-for-#{app_name}]"
     end
 
     # yml files
@@ -56,7 +56,7 @@ if util_or_app_server?(node['sidekiq']['utility_name'])
         source "sidekiq.yml.erb"
         backup false
         variables(node['sidekiq'])
-        notifies :run, resources(:execute => "restart-sidekiq-for-#{app_name}")
+        notifies :run, "execute[restart-sidekiq-for-#{app_name}]"
       end
     end
   end 
