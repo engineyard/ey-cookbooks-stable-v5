@@ -3,7 +3,7 @@ class Chef::Recipe
 end
 
 # Report to Cloud dashboard
-ey_cloud_report "processing php" do
+ey_cloud_report "processing php#{node["php"]["minor_version"]}" do
   message "processing php - php-fpm #{node["php"]["minor_version"]}"
 end
 
@@ -41,9 +41,22 @@ directory "/var/run/engineyard" do
   action :create
 end
 
-execute 'eslect php fpm version' do
-  command "eselect php set fpm php#{node["php"]["minor_version"]}"
+
+bash 'eselect php and restart via monit' do
+  code <<-EOH
+    eselect php set fpm php#{node["php"]["minor_version"]}
+    EOH
+  not_if "php-fpm -v | grep PHP | grep #{node['php']['version']}" 
+  notifies :run, 'execute[monit_restart_fpm]'
 end
+
+
+execute 'monit_restart_fpm' do
+  command "sudo monit restart php-fpm"
+  action :nothing
+end
+
+
 
 
 # get all applications with type PHP
@@ -101,9 +114,9 @@ app_names.each do |app_name|
 end
 
 # Report to Cloud dashboard
-ey_cloud_report "processing php" do
-  message "processing php - monitoring"
-end
+#ey_cloud_report "processing php" do
+#  message "processing php - monitoring"
+#end
 
 # Create global init.d file
 # We are unable to start and stop each app individually
