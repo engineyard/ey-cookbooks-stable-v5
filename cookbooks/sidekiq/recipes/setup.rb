@@ -3,7 +3,7 @@
 # Recipe:: setup
 #
 
-if util_or_app_server?(node['sidekiq']['utility_name']) 
+if node['sidekiq']['is_sidekiq_instance']
   # report to dashboard
   ey_cloud_report "sidekiq" do
     message "Setting up sidekiq"

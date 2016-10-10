@@ -9,7 +9,7 @@ default['sidekiq'].tap do |sidekiq|
   # unless a utility name is set, in which case, Sidekiq will
   # only be installed on to a utility instance that matches
   # the name
-  sidekiq['utility_name'] = 'sidekiq'
+  sidekiq['is_sidekiq_instance'] = true
   
   # Number of workers (not threads)
   sidekiq['workers'] = 1
