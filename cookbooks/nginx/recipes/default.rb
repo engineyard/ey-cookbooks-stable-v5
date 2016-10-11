@@ -446,6 +446,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
         :chain => app[:vhosts][1][:chain],
         :key => app[:vhosts][1][:key]
       )
+      notifies :restart, 'service[haproxy]', :delayed
     end
 
     # CC-260: Same issue as previous; using compile-time if rather than run-time only_if directive
