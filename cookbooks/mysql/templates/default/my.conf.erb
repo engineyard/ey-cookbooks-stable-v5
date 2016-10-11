@@ -178,6 +178,9 @@ query_cache_type		= 1
 [mysqldump]
 quick
 max_allowed_packet		= 128M
+<% if @mysql_full_version >= '5.6.21' %>
+hex-blob
+<% end %>
 
 [mysql]
 # uncomment the next directive if you are not familiar with SQL
