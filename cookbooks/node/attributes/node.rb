@@ -1,4 +1,14 @@
-default['nodejs']['version'] = node.engineyard.environment.metadata('nodejs_version','4.4.5')
+fallback_nodejs_version = case attribute['dna']['engineyard']['environment']['components'].find {|node| node['key'] == 'nodejs'}['value'] || attribute['dna']['engineyard']['environment']['components'].map(&:values).flatten.find(/^nodejs_/).first
+                           when 'nodejs_6'
+                             '6.4.0'
+                           when 'nodejs_5'
+                             '5.11.0'
+                           else
+                             '4.4.5'
+                           end
+
+default['nodejs']['version'] = node.engineyard.environment.metadata('nodejs_version', fallback_nodejs_version)
+
 default['nodejs']['available_versions'] = [
   '4.4.5', # net-libs/nodejs-4.4.5
   '4.6.0', # net-libs/nodejs-4.6.0
