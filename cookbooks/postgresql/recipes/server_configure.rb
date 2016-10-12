@@ -301,3 +301,13 @@ node.engineyard.apps.each do |app|
     owner username
   end
 end
+
+if ::File.exist?(node[:pg_extensions_file])
+  exts = JSON.parse(::File.read(node[:pg_extensions_file]))
+  exts.each do |db_name, exts|
+    pg_extension "loading extensions #{exts} to database #{db_name}" do
+      ext_name exts
+      db_name db_name
+    end
+  end
+end
