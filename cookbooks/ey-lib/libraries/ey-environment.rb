@@ -135,7 +135,7 @@ class Chef
         #and:
         # https://github.com/engineyard/awsm/blob/0accca6f3695b700524f0fff62e3d79375fdb580/lib/awsm/component_version.rb#L21
         versions = {
-          :ruby_200   => "2.0.0p648",
+          :ruby_200   => "2.0.0_p648",
           :ruby_212   => "2.1.10",
           :ruby_213   => "2.1.10",
           :ruby_214   => "2.1.10",
