@@ -2,8 +2,8 @@ deviceid = File.read('/opt/.efsid').chomp
 mount = node['efs']['mountpoint']
 
 
-execute "umount -l #{mount}" do
-  command "umount -l #{mount}"
+execute "umount -l -f #{mount}" do
+  command "umount -l -f #{mount}"
 end
 
 mount "#{mount}" do
