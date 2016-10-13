@@ -16,7 +16,7 @@ shared = node['efs']['sharedfolder']
     device "#{deviceid}:/"
     fstype "nfs4"
     options "rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2"
-    action :enable
+    action [:mount, :enable]
   end
 
 
