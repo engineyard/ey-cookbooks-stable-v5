@@ -1,4 +1,18 @@
-fallback_nodejs_version = case attribute['dna']['engineyard']['environment']['components'].find {|node| node['key'] == 'nodejs'}['value'] || attribute['dna']['engineyard']['environment']['components'].map(&:values).flatten.find(/^nodejs_/).first
+env_components = attribute['dna']['engineyard']['environment']['components']
+
+hard_version = begin
+                 env_components.find {|node| node['key'] == 'nodejs'}['value']
+               rescue NoMethodError
+                 nil
+               end
+
+fuzzy_version = begin
+                  env_components.map(&:values).flatten.find {|value| value =~ /^nodejs_/}.first
+                rescue NoMethodError
+                  nil
+                end
+
+fallback_nodejs_version = case (hard_version || fuzzy_version)
                            when 'nodejs_6'
                              '6.4.0'
                            when 'nodejs_5'
