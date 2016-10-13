@@ -1,8 +1,8 @@
-this = attribute['dna']['engineyard']['this']
-instance = attribute['dna']['engineyard']['environment']['instances'].find {|instance| instance['id'] == this}
+this = node['dna']['engineyard']['this']
+instance = node['dna']['engineyard']['environment']['instances'].find {|instance| instance['id'] == this}
 deviceid = instance['components'].find {|component| component['key'] == 'efs'}.flatten[1]
-mount = attribute['efs']['mountpoint']
-shared = attribute['efs']['sharedfolder']
+mount = node['efs']['mountpoint']
+shared = node['efs']['sharedfolder']
 
 
   directory "#{mount}" do
