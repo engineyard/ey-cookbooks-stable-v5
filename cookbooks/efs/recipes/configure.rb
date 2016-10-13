@@ -26,3 +26,9 @@ shared = node['efs']['sharedfolder']
      mode 0755
      not_if { File.exist?("#{mount}#{shared}") }
    end
+
+   file '/opt/.efsid' do
+     content "#{deviceid}"
+     mode '0755'
+     action :create
+   end
