@@ -5,7 +5,7 @@ mount "#{mount}" do
   device "#{deviceid}:/"
   fstype "nfs4"
   options "rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2"
-  action [:unmount, :disable]
+  action [:umount, :disable]
 end
 
 file '/opt/.efsid' do
