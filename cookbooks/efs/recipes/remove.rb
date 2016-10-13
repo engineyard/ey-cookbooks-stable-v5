@@ -1,4 +1,4 @@
-deviceid = File.read(/opt/.efsid)
+deviceid = File.read('/opt/.efsid').chomp
 mount = node['efs']['mountpoint']
 
 mount "#{mount}" do
