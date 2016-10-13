@@ -163,6 +163,7 @@ include_recipe "framework_env"
 include_recipe "chef-custom"
 include_recipe "sudo"
 include_recipe "ssh_keys"
+include_recipe "efs"
 # do not run the ruby recipes when we install Node.js and other languages.
 include_recipe "ruby" if node.engineyard.environment.ruby?
 include_recipe "motd" # educational message on login
