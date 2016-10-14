@@ -6,10 +6,10 @@ fallback_php_version = case attribute['dna']['engineyard']['environment']['compo
   when 'php_56'
     '5.6.25'
   when 'php_7'
-    '7.0.6'
+    '7.0.11'
   else
-    '7.0.6'
-   #'5.6.25'	
+   #'7.0.11'
+   '5.6.25'	
 end
  
 default['php']['version'] = node.engineyard.environment.metadata('php_version', fallback_php_version)
