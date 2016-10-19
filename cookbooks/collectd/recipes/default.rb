@@ -50,7 +50,7 @@ cron 'hourly collectd check' do
   day '*'
   month '*'
   weekday '*'
-  command 'collectd_nanny'
+  command '/engineyard/bin/collectd_nanny'
 end
 
 cron 'daily collectd check' do
@@ -59,7 +59,7 @@ cron 'daily collectd check' do
   day '*'
   month '*'
   weekday '*'
-  command 'collectd_nanny daily'
+  command '/engineyard/bin/collectd_nanny daily'
 end
 
 has_db = ['solo','db_master','db_slave'].include?(node.dna['instance_role'])
