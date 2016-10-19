@@ -72,7 +72,7 @@ end
 # Setup HTTP auth so AWSM can get at the graphs
 execute "install-http-auth" do
   command %Q{
-    htpasswd -cb /etc/collectd-httpd/collectd-httpd.users  engineyard #{node.dna['haproxy']['password']}
+    htpasswd -cb /etc/collectd-httpd/collectd-httpd.users  engineyard #{node.engineyard.environment['stats_password']}
   }
 end
 
