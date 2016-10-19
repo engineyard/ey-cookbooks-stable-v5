@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if (( $# > 1 )) || { (( $# != 0 )) && [[ $1 != 'daily' ]] ;}
+then
+  echo 1>&2 Usage: $0 [daily]
+  exit 127
+fi
+
+if [[ $1 == 'daily' ]]
+then
+  #echo "Resetting collectd based on daily schedule"
+  # inittab will reset automatically
+  killall -9 collectd
+  #echo "done!"
+else
+  #echo "Cancelling child processes running longer than 1 hour..."
+  ps -eo pid,ppid,etime,cmd|grep '/usr/sbin/[c]ollectd'|awk '{print $1" "$2" "$3}' | while read -r p
+  do
+    unset pid
+    unset days
+    pid=$(echo "$p"|awk '{print $1}')
+    ppid=$(echo "$p"|awk '{print $2}')
+    datepart=$(echo "$p"|awk '{print $3}')
+    days=$(echo "$datepart"|awk -F- '{print $1}')
+    hours=$(echo "$datepart"|awk -F: '{print $1}')
+    if [[ "$hours" == *-* ]]
+    then
+      hours=$(echo "$hours"|awk -F- '{print $2}')
+      hours=$(echo $hours+$days*24 | bc)
+    fi
+    #echo "$pid $ppid $datepart $days Hours: $hours"
+    if [[ "$ppid" == 1 ]]
+    then
+      msg="Not killing pid '$pid', it is the parent."
+      #echo "$msg"
+    elif [[ "$hours" =~ ^[0-9]+$ ]] && [[ "$hours" -gt 1 ]]
+    then
+      #echo "Killing pid '$pid' live for '$hours' hours."
+      kill -9 "$pid"
+    fi
+  done
+  #echo "done!"
+fi
