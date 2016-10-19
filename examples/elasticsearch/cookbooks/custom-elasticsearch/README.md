@@ -1,63 +1,47 @@
-Elasticsearch Cookbook for AppCloud
----------------
+# Elasticsearch
 
-You know, for Search
+This recipe installs Elasticsearch 2.4.0 and requires Java 7 or later.
 
-So, we build a web site or an application and want to add search to it, and then it hits us: getting search working is hard. We want our search solution to be fast, we want a painless setup and a completely free search schema, we want to be able to index data simply using JSON over HTTP, we want our search server to be always available, we want to be able to start with one machine and scale to hundreds, we want real-time search, we want simple multi-tenancy, and we want a solution that is built for the cloud.
+  
+## Installation
 
-"This should be easier", we declared, "and cool, bonsai cool".
+For simplicity, we recommend that you create the cookbooks directory at the root of your application. If you prefer to keep the infrastructure code separate from application code, you can create a new repository.
 
-[elasticsearch][2] aims to solve all these problems and more. It is an Open Source (Apache 2), Distributed, RESTful, Search Engine built on top of [Lucene][1].
+Our main recipes have the `elasticsearch` recipe but it is not included by default. To use the `elasticsearch` recipe, you should copy this recipe `custom-elasticsearch`. You should not copy the actual `elasticsearch ` recipe. That is managed by Engine Yard.
 
-NOTE: This recipe installs Elasticsearch 2.4.0 and requires Java 7 or later. It will only work on the Gentoo 12.11 stack; the Java 7 ebuild is not available on Gentoo 2009. We do not recommend running older versions of Elasticsearch - versions prior to 1.2 have a remote code execution vulnerability, see http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-3120
+1. Edit `cookbooks/ey-custom/recipes/after-main.rb` and add
 
-Known Issues
---------
-- A prior version of this recipe would create duplicate bind mounts under `/proc/mounts`. These weren't known to create any specific problems so this was added as a cleanup rather than a bugfix. In order to remove the extra mounts you need to run `sudo umount /usr/lib64/elasticsearch-#{version}/data` for each extra mount.
+      ```
+      include_recipe 'custom-elasticsearch'
+      ```
 
-Dependencies
---------
+2. Edit `cookbooks/ey-custom/metadata.rb` and add
 
-  * Your application should use gems(s) such as [tire][4],[rubberband][3],[elastic_searchable][5].
+      ```
+      depends 'custom-elasticsearch'
+      ```
 
-Using it
---------
+3. Copy `examples/elasticsearch/cookbooks/custom-elasticsearch ` to `cookbooks/`
 
-There are several ways to use this recipe, depending on your environment.
+      ```
+      cd ~ # Change this to your preferred directory. Anywhere but inside the application
 
-  * On a solo environment
-  * On a small cluster: run Elasticsearch on app_master
+      git clone https://github.com/engineyard/ey-cookbooks-stable-v5
+      cd ey-cookbooks-stable-v5
+      cp examples/elasticsearch/cookbooks/custom-elasticsearch /path/to/app/cookbooks/
+      ```
+ 
+  If you do not have `cookbooks/ey-custom` on your app repository, you can copy `examples/elasticsearch/cookbooks/ey-custom` to `/path/to/app/cookbooks`.
 
-  Uncomment this line in attributes/default.rb:
+4. Run `ey recipes --upload --environment=<environment_name>` and click Apply on the dashboard
+  
+5. After running chef, ssh to an elasticsearch instance to verify that it's running.   
 
-    ```
-      #'is_elasticsearch_instance' => ( node['dna']['instance_role'] == 'util' && node['dna']['name'].include?('elasticsearch_') ),
-    ```
+Run:
 
-  * On a cluster with dedicated util instances for Elasticsearch
-
-  Name the Elasticsearch instances elasticsearch_0, elasticsearch_1, etc.
-
-
-  Uncomment this line in attributes/default.rb:
-
-  ```
-    'is_elasticsearch_instance' => ( ['solo', 'app_master'].include?(node['dna']['instance_role']) ),
-  ```
-
-  And set `configure_cluster` to true:
-
-  ```
-  'configure_cluster'       => true,
-  ```
-
-
-Verify
--------
-
-On your instance, run:
-
-    curl localhost:9200
+```
+curl localhost:9200
+```
 
 Results should be simlar to:
 
@@ -75,6 +59,60 @@ Results should be simlar to:
   "tagline" : "You Know, for Search"
 }
 ```
+
+## Customizations
+
+All customizations go to `cookbooks/custom-elasticsearch/attributes/default.rb`.
+
+### Choose the instances that run the recipe
+
+By default, the elasticsearch recipe runs on utility instances with a name that starts with `elasticsearch_`. You can change this by modifying `attributes/default.rb`.
+
+#### A. Run Elasticsearch on utility instances
+
+* Name the Elasticsearch instances elasticsearch\_0, elasticsearch\_1, etc.
+
+* Uncomment this line:
+
+```
+elasticsearch['is_elasticsearch_instance'] = ( node['dna']['instance_role'] == 'util' && node['dna']['name'].include?('elasticsearch_') )
+```
+
+* Make sure this line is commented out:
+
+```
+elasticsearch['is_elasticsearch_instance'] = ( ['solo', 'app_master'].include?(node['dna']['instance_role']) )
+```
+
+* Set `configure_cluster` to true:
+
+```
+elasticsearch['configure_cluster'] = true
+```
+
+#### B. Run Elasticsearch on app_master or on a solo environment
+
+This is not recommended for production environments.
+
+* Uncomment this line:
+
+```
+elasticsearch['is_elasticsearch_instance'] = ( ['solo', 'app_master'].include?(node['dna']['instance_role']) )
+```
+
+* Make sure this line is commented out:
+
+```
+#elasticsearch['is_elasticsearch_instance'] = ( node['dna']['instance_role'] == 'util' && node['dna']['name'].include?('elasticsearch_') )
+```
+
+## Upgrading
+
+If you have a small index and can easily rebuild it, the simplest way to upgrade from a previous version is to completely delete `/data/elasticsearch` and then re-run the recipe with the newer version. To do an in-place upgrade while keeping the index, please consult the [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html).
+
+## Dependencies
+
+  * Your application should use gems(s) such as [tire][4],[rubberband][3],[elastic_searchable][5].
 
 Plugins
 --------
@@ -102,10 +140,6 @@ Backups
 
 Non-automated, regular snapshot should work.  If you have a large cluster this may complicate things, please consult the [elasticsearch][2] documentation regarding that.
 
-Upgrading
---------
-
-If you have a small index and can easily rebuild it, the simplest way to upgrade from a previous version is to completely delete `/data/elasticsearch` and then re-run the recipe with the newer version. To do an in-place upgrade while keeping the index, please consult the [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html).
 
 Warranty
 --------
