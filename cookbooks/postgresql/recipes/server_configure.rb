@@ -251,6 +251,7 @@ end
 
 service "postgresql-#{postgres_version}" do
   action [:enable, :start]
+  timeout 7200
 end
 
 cookbook_file "/engineyard/bin/load_postgres_db.sh" do
