@@ -46,6 +46,7 @@ if (`grep '/db ' /etc/fstab` == "")
 
       bash "grow-db-ebs" do
         code "resize2fs #{node['db_volume'].device}"
+        timeout 7200
         only_if { node['db_volume'].found? }
       end
       break
