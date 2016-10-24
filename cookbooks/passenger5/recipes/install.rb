@@ -96,14 +96,14 @@
     if app.vhosts.first.https?
       file "/data/nginx/servers/#{app.name}/custom.ssl.conf" do
         action :create_if_missing
-        owner node.ssh_username
-        group node.ssh_username
+        owner ssh_username
+        group ssh_username
         mode 0644
       end
 
       template "/data/nginx/servers/#{app.name}.ssl.conf" do
-        owner node.ssh_username
-        group node.ssh_username
+        owner ssh_username
+        group ssh_username
         mode 0644
         source "nginx_app.conf.erb"
         variables({
