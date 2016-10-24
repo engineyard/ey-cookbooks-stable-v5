@@ -1,8 +1,6 @@
 default['php']['full_atom'] = "dev-lang/php"
 
-fallback_php_version = case attribute['dna']['engineyard']['environment']['components'].map(&:values).flatten.find(/^php_/).first
-  when 'php_55'
-    '5.5.35'
+default['php']['version'] = case attribute['dna']['engineyard']['environment']['components'].map(&:values).flatten.find(/^php_/).first
   when 'php_56'
     '5.6.25'
   when 'php_7'
@@ -12,6 +10,4 @@ fallback_php_version = case attribute['dna']['engineyard']['environment']['compo
    '5.6.25'	
 end
  
-default['php']['version'] = node.engineyard.environment.metadata('php_version', fallback_php_version)
-
 default['php']['minor_version'] =  default['php']['version'].split(".").first(2).join(".")
