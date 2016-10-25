@@ -2,7 +2,7 @@
 
 The thinking_sphinx_3 recipe installs sphinx, creates a monit config file, and creates thinking_sphinx.yml.
 
-You need to add the thinking-sphinx and mysql2 gems. You need mysql2 even if you you're using postgres as your database.
+You need to add the thinking-sphinx and mysql2 gems. You need mysql2 even if you're using postgres as your database.
 
 ## Installation
 
