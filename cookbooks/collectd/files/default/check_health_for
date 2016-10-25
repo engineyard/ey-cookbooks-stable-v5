@@ -51,7 +51,8 @@ function alert() {
 function check_interval {
     if [[ ! $(( $(date +"%-M") % ${INTERVAL} )) -eq 0 ]] || [[ $(date +"%-M") -eq 0 ]]
     then
-      exit
+      echo "PUTVAL $(hostname) interval=$(( $INTERVAL * 60)) U:$(date)" > /tmp/check_health_for.tmp
+      exit 
     fi
 }
 
