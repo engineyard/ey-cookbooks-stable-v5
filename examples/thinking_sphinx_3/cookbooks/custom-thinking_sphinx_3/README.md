@@ -120,6 +120,6 @@ You have to add all 3 lines
 
 ```ruby
 default['sphinx']['utility_name'] = 'this_will_not_match_a_util'
-default['sphinx']['is_thinking_sphinx_instance'] = ['app_master', 'app'].includee?(node['dna']['instance_role'])
+default['sphinx']['is_thinking_sphinx_instance'] = ['app_master', 'app'].include?(node['dna']['instance_role'])
 default['sphinx']['host'] = '127.0.0.1'
 ```
