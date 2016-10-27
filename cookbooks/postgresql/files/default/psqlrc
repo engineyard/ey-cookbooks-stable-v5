@@ -1,0 +1,11 @@
+\set QUIET 1
+\set PROMPT1 '%n@%M %/ %R%#%x '
+\set PROMPT2 '%n@%M %/ %R%# '
+\pset null '(null)'
+\set timing
+
+\set HISTSIZE 2000
+\set HISTCONTROL ignoredups
+
+\set ON_ERROR_ROLLBACK interactive
+\set QUIET 0

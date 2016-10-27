@@ -18,3 +18,11 @@ update_file "add_PGUSER_to_root_bash_login" do
   body "export PGUSER='postgres'"
   not_if "grep 'PGUSER' /root/.bash_login"
 end
+
+cookbook_file "/root/.psqlrc" do
+  source 'psqlrc'
+  owner 'root'
+  group 'root'
+  mode '0600'
+  action :create_if_missing
+end
