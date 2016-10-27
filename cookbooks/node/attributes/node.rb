@@ -6,13 +6,14 @@ hard_version = begin
                  nil
                end
 
+
 fuzzy_version = begin
-                  env_components.map(&:values).flatten.find {|value| value =~ /^nodejs_/}.first
+                  env_components.map(&:values).flatten.find {|value| value =~ /^nodejs_/}
                 rescue NoMethodError
                   nil
                 end
 
-fallback_nodejs_version = case (hard_version || fuzzy_version)
+fallback_nodejs_version = case (fuzzy_version || hard_version)
                            when 'nodejs_6'
                              '6.4.0'
                            when 'nodejs_5'
