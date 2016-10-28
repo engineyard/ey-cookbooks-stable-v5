@@ -8,8 +8,7 @@
 
 package "mail-mta/ssmtp" do
   action :upgrade
-  version "2.62-r7"
-  not_if { "eix -I -C -c mail-mta | grep -v ssmtp | grep mail-mta" }
+  version "2.64-r2"
 end
 
 execute "fix the permissions" do
