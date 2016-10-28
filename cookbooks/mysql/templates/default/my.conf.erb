@@ -75,6 +75,7 @@ log-bin-index	= <%= @datadir %>/master-bin.index
 log-slave-updates = 1
 binlog-format  = MIXED
 <% end %>
+sync_binlog = 0
 
 # END master/slave configuration
 
