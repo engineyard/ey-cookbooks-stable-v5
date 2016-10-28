@@ -99,7 +99,7 @@ class Chef
       def app_server_recipes
         ['nginx', 'trinidad', 'thin', 'puma', 'passenger', 'passenger3', 'passenger4',
           'passenger::apache', 'passenger::nginx', 'mongrel',
-          'unicorn', 'node::standard', 'node::tcp']
+          'unicorn', 'node::standard', 'node::tcp', 'passenger5']
       end
 
       class Vhost
