@@ -5,9 +5,14 @@ class Chef::Recipe
   include NewrelicHelpers
 end
 
-if node.engineyard.metadata("descriptive_hostname", "false") == "true" && File.exists?('/etc/descriptive_hostname')
-  descriptive_hostname = File.read('/etc/descriptive_hostname').strip
-end
+# Setting a meningful hostname to easy identification in New Relic dashboard
+id = node.dna['engineyard']['this']
+role = node.dna['instance_role'].gsub('_', ' ')
+name = node['name']
+
+descriptive_hostname = "#{id} - #{role}"
+descriptive_hostname << " (#{name})" if name
+
 
 if newrelic_enabled?
   node.engineyard.apps.each do |app|
@@ -23,11 +28,12 @@ if newrelic_enabled?
   end
 
   ey_cloud_report "newrelic" do
-    message "configuring NewRelic Server Monitoring"
+    message "configuring NewRelic Server Monitoring for #{descriptive_hostname}"
   end
 
-  #Update hostname
-  execute "Updating hostname" do
-    command "nrsysmond hostname #{descriptive_hostname}"
+  # Use the newrelic resource to install server monitoring
+  newrelic "sysmond" do
+    hostname descriptive_hostname
   end
+
 end

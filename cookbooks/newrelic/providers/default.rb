@@ -139,12 +139,12 @@ end
 
 def install_server_monitoring
   enable_package "sys-apps/newrelic-sysmond" do
-    version node.dna['newrelic']['sysmond_version']
+    version node['newrelic']['sysmond_version']
   end
 
   package "sys-apps/newrelic-sysmond" do
     action :upgrade
-    version node.dna['newrelic']['sysmond_version']
+    version node['newrelic']['sysmond_version']
     notifies :run, 'execute[restart nrsysmond]', :delayed
   end
 
@@ -166,11 +166,28 @@ def install_server_monitoring
     variables(:hostname => new_resource.hostname)
   end
 
+  template "/etc/init.d/newrelic-sysmond" do
+    owner "root"
+    group "root"
+    mode 0755
+    backup 0
+    source "newrelic-sysmond.init.erb"
+    variables(:hostname => new_resource.hostname)
+  end
+
+  
   directory "/var/log/newrelic" do
     action :create
     recursive true
     owner 'root'
     group 'root'
+  end
+
+  directory "/var/run/newrelic" do
+    action :create
+    recursive true
+    owner 'newrelic'
+    group 'newrelic'
   end
 
  execute "monit reload" do
