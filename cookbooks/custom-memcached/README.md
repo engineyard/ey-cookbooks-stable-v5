@@ -59,6 +59,7 @@ when you ship (deploy) your application code.
 
 This custom chef recipe has been verified using these test cases:
 
+```
 A. Install memcached on all app instances
   A1. memcached should be running on app_master
   A2. memcached should be running on app instances
@@ -69,3 +70,4 @@ B. Install memcached on a utility instance named 'memcached'
   B1. memcached should be running on the utility instance named memcached
   B2. memcached should not be running on app_master, app, and database instances
   B3. /data/app_name/shared/config/memcached-custom.yml should list all the utility instances named memcached in the environment
+```
