@@ -54,3 +54,18 @@ This recipe does NOT restart your application. The reason for this is that shipp
 your application and rebuilding your instances (i.e. running chef) are not
 always done at the same time. It is best to restart your application
 when you ship (deploy) your application code.
+
+## Test Cases
+
+This custom chef recipe has been verified using these test cases:
+
+A. Install memcached on all app instances
+  A1. memcached should be running on app_master
+  A2. memcached should be running on app instances
+  A3. memcached should not be running on utility or database instances
+  A4. /data/app_name/shared/config/memcached-custom.yml should list all the app instances in the environment
+
+B. Install memcached on a utility instance named 'memcached'
+  B1. memcached should be running on the utility instance named memcached
+  B2. memcached should not be running on app_master, app, and database instances
+  B3. /data/app_name/shared/config/memcached-custom.yml should list all the utility instances named memcached in the environment

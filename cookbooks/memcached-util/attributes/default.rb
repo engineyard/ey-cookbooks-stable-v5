@@ -5,8 +5,10 @@
 
 default['memcached'].tap do |memcached|
 
-  # Memcached will be installed on a solo or a utility instance named 'memcached'
-  #memcached['is_memcached_instance'] =
-  #  (node['dna']['instance_role'] == 'solo') ||
-  #  (node['dna']['instance_role'] == 'util' && node['dna']['name'] == 'memcached')
+  # Install memcached on a utility instance named 'memcached'
+  #memcached['install_type'] = 'NAMED_UTILS'
+  #memcached['util_name'] = 'memcached'
+
+  # Install memcached on all app instances
+  memcached['install_type'] = 'ALL_APP_INSTANCES'
 end
