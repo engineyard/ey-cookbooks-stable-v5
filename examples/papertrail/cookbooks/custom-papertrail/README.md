@@ -31,6 +31,11 @@ That is managed by Engine Yard.
         cd ey-cookbooks-stable-v5
         cp examples/papertrail/cookbooks/custom-papertrail /path/to/app/cookbooks/
 
+4. Specify the papertrail port and endpoint
+
+        default['papertrail']['destination_host'] = 'host1.papertrailapp.com'
+        default['papertrail']['port'] = 1235
+
 If you do not have `cookbooks/ey-custom` on your app repository, you can copy
 `examples/papertrail/cookbooks/ey-custom` to `/path/to/app/cookbooks` as well.
 
@@ -38,11 +43,6 @@ If you do not have `cookbooks/ey-custom` on your app repository, you can copy
 
 All customizations go to `cookbooks/custom-papertrail/attributes/default.rb`.
 
-### Specify the papertrail endpoint (Required)
-
-    # this is the default
-    default['papertrail']['destination_host'] = 'HOST.papertrailapp.com'
-    default['papertrail']['port'] = 111111111111111
 
 ### Specify the logs to monitor
 
@@ -52,4 +52,9 @@ All customizations go to `cookbooks/custom-papertrail/attributes/default.rb`.
       '/var/log/engineyard/apps/*/*.log',
       '/var/log/mysql/*.log',
       '/var/log/mysql/mysql.err',
+    ]
+
+    # Only logs from Chef runs
+    default['papertrail']['other_logs'] = [
+      '/var/log/chef.log'
     ]
