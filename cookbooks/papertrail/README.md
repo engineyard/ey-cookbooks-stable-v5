@@ -1,15 +1,11 @@
-Papertrail Cookbook for EngineYard EYCloud
-=========
+# papertrail
 
-Papertrail is a service that provides hosted log management. See http://help.papertrailapp.com/ for details.
+This cookbook is used to run Papertrail on the stable-v5 stack.
 
-The official guide on how to run Papertrail on Engine Yard is [here](http://help.papertrailapp.com/kb/hosting-services/engine-yard/).
+The papertrail cookbook is managed by Engine Yard. You should not copy this
+recipe to your repository but instead copy custom-papertrail. Please check the
+[custom-papertrail
+readme](../../examples/papertrail/cookbooks/custom-papertrail) for the
+complete instructions.
 
-This recipe has been updated with changes from https://github.com/leonsodhi/ey-cloud-recipes/tree/master/cookbooks/papertrail. We also incorporate fixes as we encounter them.
-
-## Usage
-
-Add `include_recipe "papertrail"` to `main/recipes/default.rb`
-
-Add the port and host from papertrailapp.com to `papertrail/recipes/default.rb`
-
+We accept contributions for changes that can be used by all customers.
