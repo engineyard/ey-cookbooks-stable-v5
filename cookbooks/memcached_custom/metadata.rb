@@ -1,4 +1,4 @@
-name 'memcached-util'
+name 'memcached_custom'
 description 'Configuration & deployment of Memcached on Engine Yard'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 maintainer 'Engine Yard'

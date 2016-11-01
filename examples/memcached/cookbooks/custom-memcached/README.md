@@ -10,27 +10,33 @@ For simplicity, we recommend that you create the `cookbooks/` directory at the
 root of your application. If you prefer to keep the infrastructure code separate
 from application code, you can create a new repository.
 
-Our main recipes have the `memcached` cookbook but it is not included by default.
-To use the `memcached` cookbook, you should copy this cookbook
-`custom-memcached`. You should not copy the actual `memcached` recipe as
+Our main recipes have the `memcached_custom` cookbook but it is not included by default.
+To use the `memcached_custom` cookbook, you should copy the cookbook
+`custom-memcached`. You should not copy the actual `memcached_custom` recipe as
 that is managed by Engine Yard.
 
 1. Edit `cookbooks/ey-custom/recipes/after-main.rb` and add
 
+```
     include_recipe 'custom-memcached'
+```
 
 2. Edit `cookbooks/ey-custom/metadata.rb` and add
 
+```
     depends 'custom-memcached'
+```
 
 3. Copy `examples/memcached/cookbooks/custom-memcached` to `cookbooks/`
 
+```
     cd ~ # Change this to your preferred directory. Anywhere but inside the
          # application
 
     git clone https://github.com/engineyard/ey-cookbooks-stable-v5
     cd ey-cookbooks-stable-v5
     cp examples/memcached/cookbooks/custom-memcached /path/to/app/cookbooks/
+```
 
 If you do not have `cookbooks/ey-custom` on your app repository, you can copy
 `examples/memcached/cookbooks/ey-custom` to `/path/to/app/cookbooks` as well.
@@ -41,12 +47,25 @@ All customizations go to `cookbooks/custom-memcached/attributes/default.rb`.
 
 ### Choose the instances that run the recipe
 
-By default, the memcached recipe runs on a utility instance named memcached.
+By default, the recipe runs on a utility instance named 'memcached'. This is configured in `attributes/default.rb`. This will run the memcached daemon on the utility instance named 'memcached' and create a `/data/appname/shared/config/memcached-custom.yml` file that points to the private IP of the memcached instance.
 
-TODO
+```
+  # Install memcached on a utility instance named 'memcached'
+  memcached['install_type'] = 'NAMED_UTILS'
+  memcached['util_name'] = 'memcached'
+```
+
+To install memcached on all app instances, comment out the block above and set `memcached['install_type']` to 'ALL_APP_INSTANCES'. This will run the memcached daemon on all app instances and create a `/data/appname/shared/config/memcached-custom.yml` file that points to the private IPs of all the app instances. The memcache client will be responsible for sharding the data across all the instances running memcached
+
+```
+  # Install memcached on all app instances
+  #memcached['install_type'] = 'ALL_APP_INSTANCES'
+```
+
 
 ### Configure memcached
 
+TODO
 
 ## Restarting your application
 
