@@ -1,1 +1,1 @@
-include_recipe 'custom-sidekiq'
+include_recipe 'custom-memcached'

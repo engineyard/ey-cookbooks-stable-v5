@@ -1,3 +1,3 @@
 name 'ey-custom'
 
-depends 'custom-sidekiq'
+depends 'custom-memcached'
