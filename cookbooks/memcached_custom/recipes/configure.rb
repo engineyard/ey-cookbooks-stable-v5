@@ -1,6 +1,6 @@
 require 'pp'
 #
-# Cookbook Name:: memcached-util
+# Cookbook Name:: memcached_custom
 # Recipe:: configure
 #
 
@@ -25,7 +25,7 @@ memcached_instances = case node['memcached']['install_type']
 when 'ALL_APP_INSTANCES'
   get_app_instances
 else
-  get_utils_by_name node['memcached']['util_name']
+  get_utils_by_name node['memcached']['utility_name']
 end
 
 # Drop the memcached.yml on all app and util instances

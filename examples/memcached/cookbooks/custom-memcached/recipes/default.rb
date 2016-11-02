@@ -1,1 +1,1 @@
-include_recipe 'memcached-util'
+include_recipe 'memcached_custom'

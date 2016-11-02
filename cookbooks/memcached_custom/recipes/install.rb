@@ -12,7 +12,7 @@ is_memcached_instance = case node['memcached']['install_type']
 when 'ALL_APP_INSTANCES'
   ['solo', 'app_master', 'app'].include?(node['dna']['instance_role'])
 else
-  (node['dna']['instance_role'] == 'util' && node['dna']['name'] == 'memcached')
+  (node['dna']['instance_role'] == 'util' && node['dna']['name'] == node['dna']['utility_name'])
 end
 
 if is_memcached_instance

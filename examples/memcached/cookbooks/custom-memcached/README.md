@@ -47,15 +47,15 @@ All customizations go to `cookbooks/custom-memcached/attributes/default.rb`.
 
 ### Choose the instances that run the recipe
 
-By default, the recipe runs on a utility instance named 'memcached'. This is configured in `attributes/default.rb`. This will run the memcached daemon on the utility instance named 'memcached' and create a `/data/appname/shared/config/memcached-custom.yml` file that points to the private IP of the memcached instance.
+By default, the recipe runs on a utility instance named 'memcached'. This is configured in `attributes/default.rb`. This will run the memcached daemon on the utility instance named 'memcached' and create a `/data/appname/shared/config/memcached_custom.yml` file that points to the private IP of the memcached instance.
 
 ```
   # Install memcached on a utility instance named 'memcached'
   memcached['install_type'] = 'NAMED_UTILS'
-  memcached['util_name'] = 'memcached'
+  memcached['utility_name'] = 'memcached'
 ```
 
-To install memcached on all app instances, comment out the block above and set `memcached['install_type']` to 'ALL_APP_INSTANCES'. This will run the memcached daemon on all app instances and create a `/data/appname/shared/config/memcached-custom.yml` file that points to the private IPs of all the app instances. The memcache client will be responsible for sharding the data across all the instances running memcached
+To install memcached on all app instances, comment out the block above and set `memcached['install_type']` to 'ALL_APP_INSTANCES'. This will run the memcached daemon on all app instances and create a `/data/appname/shared/config/memcached_custom.yml` file that points to the private IPs of all the app instances. The memcache client will be responsible for sharding the data across all the instances running memcached
 
 ```
   # Install memcached on all app instances
@@ -83,10 +83,10 @@ A. Install memcached on all app instances
   A1. memcached should be running on app_master
   A2. memcached should be running on app instances
   A3. memcached should not be running on utility or database instances
-  A4. /data/app_name/shared/config/memcached-custom.yml should list all the app instances in the environment
+  A4. /data/app_name/shared/config/memcached_custom.yml should list all the app instances in the environment
 
 B. Install memcached on a utility instance named 'memcached'
   B1. memcached should be running on the utility instance named memcached
   B2. memcached should not be running on app_master, app, and database instances
-  B3. /data/app_name/shared/config/memcached-custom.yml should list all the utility instances named memcached in the environment
+  B3. /data/app_name/shared/config/memcached_custom.yml should list all the utility instances named memcached in the environment
 ```
