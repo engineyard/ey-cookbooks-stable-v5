@@ -24,7 +24,7 @@ God.watch do |w|
   w.log = "/var/log/engineyard/apps/#{app_name}/node.log"
 
   w.start = "#{shared_dir}/bin/start"
-  w.stop = "/bin/kill -SIGINT -`cat /var/run/god/node-#{app_name}.pid`"
+  w.stop = "/usr/bin/pkill -SIGTERM -g `cat /var/run/god/node-#{app_name}.pid`"
   w.restart = "#{shared_dir}/bin/restart" if File.exist?("#{shared_dir}/bin/restart")
 
   w.transition(:up, :restart) do |on|
