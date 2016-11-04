@@ -64,6 +64,9 @@ GEM
     ey_instance_api_client (0.1.11)
       json
       rest-client
+    ey_services_setup (0.0.7)
+      ey_instance_api_client (= 0.1.11)
+      json (~> 1.0)
     ey_snaplock (2.0.3)
       addressable (~> 2.3)
       rack
@@ -192,6 +195,7 @@ DEPENDENCIES
   engineyard-serverside (~> 2.6.6)!
   ey_cloud_server (= 1.4.51)!
   ey_enzyme (= 2.0.5)!
+  ey_services_setup (= 0.0.7)!
   ey_snaplock (= 2.0.3)!
   right_aws (~> 3.1.0)!
 
