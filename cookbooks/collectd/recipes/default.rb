@@ -11,6 +11,12 @@ ey_cloud_report "collectd" do
   message 'processing performance monitoring'
 end
 
+# Update rrdtool-binding to latest available
+# - updates net-analyzer/rrdtool as well
+package 'dev-ruby/rrdtool-bindings' do
+  action :upgrade
+end
+
 include_recipe 'collectd::httpd'
 
 template "/engineyard/bin/ey-alert.rb" do
@@ -29,6 +35,31 @@ end
 
 package 'app-admin/collectd' do
  version node['collectd']['version']
+end
+
+cookbook_file "/engineyard/bin/collectd_nanny" do
+  owner 'root'
+  group 'root'
+  mode 0755
+  source 'collectd_nanny'
+end
+
+cron 'hourly collectd check' do
+  minute '5'
+  hour '0-2,4-23'
+  day '*'
+  month '*'
+  weekday '*'
+  command '/engineyard/bin/collectd_nanny'
+end
+
+cron 'daily collectd check' do
+  minute '5'
+  hour '3'
+  day '*'
+  month '*'
+  weekday '*'
+  command '/engineyard/bin/collectd_nanny daily'
 end
 
 has_db = ['solo','db_master','db_slave'].include?(node.dna['instance_role'])
