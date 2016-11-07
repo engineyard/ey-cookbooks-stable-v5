@@ -15,7 +15,7 @@ end
 
 execute 'eslect php cli version' do
   command "eselect php set cli php#{node["php"]["minor_version"]}"
-#  not_if ( "eselect php list cli | grep \* | grep #{node['php']['minor_version']}" )
+  not_if "php -v | grep PHP | grep #{node['php']['version']}"
 end
 
 
