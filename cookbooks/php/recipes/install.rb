@@ -13,6 +13,13 @@ package node['php']['full_atom'] do
   action :install
 end
 
+execute 'eslect php cli version' do
+  command "eselect php set cli php#{node["php"]["minor_version"]}"
+#  not_if ( "eselect php list cli | grep \* | grep #{node['php']['minor_version']}" )
+end
+
+
+
 # Install required extensions
 # enable_package "dev-php/pecl-memcache" do
 #   version "3.0.8-r1"
