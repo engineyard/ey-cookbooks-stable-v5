@@ -63,9 +63,22 @@ To install memcached on all app instances, comment out the block above and set `
 ```
 
 
-### Configure memcached
+### Adjust memory usage
 
-TODO
+```
+  # Amount of memory in MB to be used by memcached
+  memcached['memusage'] = 1024
+```
+
+### Adjust the growth factor
+
+```
+  # Increase the growth factor.
+  # Try this if you allocated more memory to memcached
+  # and you're seeing lots of partially-filled slabs
+  # memcached['misc_opts'] = '-f 1.5'
+  # See https://blog.engineyard.com/2015/fine-tuning-memcached
+```
 
 ## Restarting your application
 
