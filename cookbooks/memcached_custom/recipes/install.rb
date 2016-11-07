@@ -1,6 +1,6 @@
 require 'pp'
 #
-# Cookbook Name:: memcached-util
+# Cookbook Name:: memcached-custom
 # Recipe:: install
 #
 
@@ -24,8 +24,9 @@ if is_memcached_instance
       owner 'root'
       group 'root'
       mode 0644
-      variables :memusage => 64,
-        :port     => 11211
+      variables :memusage => node['memcached']['memusage'],
+        :port     => 11211,
+        :misc_opts => node['memcached']['misc_opts']
     end
 
     template '/etc/monit.d/memcached.monitrc' do

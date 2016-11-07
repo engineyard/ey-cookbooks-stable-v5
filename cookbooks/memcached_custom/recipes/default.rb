@@ -4,5 +4,5 @@ require 'pp'
 # Recipe:: default
 #
 
-include_recipe "memcached-util::install"
-include_recipe "memcached-util::configure"
+include_recipe "memcached_custom::install"
+include_recipe "memcached_custom::configure"
