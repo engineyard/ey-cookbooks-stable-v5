@@ -24,7 +24,7 @@ if node['sidekiq']['is_sidekiq_instance']
     end
 
     # yml files
-    node['sidekiq']['workers'].times do |count|
+    node['sidekiq']['workers'].each_with_index do |_, count|
       file "/data/#{app_name}/shared/config/sidekiq_#{count}.yml" do
         action :delete
       end
