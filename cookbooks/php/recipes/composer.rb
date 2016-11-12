@@ -1,5 +1,5 @@
 # Report to Cloud dashboard
-ey_cloud_report "processing php" do
+ey_cloud_report "processing php composer.rb" do
   message "processing php - composer"
 end
 
