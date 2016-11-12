@@ -55,7 +55,7 @@ end
 # We assign it an hour and minute based on the app master instance id to spread
 # load on portage server out more than it was before. In case of error
 # calculating this time, it will default to 12:25 am Pacific.
-selected_id = node['engineyard']['environment']['instances'].select {|i|
+selected_id = node['dna']['engineyard']['environment']['instances'].select {|i|
     i["role"] == "app_master" || i["role"] == "solo"
   }[0]['id'] rescue 'i-00000019'
 eix_sync_hour   = selected_id[2..5].to_i(16) % 24 rescue 0
@@ -73,8 +73,8 @@ directory "/var/spool/cron" do
   group "crontab"
 end
 
-if ['solo', 'app_master'].include?(node['instance_role'])
-  (node['crons']||[]).each do |c|
+if ['solo', 'app_master'].include?(node['dna']['instance_role'])
+  (node['dna']['crons']||[]).each do |c|
     cron c['name'] do
       minute   c['minute']
       hour     c['hour']
