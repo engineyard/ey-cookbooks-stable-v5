@@ -24,6 +24,10 @@ include_recipe 'nginx::install'
 
 tlsv12_available  = node.openssl.version =~ /1\.0\.1/
 
+execute "reload-haproxy" do
+  command 'if /etc/init.d/haproxy status ; then /etc/init.d/haproxy reload; else /etc/init.d/haproxy restart; fi'
+  action :nothing
+end
 
 service "nginx" do
   action :nothing
@@ -446,6 +450,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
         :chain => app[:vhosts][1][:chain],
         :key => app[:vhosts][1][:key]
       )
+      notifies :run, resources(:execute => 'reload-haproxy'), :delayed
     end
 
     # CC-260: Same issue as previous; using compile-time if rather than run-time only_if directive
