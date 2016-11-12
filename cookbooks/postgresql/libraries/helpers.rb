@@ -19,6 +19,18 @@ module PostgreSQL
     def binary_pg_version
       %x{psql -U postgres --version | grep PostgreSQL | awk '{print $NF}'}.strip
     end
+
+    def add_shared_preload_library(lib)
+      custom_conf = "/db/postgresql/#{node[:postgresql][:short_version]}/custom.conf"
+      body = File.read(custom_conf)
+      return if body[/shared_preload_libraries.*#{lib}/]
+      if body[/shared_preload_libraries/]
+        body.gsub!(/^(shared_preload_libraries.*'?)(.*?)('.*)$/, '\1\2,' + lib + '\3')
+        File.write(custom_conf, body)
+      else
+        %x{echo "shared_preload_libraries = '#{lib}'" >> #{custom_conf}}
+      end
+    end
   end
 end
 
