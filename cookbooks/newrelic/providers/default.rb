@@ -179,8 +179,8 @@ def install_server_monitoring
   directory "/var/log/newrelic" do
     action :create
     recursive true
-    owner 'root'
-    group 'root'
+    owner 'newrelic'
+    group 'newrelic'
   end
 
   directory "/var/run/newrelic" do
