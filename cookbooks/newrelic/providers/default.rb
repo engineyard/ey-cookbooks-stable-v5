@@ -41,16 +41,16 @@ def install_php_rpm
     '/usr/lib64/php5.6/lib/extensions/no-debug-non-zts-20131226'
   when '7.0'
     '/usr/lib64/php7.0/lib/extensions/no-debug-non-zts-20151012'
-  else
-    '/tmp'
   end
 
-  directory extensions_dir do
-    owner 'root'
-    group 'root'
-    mode 0755
-    action :create
-    recursive true
+  if extensions_dir
+    directory extensions_dir do
+      owner 'root'
+      group 'root'
+      mode 0755
+      action :create
+      recursive true
+    end
   end
 
   directory "/opt/php_rpm" do
