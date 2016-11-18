@@ -115,11 +115,12 @@ def configure_php_rpm
     group "root"
     mode 0644
     source "newrelic-daemon.monitrc.erb"
+    notifies :run, 'execute[monit reload]', :immediately
   end
 
   # cookbooks/php/libraries/php_helpers.rb
   #restart_fpm
-  ['app_master', 'app', 'solo'].include?(node['dna']['instance_role']) do
+  if ['app_master', 'app', 'solo'].include?(node['dna']['instance_role'])
     execute 'monit restart all -g php-fpm' do
       action :run
     end
@@ -131,7 +132,6 @@ def configure_php_rpm
 
   execute "monit reload" do
     action :nothing
-    subscribes :run, 'template[/etc/monit.d/newrelic-daemon.monitrc]', :immediately
     notifies :run, 'execute[restart newrelic-daemon]', :delayed
   end
 
@@ -172,6 +172,7 @@ def install_server_monitoring
     backup 0
     source "nrsysmond.monitrc.erb"
     variables(:hostname => new_resource.hostname)
+    notifies :run, 'execute[monit reload]', :immediately
   end
 
   template "/etc/init.d/newrelic-sysmond" do
@@ -180,6 +181,7 @@ def install_server_monitoring
     mode 0755
     backup 0
     source "newrelic-sysmond.init.erb"
+    notifies :run, 'execute[restart nrsysmond]', :delayed
   end
 
   
@@ -199,7 +201,6 @@ def install_server_monitoring
 
   execute "monit reload" do
     action :nothing
-    subscribes :run, 'template[/etc/monit.d/nrsysmond.monitrc]', :immediately
     notifies :run, 'execute[restart nrsysmond]', :delayed
   end
 
