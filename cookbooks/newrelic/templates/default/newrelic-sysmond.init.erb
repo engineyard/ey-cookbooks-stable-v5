@@ -18,8 +18,7 @@ start() {
 	                  --user newrelic \
 	                  --exec /usr/sbin/nrsysmond -- \
 	                  -c /etc/newrelic/nrsysmond.cfg \
-	                  -p /var/run/newrelic/nrsysmond.pid \
-	                  -n '<%= @hostname %>'
+	                  -p /var/run/newrelic/nrsysmond.pid
         eend $?
 }
 

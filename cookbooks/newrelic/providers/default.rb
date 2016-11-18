@@ -36,6 +36,23 @@ end
 
 
 def install_php_rpm
+  extensions_dir = case node['php']['minor_version']
+  when '5.6'
+    '/usr/lib64/php5.6/lib/extensions/no-debug-non-zts-20131226'
+  when '7.0'
+    '/usr/lib64/php7.0/lib/extensions/no-debug-non-zts-20151012'
+  end
+
+  if extensions_dir
+    directory extensions_dir do
+      owner 'root'
+      group 'root'
+      mode 0755
+      action :create
+      recursive true
+    end
+  end
+
   directory "/opt/php_rpm" do
     owner 'root'
     group 'root'
@@ -66,7 +83,7 @@ end
 
 def configure_php_rpm
   # Write custom newrelic.ini information
-  template "/etc/php/cli-php5.6/ext-active/newrelic.ini" do
+  template "/etc/php/cli-php#{node['php']['minor_version']}/ext-active/newrelic.ini" do
     owner "root"
     group "root"
     mode 0644
@@ -77,7 +94,7 @@ def configure_php_rpm
       :license_key => newrelic_license_key)
   end
 
-  template "/etc/php/fpm-php5.6/ext-active/newrelic.ini" do
+  template "/etc/php/fpm-php#{node['php']['minor_version']}/ext-active/newrelic.ini" do
     owner "root"
     group "root"
     mode 0644
@@ -96,8 +113,10 @@ def configure_php_rpm
     backup 0
     source "newrelic.cfg.erb"
     variables(
-      :license_key => newrelic_license_key
+      :license_key => newrelic_license_key,
+      :labels => new_resource.labels
     )
+    notifies :run, 'execute[restart newrelic-daemon]', :delayed
   end
 
   # Set up newrelic per application
@@ -113,21 +132,23 @@ def configure_php_rpm
     group "root"
     mode 0644
     source "newrelic-daemon.monitrc.erb"
+    notifies :run, 'execute[monit reload]', :immediately
   end
 
   # cookbooks/php/libraries/php_helpers.rb
   #restart_fpm
-  execute 'monit restart all -g php-fpm' do
-    action :run
-  end
+  if ['app_master', 'app', 'solo'].include?(node['dna']['instance_role'])
+    execute 'monit restart all -g php-fpm' do
+      action :run
+    end
 
-  service "nginx" do
-    action :restart
+    service "nginx" do
+      action :restart
+    end
   end
 
   execute "monit reload" do
     action :nothing
-    subscribes :run, 'template[/etc/monit.d/newrelic-daemon.monitrc]', :immediately
     notifies :run, 'execute[restart newrelic-daemon]', :delayed
   end
 
@@ -154,7 +175,11 @@ def install_server_monitoring
     group 'root'
     mode 0644
     backup 0
-    variables(:key => newrelic_license_key)
+    variables(
+      :key => newrelic_license_key,
+      :labels => new_resource.labels
+    )
+    notifies :run, 'execute[restart nrsysmond]', :delayed
   end
 
   template "/etc/monit.d/nrsysmond.monitrc" do
@@ -164,6 +189,7 @@ def install_server_monitoring
     backup 0
     source "nrsysmond.monitrc.erb"
     variables(:hostname => new_resource.hostname)
+    notifies :run, 'execute[monit reload]', :immediately
   end
 
   template "/etc/init.d/newrelic-sysmond" do
@@ -172,7 +198,7 @@ def install_server_monitoring
     mode 0755
     backup 0
     source "newrelic-sysmond.init.erb"
-    variables(:hostname => new_resource.hostname)
+    notifies :run, 'execute[restart nrsysmond]', :delayed
   end
 
   
@@ -190,9 +216,8 @@ def install_server_monitoring
     group 'newrelic'
   end
 
- execute "monit reload" do
+  execute "monit reload" do
     action :nothing
-    subscribes :run, 'template[/etc/monit.d/nrsysmond.monitrc]', :immediately
     notifies :run, 'execute[restart nrsysmond]', :delayed
   end
 
