@@ -64,7 +64,7 @@
     # See https://support.cloud.engineyard.com/entries/23852283-Worker-Allocation-on-Engine-Yard-Cloud for more details
     memory_limit = metadata_app_get_with_default(app.name, :worker_memory_size, depreciated_memory_limit)
     memory_option = memory_limit ? "-l #{memory_limit}" : ""
-    worker_count = get_pool_size
+    worker_count = 2
 
     # Render the http Nginx vhost
     template "/data/nginx/servers/#{app.name}.conf" do
@@ -81,6 +81,15 @@
       })
       notifies :restart, resources(:service => "nginx"), :delayed
     end
+
+    cookbook_file "/etc/monit.d/passenger5_api.monitrc"
+      owner ssh_username
+      group ssh_username
+      mode 0644
+      source "passenger5_api.monitrc"
+      notifies :restart, resources(:service => "nginx"), :delayed
+     end
+
 
     # Render proxy.conf
     cookbook_file "/etc/nginx/common/proxy.conf" do

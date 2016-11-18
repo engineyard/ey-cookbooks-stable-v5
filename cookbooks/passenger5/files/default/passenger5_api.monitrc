@@ -1,0 +1,6 @@
+check process passenger_gh_9300
+  with pidfile /data/gh/shared/pids/passenger.9300.i-6dde5f7b.pid
+  start program = "/engineyard/bin/app_api start" as uid deploy and gid deploy
+  stop program = "/engineyard/bin/app_api stop" as uid deploy and gid deploy
+  if mem > 255.0 MB for 2 cycles then restart
+  group gh

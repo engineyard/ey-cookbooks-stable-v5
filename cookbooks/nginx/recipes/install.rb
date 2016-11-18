@@ -139,6 +139,13 @@ cookbook_file "/data/nginxkoi-win" do
   source "koi-win"
 end
 
+cookbook_file "/data/nginx/servers/apis.conf" do
+  owner node['owner_name']
+  group node['owner_name']
+  mode 0755
+  source "apis.conf"
+end
+
 logrotate "nginx" do
   files "/var/log/engineyard/nginx/*log"
   copy_then_truncate true
