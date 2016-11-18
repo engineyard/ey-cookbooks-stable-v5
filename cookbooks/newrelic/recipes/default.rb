@@ -8,10 +8,13 @@ end
 # Setting a meningful hostname to easy identification in New Relic dashboard
 id = node.dna['engineyard']['this']
 role = node.dna['instance_role'].gsub('_', ' ')
-name = node['name']
+name = node.dna['name']
+environment = node.dna['environment']['name']
 
 descriptive_hostname = "#{id} - #{role}"
 descriptive_hostname << " (#{name})" if name
+
+labels = "Server:#{id};Role:#{role};Environment:#{environment}"
 
 
 if newrelic_enabled?
@@ -34,6 +37,7 @@ if newrelic_enabled?
   # Use the newrelic resource to install server monitoring
   newrelic "sysmond" do
     hostname descriptive_hostname
+    labels labels
   end
 
 end
