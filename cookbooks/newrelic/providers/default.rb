@@ -36,6 +36,23 @@ end
 
 
 def install_php_rpm
+  extensions_dir = case node['php']['minor_version']
+  when '5.6'
+    '/usr/lib64/php5.6/lib/extensions/no-debug-non-zts-20131226'
+  when '7.0'
+    '/usr/lib64/php7.0/lib/extensions/no-debug-non-zts-20151012'
+  else
+    '/tmp'
+  end
+
+  directory extensions_dir do
+    owner 'root'
+    group 'root'
+    mode 0755
+    action :create
+    recursive true
+  end
+
   directory "/opt/php_rpm" do
     owner 'root'
     group 'root'
