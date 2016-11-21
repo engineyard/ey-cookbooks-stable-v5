@@ -18,15 +18,18 @@ labels = "Server:#{id};Role:#{role};Environment:#{environment}"
 
 
 if newrelic_enabled?
-  node.engineyard.apps.each do |app|
-    ey_cloud_report "newrelic" do
-      message "configuring NewRelic RPM for #{app.name}"
-    end
+  # do not install newrelic rpm on db instances
+  if ['app_master', 'app', 'solo', 'util'].include?(node['dna']['instance_role'])
+    node.engineyard.apps.each do |app|
+      ey_cloud_report "newrelic" do
+        message "configuring NewRelic RPM for #{app.name}"
+      end
 
-    # Use the newrelic resource to install rpm
-    newrelic "rpm" do
-      app_name app.name
-      app_type app.type
+      # Use the newrelic resource to install rpm
+      newrelic "rpm" do
+        app_name app.name
+        app_type app.type
+      end
     end
   end
 

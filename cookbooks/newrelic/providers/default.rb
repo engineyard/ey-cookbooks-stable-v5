@@ -209,6 +209,12 @@ def install_server_monitoring
     group 'newrelic'
   end
 
+  file "/var/log/newrelic/nrsysmond.log" do
+    action :create
+    owner 'newrelic'
+    group 'newrelic'
+  end
+
   directory "/var/run/newrelic" do
     action :create
     recursive true
