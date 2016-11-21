@@ -1,6 +1,6 @@
 check process nrsysmond
   with pidfile /var/run/newrelic/nrsysmond.pid
-  start program = "/etc/init.d/newrelic-sysmond start"
+  start program = "/etc/init.d/newrelic-sysmond zap start"
   stop program = "/etc/init.d/newrelic-sysmond stop"
   if mem > 255.0 MB for 2 cycles then restart
   if cpu > 100% for 2 cycles then restart
