@@ -1,0 +1,10 @@
+check process phoenix
+  with pidfile /var/run/engineyard/phoenix.pid
+  group phoenix
+  start program = "/bin/bash -c '/etc/init.d/php-fpm start'"
+    as uid <%= @user %> and gid <%= @user %>
+  stop program = "/bin/bash -c '/etc/init.d/php-fpm stop'"
+    as uid <%= @user %> and gid <%= @user %>
+<% @apps.each do |app| %>
+if failed unixsocket /var/run/engineyard/phoenix_<%= app %>.sock then restart
+<% end %>
