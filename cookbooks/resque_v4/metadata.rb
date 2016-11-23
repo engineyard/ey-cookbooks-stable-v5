@@ -1,0 +1,5 @@
+name 'resque'
+description 'Configuration & deployment of resque on Engine Yard'
+maintainer 'Engine Yard'
+maintainer_email 'support@engineyard.com'
+version '1.0'
