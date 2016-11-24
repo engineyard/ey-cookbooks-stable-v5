@@ -154,7 +154,7 @@ if [ -d $RAILS_ROOT ]; then
        # Find children
        WORKER_PID=$(ps axo pid,ppid,command|awk '$2=='$PID' {print $1}')
 
-       kill -15 $PID $PPID; # kill worker and any child that it may have at this very moment
+       kill -15 $PID $WORKER_PID; # kill worker and any child that it may have at this very moment
        logger -t "monit-dj:$WORKER[$$]" "Stopping DJ Worker Process $PID $PPID"
 
        SLEEP_COUNT=0
