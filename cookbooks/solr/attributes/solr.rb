@@ -7,6 +7,7 @@ default['solr'].tap do |solr|
   # Run Solr on a named util instance
   # This is the default
   solr['is_solr_instance'] = (node['dna']['instance_role'] == 'util' && node['dna']['name'] == 'solr')
+  solr['solr_instance_name'] = 'solr'
 
   # Run Solr on a solo instance
   # Not recommended for production environments
