@@ -19,8 +19,9 @@ if ['app_master', 'app', 'solo', 'util'].include?(node['dna']['instance_role'])
       mode 0655
       backup 0
       variables({
-        :environment => node['dna']['environment']['framework_env'],
-        :hostname => solr_instance['hostname']
+        environment: node['dna']['environment']['framework_env'],
+        hostname: solr_instance['hostname'],
+        port: node['solr']['port']
       })
     end
   end

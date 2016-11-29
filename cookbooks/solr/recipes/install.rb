@@ -11,7 +11,7 @@ solr_file = "solr-#{solr_version}.tgz"
 solr_url = "https://archive.apache.org/dist/lucene/solr/#{solr_version}/#{solr_file}"
 core_name = node['solr']['core_name']
 
-username = node['dna']['users'].first['username']
+username = node['dna']['engineyard']['environment']['ssh_username']
 
 # Install Solr
 if node['solr']['is_solr_instance']
@@ -55,7 +55,8 @@ if node['solr']['is_solr_instance']
     group username
     mode 0755
     variables({
-      :rails_env => node['dna']['environment']['framework_env']
+      rails_env: node['dna']['environment']['framework_env'],
+      port: node['solr']['port']
     })
   end
 
@@ -64,6 +65,11 @@ if node['solr']['is_solr_instance']
     owner username
     group username
     mode 0644
+    variables({
+      memory_limit: node['solr']['memory_limit'],
+      memory_limit_cycles: node['solr']['memory_limit_cycles'],
+      port: node['solr']['port']
+    })
   end
 
   remote_file "/data/#{solr_file}" do

@@ -23,10 +23,10 @@ The Solr cookbook does the following:
 * Create `/engineyard/bin/solr` for starting and stopping solr
 * Create a monitrc file for solr
 * Create `/data/app_name/shared/config/solr.yml` populated with the IP address of the solr instance
-* (If enabled) create `/data/app_name/shared/config/sunspot.yml` populated with the IP address of the solr instance
+* Create `/data/app_name/shared/config/sunspot.yml` populated with the IP address of the solr instance
 * Create a solr core named `default`
 
-The solr server runs on port 8983.
+The solr server listens on port 8983. The port can be modified by setting `node['solr']['port']` in the attributes file.
 
 To access the Solr logs: `/var/log/engineyard/solr`
 
