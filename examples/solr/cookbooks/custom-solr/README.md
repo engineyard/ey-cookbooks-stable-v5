@@ -1,9 +1,40 @@
-## DESCRIPTION
+## Custom Solr
 
 This is a wrapper cookbook for Solr. This is designed to help you customize how Solr is setup on your environment without having to modify the Solr recipe. If you find you're unable to modify the way Solr runs just by modifying this recipe, please open a Github issue.
 
+<a name="#installation"></a>
+## Installation
+
+For simplicity, we recommend that you create the cookbooks directory at the root of your application. If you prefer to keep the infrastructure code separate from application code, you can create a new repository.
+
+Our main recipes have the solr recipe but it is not included by default. To use the solr recipe, you should copy this recipe, `custom-solr`. You should not copy the actual solr recipe. That is managed by Engine Yard.
+
+1. Edit `cookbooks/ey-custom/recipes/after-main.rb` and add
+
+  ```
+  include_recipe 'custom-solr'
+  ```
+   
+2. Edit `cookbooks/ey-custom/metadata.rb` and add
+
+  ```
+  depends 'custom-solr'
+  ```
+
+3. Copy `examples/solr/cookbooks/custom-solr` to `cookbooks/`
+
+  ```
+  cd ~ # Change this to your preferred directory. Anywhere but inside the application
+
+  git clone https://github.com/engineyard/ey-cookbooks-stable-v5
+  cd ey-cookbooks-stable-v5
+  cp examples/delayed_job4/cookbooks/custom-delayed_job4 /path/to/app/cookbooks/
+  ```
+
+If you do not have `cookbooks/ey-custom` on your app repository, you can copy `examples/solr/cookbooks/ey-custom` to `/path/to/app/cookbooks`.
+
 <a name="usage"></a>
-## USAGE
+## Usage
 
 Enable the recipe:
 
