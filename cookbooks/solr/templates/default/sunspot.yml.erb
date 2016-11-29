@@ -1,6 +1,7 @@
 <%= @environment %>:
   solr:
     hostname: <%= @hostname %>
-    port: 8983
+    port: <%= @port %>
     log_level: WARNING
-    path: /solr/<%= @core_name %>/
+    path: /solr/default
+    solr_home: /data/solr
