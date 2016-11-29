@@ -41,6 +41,49 @@ To stop the solr server use the following on the SSH console: `sudo monit stop s
 
 To start the solr server use the following on the SSH console: `sudo monit start solr`
 
+### Additional Notes For Sunspot Users
+
+The Solr cookbook has been updated to support the latest version of Sunspot, 2.2.5.
+
+Running `bundle exec rake sunspot:reindex` on an empty index fails. After installing, seed the index first by updating some data from the Rails console. 
+
+<a name="customizations"></a>
+## Customizations
+
+All customizations go to `cookbooks/custom-solr/attributes/default.rb`.
+
+### Adjust the monit memory limit
+
+The custom chef recipe sets up monit to monitor Solr. If the Solr process grows beyond a certain size, monit will restart Solr.
+
+Modify this line in the attributes file to specify the memory limit, in megabytes.
+
+```
+  solr['memory_limit'] = 1024
+```
+
+You can also specify how many cycles monit will wait before restarting Solr. The default monit cycle is 30 seconds.
+
+```
+  solr['memory_limit_cycles'] = 4
+```
+
+### Specify the Solr instance name
+
+Change this if you're using a different name for the Solr instance.
+
+```
+  solr['solr_instance_name'] = 'solr'
+```
+
+### Specify the Solr port
+
+Change this if you want to have Solr listen on a different port. The default port is 8983.
+
+```
+  solr['port'] = '8983'
+```
+
 <a name="ramblings"></a>
 ## Ramblings
 
@@ -61,11 +104,6 @@ The Solr cookbook does not support multiple instances of Solr, or configuration 
 
 The Solr cookbook is designed for Java 8 and Solr 6 on the V5 stack. It _might_ be possible to run Solr 5, but that version hasn't been tested.
 
-### Additional Notes For Sunspot Users
-
-The Solr cookbook has been updated to support the latest version of Sunspot, 2.2.5.
-
-Running `bundle exec rake sunspot:reindex` on an empty index fails. After installing, seed the index first by updating some data from the Rails console. 
 
 ## Credits
 
