@@ -119,6 +119,15 @@ cookbook_file '/etc/env.d/26history' do
   group 'root'
 end
 
+  if node.engineyard.environment['framework_env'] == "production"
+    elxir_env = "prod"
+  elsif node.engineyard.environment['framework_env'] == "development"
+    elxir_env = "dev"
+  else
+    elxir_env = node.engineyard.environment['framework_env']
+  end
+
+
 template '/etc/env.d/05framework_env' do
   owner 'root'
   group 'root'
@@ -128,6 +137,7 @@ template '/etc/env.d/05framework_env' do
   variables(
     #:framework_env => node.dna['environment']['framework_env']
     :framework_env => node.engineyard.environment['framework_env']
+    :elixir_env => elixir_env 
   )
 end
 
