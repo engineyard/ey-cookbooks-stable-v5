@@ -1,3 +1,5 @@
+app_name = node.dna[:applications].keys.first
+
 default['papertrail'].tap do |papertrail|
   papertrail['syslog_ng_version']      = '3.7.3',
   papertrail['remote_syslog_version']  = 'v0.16'

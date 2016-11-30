@@ -11,8 +11,6 @@
 # * remote_syslog2 is used for other (application, database, etc.) logs
 # * TLS is used instead of UDP
 
-app_name = node.dna[:applications].keys.first
-env = node.dna[:environment][:framework_env]
 PAPERTRAIL_CONFIG = node['papertrail']
 
 remote_syslog_src_filename = PAPERTRAIL_CONFIG[:remote_syslog_filename]
