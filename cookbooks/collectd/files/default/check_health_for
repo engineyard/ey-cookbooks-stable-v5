@@ -28,7 +28,7 @@ function alert() {
     # no status file for the ACTION exists
     # SEVERITY is not OKAY and ALERT_COUNT is greater than 1
     # SEVERITY is OKAY but an WARN/FAIL alert fired on the last check (ALERT_COUNT will now be > 2)
-    if [[ (! -e "${STATUS_FILE}") || ("${SEVERITY}" != "OKAY" && "${ALERT_COUNT}" > 1) || ("${SEVERITY}" = "OKAY" && "${ALERT_COUNT}" > 2) ]]
+    if [[ (! -e "${STATUS_FILE}") || ("${SEVERITY}" != "OKAY" && "${ALERT_COUNT}" -gt "1") || ("${SEVERITY}" = "OKAY" && "${ALERT_COUNT}" -gt "2") ]]
     then
         echo "PUTNOTIF Time=${timestamp} TYPE=${CHECK_TYPE}-${ACTION} severity=${SEVERITY} message=\"raw_message: $(date +'%T') ${MESSAGE}\""
     fi
