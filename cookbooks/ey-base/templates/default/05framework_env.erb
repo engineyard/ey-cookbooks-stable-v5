@@ -3,4 +3,10 @@ MERB_ENV=<%= @framework_env %>
 RACK_ENV=<%= @framework_env %>
 PHP_ENV=<%= @framework_env %>
 NODE_ENV=<%= @framework_env %>
-MIX_ENV=<%= @elixir_env %>
+<% if node.engineyard.environment['framework_env'] == "production" %>
+MIX_ENV=prod
+<% elsif node.engineyard.environment['framework_env'] == "development" %>
+MIX_ENV=dev
+<% else %>
+MIX_ENV=<%= @framework_env %>
+<% end %>
