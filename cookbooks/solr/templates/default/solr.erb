@@ -21,18 +21,18 @@ cd /data/solr
   case "$1" in
     start)
       echo "Starting the Solr server."
-      if [ -f /var/run/solr/solr-8983.pid ]; then
-PID=`cat /var/run/solr/solr-8983.pid`
+      if [ -f /var/run/solr/solr-<%= @port %>.pid ]; then
+PID=`cat /var/run/solr/solr-<%= @port %>.pid`
         if [ ! -d /proc/$PID ]; then
           rm -f /var/run/solr/solr.pid
         fi
       fi
-      SOLR_PID_DIR=/var/run/solr /data/solr/bin/solr start
+      SOLR_PID_DIR=/var/run/solr /data/solr/bin/solr start -p <%= @port %>
       ;;
     stop)
       echo "Stopping the solr server."
-      if [ -f /var/run/solr/solr-8983.pid ]; then
-        kill -9 `cat /var/run/solr/solr-8983.pid` 2>/dev/null; true
+      if [ -f /var/run/solr/solr-<%= @port %>.pid ]; then
+      kill -9 `cat /var/run/solr/solr-<%= @port %>.pid` 2>/dev/null; true
       fi
       ;;
     *)
