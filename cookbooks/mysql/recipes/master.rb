@@ -39,14 +39,14 @@ execute "do-init-mysql" do
     mysql_install_db --basedir=/usr/
   }
   not_if { File.directory?("#{node['mysql']['datadir']}/mysql")  }
-  only_if { node['mysql']['short_version'] == "5.6" }
+  only_if { ['5.5', '5.6'].include?(node['mysql']['short_version']) }
 end
 
 execute "do-init-mysql" do
   command %Q{
     mysqld --initialize-insecure --user=mysql
   }
-  not_if { node['mysql']['short_version'] == "5.6" or File.directory?("#{node['mysql']['datadir']}/mysql") }
+  not_if { ['5.5', '5.6'].include?(node['mysql']['short_version']) or File.directory?("#{node['mysql']['datadir']}/mysql") }
 end
 
 include_recipe "mysql::startup"
