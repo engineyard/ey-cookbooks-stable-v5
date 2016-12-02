@@ -31,7 +31,8 @@ That is managed by Engine Yard.
         cd ey-cookbooks-stable-v5
         cp examples/papertrail/cookbooks/custom-papertrail /path/to/app/cookbooks/
 
-4. Specify the papertrail port and endpoint
+4. Specify the papertrail port and endpoint in
+   `cookbooks/custom-papertrail/attributes/default.rb`:
 
         default['papertrail']['destination_host'] = 'host1.papertrailapp.com'
         default['papertrail']['port'] = 1235
