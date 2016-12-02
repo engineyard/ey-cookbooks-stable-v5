@@ -13,26 +13,26 @@ root of your application. If you prefer to keep the infrastructure code separate
 from application code, you can create a new repository.
 
 Our main recipes have the `sidekiq` Cookbook but it is not included by default.
-To use the `delayed_job4` cookbook, you should copy this cookbook
-`custom_sidekiq`. You should not copy the actual `delayed_job4` recipe as
-That is managed by Engine Yard.
+To use the `sidekiq` cookbook, you should copy this cookbook
+`custom-sidekiq`. You should not copy the actual `sidekiq` recipe as
+this is managed by Engine Yard.
 
 1. Edit `cookbooks/ey-custom/recipes/after-main.rb` and add
 
-    include_recipe 'custom-delayed_job4'
+    include_recipe 'custom-sidekiq'
 
 2. Edit `cookbooks/ey-custom/metadata.rb` and add
 
-    depends 'custom-delayed_job4'
+    depends 'custom-sidekiq'
 
-3. Copy `examples/sidekiq/cookbooks/custom_sidekiq` to `cookbooks/`
+3. Copy `examples/sidekiq/cookbooks/custom-sidekiq` to `cookbooks/`
 
     cd ~ # Change this to your preferred directory. Anywhere but inside the
          # application
 
     git clone https://github.com/engineyard/ey-cookbooks-stable-v5
     cd ey-cookbooks-stable-v5
-    cp examples/delayed_job4/cookbooks/custom_sidekiq /path/to/app/cookbooks/
+    cp examples/sidekiq/cookbooks/custom-sidekiq /path/to/app/cookbooks/
 
 If you do not have `cookbooks/ey-custom` on your app repository, you can copy
 `examples/sidekiq/cookbooks/ey-custom` to `/path/to/app/cookbooks` as well.
@@ -43,7 +43,7 @@ All customizations go to `cookbooks/custom_sidekiq/attributes/default.rb`.
 
 ### Choose the instances that run the recipe
 
-By default, the delayed_job4 recipe runs on all instances. You can change this
+By default, the sidekiq recipe runs on all instances. You can change this
 using `node['dna']['instance_role']` and `node['dna']['name'] `. 
 
     # this is the default
