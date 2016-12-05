@@ -141,8 +141,9 @@ innodb_buffer_pool_size		= <%= @innodb_buff %>
 innodb_additional_mem_pool_size = 16M
 <% end %>
 <% if @mysql_version == @mysql_5_5 %>
-innodb_adaptive_flushing = 1
-innodb_adaptive_flushing_method = 1
+# -- Stable-v5 uses MySQL Community not Percona
+#innodb_adaptive_flushing = 1
+#innodb_adaptive_flushing_method = 1
 <% end %>
 
 #
