@@ -31,7 +31,14 @@ That is managed by Engine Yard.
         cd ey-cookbooks-stable-v5
         cp examples/papertrail/cookbooks/custom-papertrail /path/to/app/cookbooks/
 
-4. Specify the papertrail port and endpoint in
+4. Download the ey-core gem on your local machine and upload the recipes
+
+  ```
+  gem install ey-core
+  ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
+  ```
+
+5. Specify the papertrail port and endpoint in
    `cookbooks/custom-papertrail/attributes/default.rb`:
 
         default['papertrail']['destination_host'] = 'host1.papertrailapp.com'

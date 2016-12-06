@@ -31,7 +31,12 @@ Our main recipes have the solr recipe but it is not included by default. To use 
   cp examples/solr/cookbooks/custom-solr /path/to/app/cookbooks/
   ```
 
-If you do not have `cookbooks/ey-custom` on your app repository, you can copy `examples/solr/cookbooks/ey-custom` to `/path/to/app/cookbooks`.
+4. Download the ey-core gem on your local machine and upload the recipes
+
+  ```
+  gem install ey-core
+  ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
+  ```
 
 <a name="usage"></a>
 ## Usage
