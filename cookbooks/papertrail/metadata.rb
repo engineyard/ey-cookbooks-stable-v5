@@ -1,6 +1,6 @@
 name 'papertrail'
 
-version '1.0.0'
+version '5.0.0'
 
 maintainer 'Engine Yard, Inc.'
 maintainer_email 'support@engineyard.com'
