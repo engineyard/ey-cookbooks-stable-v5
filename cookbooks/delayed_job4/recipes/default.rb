@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: delayed_job
+# Cookbook Name:: delayed_job4
 # Recipe:: default
 #
 
@@ -32,11 +32,11 @@ if node['delayed_job4']['is_dj_instance']
         })
       end
     end
-      
+
     execute "monit reload" do
        action :run
        epic_fail true
     end
-      
+
   end
 end

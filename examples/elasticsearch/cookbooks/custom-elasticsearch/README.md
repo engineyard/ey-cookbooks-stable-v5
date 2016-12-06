@@ -2,7 +2,7 @@
 
 This recipe installs Elasticsearch 2.4.0 and requires Java 7 or later.
 
-  
+
 ## Installation
 
 For simplicity, we recommend that you create the cookbooks directory at the root of your application. If you prefer to keep the infrastructure code separate from application code, you can create a new repository.
@@ -30,12 +30,15 @@ Our main recipes have the `elasticsearch` recipe but it is not included by defau
       cd ey-cookbooks-stable-v5
       cp examples/elasticsearch/cookbooks/custom-elasticsearch /path/to/app/cookbooks/
       ```
- 
-  If you do not have `cookbooks/ey-custom` on your app repository, you can copy `examples/elasticsearch/cookbooks/ey-custom` to `/path/to/app/cookbooks`.
 
-4. Run `ey recipes --upload --environment=<environment_name>` and click Apply on the dashboard
-  
-5. After running chef, ssh to an elasticsearch instance to verify that it's running.   
+4. Download the ey-core gem on your local machine and upload the recipes
+
+  ```
+  gem install ey-core
+  ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
+  ```
+
+5. After running chef, ssh to an elasticsearch instance to verify that it's running.
 
 Run:
 

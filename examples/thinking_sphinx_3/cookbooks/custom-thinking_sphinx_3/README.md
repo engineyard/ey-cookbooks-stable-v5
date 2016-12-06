@@ -24,7 +24,7 @@ Our main recipes have the `thinking_sphinx_3` recipe but it does not run by defa
 
     If you do not have `cookbooks/ey-custom` on your app repository, you can copy `examples/thinking_sphinx_3/cookbooks/ey-custom` from the next step to `/path/to/app/cookbooks`.
 
-3. Copy `examples/delayed_job4/cookbooks/custom-thinking_sphinx_3` to `cookbooks/`
+3. Copy `examples/thinking_sphinx_3/cookbooks/custom-thinking_sphinx_3` to `cookbooks/`
 
       ```
       cd ~ # Change this to your preferred directory. Anywhere but inside the application
