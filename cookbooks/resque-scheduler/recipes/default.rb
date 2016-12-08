@@ -2,7 +2,7 @@
 # Cookbook Name:: resque-scheduler
 # Recipe:: default
 #
-if %w(util).include?(node['dna']['instance_role'])
+if node['resque_scheduler']['is_resque_scheduler_instance']
   execute 'install resque gem' do
     command 'gem install resque redis redis-namespace yajl-ruby -r'
     not_if { 'gem list | grep resque' }
