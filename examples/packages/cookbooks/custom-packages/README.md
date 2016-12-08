@@ -2,7 +2,6 @@
 
 This is a wrapper cookbook for the `packages` recipe. This is designed to help you customize what packages will be installed on your environment without having to modify the `packages` recipe.
 
-<a name="#installation"></a>
 ## Installation
 
 For simplicity, we recommend that you create the cookbooks directory at the root of your application. If you prefer to keep the infrastructure code separate from application code, you can create a new repository.
@@ -14,14 +13,14 @@ Our main recipes have the `packages` recipe but it is not included by default. T
   ```
   include_recipe 'custom-packages'
   ```
-   
+
 2. Edit `cookbooks/ey-custom/metadata.rb` and add
 
   ```
   depends 'custom-packages'
   ```
 
-3. Copy `examples/solr/cookbooks/custom-packages` to `cookbooks/`
+3. Copy `examples/packages/cookbooks/custom-packages` to `cookbooks/`
 
   ```
   cd ~ # Change this to your preferred directory. Anywhere but inside the application
@@ -38,10 +37,9 @@ Our main recipes have the `packages` recipe but it is not included by default. T
   ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
   ```
 
-<a name="customizations"></a>
 ## Customizations
 
-All customizations go to `cookbooks/custom-solr/attributes/default.rb`.
+All customizations go to `cookbooks/custom-packages/attributes/default.rb`.
 
 ### Install a package
 
