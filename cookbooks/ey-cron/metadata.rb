@@ -1,4 +1,4 @@
-name 'cron'
+name 'ey-cron'
 maintainer 'Engine Yard'
 maintainer_email 'support@engineyard.com'
 version '1.0'

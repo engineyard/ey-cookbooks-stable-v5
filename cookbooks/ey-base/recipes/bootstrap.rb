@@ -155,7 +155,7 @@ execute "update-ca-certificates --fresh" do
 end
 
 # all roles get these recipes
-include_recipe 'cron'
+include_recipe 'ey-cron'
 include_recipe "ey-env"
 include_recipe "ey-bin"
 include_recipe "ey-backup::setup"
@@ -182,4 +182,4 @@ if node.engineyard.instance.component?(:exim)
   end
 end
 
-include_recipe 'cron'
+include_recipe 'ey-cron'

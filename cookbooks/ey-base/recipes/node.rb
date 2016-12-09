@@ -1,2 +1,2 @@
-include_recipe "cron"
+include_recipe "ey-cron"
 include_recipe "collectd"

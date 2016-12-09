@@ -8,6 +8,6 @@ issues_url 'https://support.engineyard.com'
 depends 'ey-lib'
 depends 'mysql'
 depends 'postgresql'
-depends 'cron'
+depends 'ey-cron'
 depends 'db_admin_tools'
 
