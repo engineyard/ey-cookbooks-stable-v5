@@ -6,6 +6,8 @@
 if ['util'].include?(node['dna']['instance_role'])
   if node['dna']['name'] == node['redis']['utility_name']
 
+    include_recipe "sysctl::tune_large_db"
+
     sysctl "Enable Overcommit Memory" do
       variables 'vm.overcommit_memory' => 1
     end
