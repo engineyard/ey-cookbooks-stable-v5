@@ -73,7 +73,7 @@ directory "/var/spool/cron" do
   group "crontab"
 end
 
-if ['solo', 'app_master'].include?(node['dna']['instance_role'])
+if crontab_instance?(node)
   (node['dna']['crons']||[]).each do |c|
     cron c['name'] do
       minute   c['minute']

@@ -35,6 +35,18 @@ class Chef
         (roles.map(&:to_sym) & desired_roles.map(&:to_sym)).any?
       end
 
+      def app_master?
+        role == 'app_master'
+      end
+
+      def solo?
+        role == 'solo'
+      end
+
+      def util?
+        role == 'util'
+      end
+
       # Support a more natural way of accessing hash members and components
       def respond_to?(method)
         # @hash.key? method is broken so check keys list

@@ -60,8 +60,9 @@ class Chef
             (base,env_name) = key.match(/^(.*)\[([^\]]*)\]$/)[1..2]
             @component_metadata[base] = value if env_name == self['name']
           end
+
         end
-        key.nil? ? @component_metadata : @component_metadata.fetch(key,default)
+        key.nil? ? @component_metadata : @component_metadata.fetch(key.to_s,default)
       end
 
       def custom_ruby
