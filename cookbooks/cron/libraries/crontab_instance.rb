@@ -9,20 +9,6 @@ class Chef
       instance.app_master? || instance.solo?
     end
 
-    #def environment_metadata(node)
-      #node.
-        #engineyard.
-        #environment.
-        #component('environment_metadata') || {}
-    #end
-
-    ## Extract the crontab instance name from the node
-    ## @return [String] an empty string when not set, otherwise the instance name
-    #def crontab_instance_name(node)
-      ##environment_metadata(node)['crontab_instance_name'].to_s
-      #node.engineyard.environment.metadata(:crontab_instance_name, '')
-    #end
-
     def util_instance?(node)
       node.engineyard.instance.util?
     end
