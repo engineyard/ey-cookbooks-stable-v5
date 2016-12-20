@@ -5,6 +5,11 @@ addition of cron jobs  for the application user (`deploy`)on the utility
 instance name specified for each cron job. All cron jobs are specified in the
 attributes file of the cron cookbook.
 
+## Limitations
+This cookbook will not install cron jobs for the root user, it must be modified
+if this is required.  Cron jobs are installed for the default application user,
+typically called deploy.
+
 ## Installation
 
 For simplicity, we recommend that you create the cookbooks directory at the root
