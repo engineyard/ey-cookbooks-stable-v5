@@ -15,21 +15,25 @@ Extensions
 
 Postgres core extensions can be specified for a database by either:
 
-1. Creating /db/postgresql/extensions.json with the following format:
+- Creating /db/postgresql/extensions.json with the following format (double quotes `"` and hard brackets `[` are required):
 
-{
-  'dbname': ['ext_name', ...],
-  ....
-}
+    ```
+    {
+      "dbname": ["ext_name", ...],
+      ....
+    }
+    ```
+    
+- Using the pg_extension custom resource directly in a cookbook:
 
-2. Using the pg_extension custom resource directly in a cookbook:
-
-pg_extension 'resource block name' do
-  ext_name [String, Array] # required, either a single extension name or multiple in an array
-  db_name [String, Array] # required, either a single db name or multiple in an array
-  schema_name String # optional, name of schema to install extension(s) to, must be present in all db specified in db_name
-  version String # optional, version of extension to install, only applicable if single ext_name is given
-  old_version # optional, for replacing old style non-extension contrib package
-end
-
+    ```
+    pg_extension 'resource block name' do
+      ext_name [String, Array] # required, either a single extension name or multiple in an array
+      db_name [String, Array] # required, either a single db name or multiple in an array
+      schema_name String # optional, name of schema to install extension(s) to, must be present in all db specified in db_name
+      version String # optional, version of extension to install, only applicable if single ext_name is given
+      old_version # optional, for replacing old style non-extension contrib package
+    end
+    ```
+    
 See PostgreSQL CREATE EXTENSION docs for full explanation of schema_name, version, and old_version
