@@ -28,7 +28,8 @@ if node['delayed_job4']['is_dj_instance']
           :app_name => app_name,
           :user => node[:owner_name],
           :worker_name => "#{app_name}_delayed_job#{count+1}",
-          :framework_env => node[:dna][:environment][:framework_env]
+          :framework_env => node[:dna][:environment][:framework_env],
+          :worker_memory => node['delayed_job4']['worker_memory']
         })
       end
     end

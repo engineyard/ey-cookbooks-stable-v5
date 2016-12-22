@@ -23,5 +23,6 @@ worker_count = if node[:dna][:instance_role] == 'solo'
 default['delayed_job4'] = {
   'is_dj_instance' => (node['dna']['instance_role'] == 'solo') || (node['dna']['instance_role'] == 'util' && node['dna']['name'] == 'delayed_job'),
   'applications' => node[:dna][:applications].map{|app_name, data| app_name},
-  'worker_count' => worker_count
+  'worker_count' => worker_count,
+  'worker_memory' => 300
 }
