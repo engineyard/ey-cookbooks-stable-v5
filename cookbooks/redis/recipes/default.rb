@@ -3,8 +3,10 @@
 # Recipe:: default
 #
 
+redis_utility_name = node['redis']['utility_name'] || 'redis'
+
 if ['util'].include?(node['dna']['instance_role'])
-  if node['dna']['name'] == node['redis']['utility_name']
+  if node['dna']['name'] == redis_utility_name
 
     include_recipe "sysctl::tune_large_db"
 
@@ -82,7 +84,7 @@ end
 
 if ['solo', 'app', 'app_master', 'util'].include?(node['dna']['instance_role'])
   instances = node['dna']['engineyard']['environment']['instances']
-  redis_instance = (node['dna']['instance_role'][/solo/] && instances.length == 1) ? instances[0] : instances.find{|i| i['name'] == 'redis'}
+  redis_instance = (node['dna']['instance_role'][/solo/] && instances.length == 1) ? instances[0] : instances.find{|i| i['name'] == redis_utility_name}
 
   if redis_instance
     ip_address = `ping -c 1 #{redis_instance['private_hostname']} | awk 'NR==1{gsub(/\\(|\\)/,"",$3); print $3}'`.chomp
