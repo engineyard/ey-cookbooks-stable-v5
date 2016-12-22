@@ -1,5 +1,5 @@
 include_recipe "deploy-keys"
-include_recipe "cron"
+include_recipe "ey-cron"
 
 #TODO: Remove this chunk to the db_master recipe
 is_solo = ['solo'].include?(node.dna['instance_role'])
