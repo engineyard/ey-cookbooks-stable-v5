@@ -1,0 +1,6 @@
+name 'timezone'
+maintainer 'Engine Yard'
+maintainer_email 'support@engineyard.com'
+version '5.0.0'
+source_url 'https://github.com/engineyard/ey-cookbooks-stable-v5'
+issues_url 'https://github.com/engineyard/ey-cookbooks-stable-v5/issues'
