@@ -9,3 +9,6 @@
 
 # run the recipe on a solo instance
 # default['sidekiq']['is_sidekiq_instance'] = (node['dna']['instance_role'] == 'solo')
+
+# Default memory limit
+# default['sidekiq']['worker_memory'] = 400
