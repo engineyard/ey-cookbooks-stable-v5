@@ -15,3 +15,5 @@ include_recipe 'timezones'
 #nuke?: include_recipe 'atd'
 include_recipe 'logrotate'
 include_recipe 'lockrun'
+
+include_recipe 'ey-hosts'
