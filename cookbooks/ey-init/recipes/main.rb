@@ -23,4 +23,4 @@ include_recipe "ec2" if ['solo', 'app', 'util', 'app_master','node'].include?(no
 #node.engineyard.instance.roles.each { |role| include_recipe "#{role}::build" }
 #include_recipe 'ey-base::post_bootstrap' # common things that we want to install setting up the instance
 
-#include_recipe 'ey-custom::after-main'
+include_recipe 'ey-custom::after-main'
