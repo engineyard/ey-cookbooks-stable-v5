@@ -12,10 +12,10 @@ template "/etc/ey_hosts" do
   variables({
     :utility_nodes => utility_nodes,
     :db_replicas => db_replicas,
-    :db_replicas_ordered => node.db_slaves,
-    :db_master => node.db_master[0],
-    :app_master => node.app_master[0],
-    :app_slaves => node.app_slaves
+    :db_replicas_ordered => node.db_slaves || '',
+    :db_master => node.db_master[0] || '',
+    :app_master => node.app_master[0] || '',
+    :app_slaves => node.app_slaves || ''
   })
 end
 
