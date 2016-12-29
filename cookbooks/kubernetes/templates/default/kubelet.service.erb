@@ -1,0 +1,13 @@
+[Unit]
+Description=kubelet
+Documentation=man page
+
+[Service]
+EnvironmentFile=/root/.aws/env
+EnvironmentFile=-/etc/default/%p
+ExecStart=/usr/bin/kubelet $DAEMON_ARGS
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,13 @@
+[Unit]
+Description=kube-controller-manager
+Documentation=man page
+
+[Service]
+EnvironmentFile=/root/.aws/env
+EnvironmentFile=/etc/default/%p
+ExecStart=/usr/bin/kube-controller-manager $DAEMON_ARGS
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=kube-scheduler
+Documentation=man page
+
+[Service]
+EnvironmentFile=-/etc/default/%p
+ExecStart=/usr/bin/kube-scheduler $DAEMON_ARGS
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

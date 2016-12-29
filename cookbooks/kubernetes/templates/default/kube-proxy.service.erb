@@ -1,0 +1,12 @@
+[Unit]
+Description=kube-proxy
+Documentation=man page
+
+[Service]
+EnvironmentFile=-/etc/default/%p
+ExecStart=/usr/bin/kube-proxy $DAEMON_ARGS
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

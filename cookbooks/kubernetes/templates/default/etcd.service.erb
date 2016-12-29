@@ -1,0 +1,21 @@
+[Unit]
+Description=etcd - highly-available key value store
+Documentation=https://github.com/coreos/etcd
+Documentation=man:etcd
+After=network.target
+Wants=network-online.target
+
+[Service]
+Environment=DAEMON_ARGS=
+Environment=ETCD_NAME=etcd0
+Environment=ETCD_DATA_DIR=/data/etcd/etcd0.etcd
+EnvironmentFile=-/etc/default/%p
+Type=notify
+PermissionsStartOnly=true
+ExecStart=/usr/local/bin/etcd $DAEMON_ARGS
+Restart=on-abnormal
+#RestartSec=10s
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

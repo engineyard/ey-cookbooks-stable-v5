@@ -1,0 +1,8 @@
+#!/sbin/openrc-run
+
+command="/usr/bin/kube-apiserver"
+pidfile="/run/${RC_SVCNAME}.pid"
+command_args=" ${DAEMON_ARGS}"
+LOGFILE="${LOGFILE:-/var/log/${RC_SVCNAME}.log}"
+start_stop_daemon_args="--background \
+    --stderr \"${LOGFILE}\" --stdout \"${LOGFILE}\" --make-pidfile --pidfile ${pidfile}"

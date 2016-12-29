@@ -1,0 +1,1 @@
+DAEMON_ARGS="$DAEMON_ARGS --master=127.0.0.1:8080 --v=2 --service-account-private-key-file=/data/kubernetes/tls/kubernetes-key.pem --cluster-name=<%= @kubernetes_cluster_tag %> --cluster-cidr=10.244.0.0/16 --cloud-provider=aws --allocate-node-cidrs=true"

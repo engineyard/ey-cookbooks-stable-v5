@@ -1,0 +1,4 @@
+check process docker
+  with pidfile <%= @pidfile %>
+  start program = "/etc/init.d/docker zap start"
+  stop program = "/etc/init.d/docker stop"

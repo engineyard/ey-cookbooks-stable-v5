@@ -1,0 +1,5 @@
+#Master api server http (--insecure-port) port=8080
+#Master api server https (--secure-port) port=6443
+#DAEMON_ARGS="$DAEMON_ARGS --master=http://192.168.200.2:8080 --v=2"
+#DAEMON_ARGS="$DAEMON_ARGS --master=http://172.31.7.187:8080 --v=2"
+DAEMON_ARGS="--master=http://<%= @kubernetes_master_hostname %>:8080 --v=2"

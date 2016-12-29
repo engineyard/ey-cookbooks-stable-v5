@@ -1,4 +1,4 @@
-name 'ey-custom'
+name "ey-custom"
 
-# Add your custom depends directives to this file
-#e.g. depends 'redis'
+#depends "docker_custom"
+depends "kubernetes"

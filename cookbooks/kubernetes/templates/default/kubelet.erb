@@ -1,0 +1,7 @@
+# Read only
+DAEMON_ARGS="--api_servers=<%= @kubernetes_master_hostname %>:8080 --address=0.0.0.0 --port=10250 --healthz-bind-address=0.0.0.0 --allow_privileged=False --config=/etc/kubernetes/manifests --hostname-override=<%= @hostname %> --cloud-provider=aws --network-plugin=kubenet --reconcile-cidr -v=2"
+#DAEMON_ARGS="$DAEMON_ARGS --api_servers=192.168.200.2:8080 --address=0.0.0.0 --port=10250 --healthz-bind-address=0.0.0.0 --allow_privileged=False --config=/etc/kubernetes/manifests --hostname-override=192.168.200.3"
+# Read/Write
+#DAEMON_ARGS="$DAEMON_ARGS --api_servers=192.168.200.2:8080 --address=0.0.0.0 --port=10250 --healthz-bind-address=0.0.0.0 --allow_privileged=False --config=/etc/kubernetes/manifests"
+# Auth setup
+#DAEMON_ARGS="$DAEMON_ARGS --api_servers=http://192.168.200.2:6443 --auth_path=/var/lib/kubelet/kubernetes_auth  --address=0.0.0.0 --config=/etc/kubernetes/manifests --allow_privileged=False --v=2 --cluster_dns=10.0.0.10 --cluster_domain=kubernetes.local"
