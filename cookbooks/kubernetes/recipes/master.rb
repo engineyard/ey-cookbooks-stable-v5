@@ -8,7 +8,7 @@ include_recipe "kubernetes::pki"
   #  command "cp /tmp/kubernetes-1.3.0/kubernetes/server/bin/#{k8s_file} /usr/bin/#{k8s_file}"
   #end
   remote_file "/usr/bin/#{k8s_file}" do
-    source "https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/#{k8s_file}"
+    source "https://storage.googleapis.com/kubernetes-release/release/v#{node['kubernetes']['version']}/bin/linux/amd64/#{k8s_file}"
     mode '0755'
   end
 end

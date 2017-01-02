@@ -10,6 +10,7 @@ if environment_metadata = node['dna']['engineyard']['environment']['components']
 end
 
 default['kubernetes'] = {
+  'version' => '1.5.1',
   'aws_access_key_id' => environment_metadata['kubernetes_aws_access_key_id'],
   'aws_secret_access_key' => environment_metadata['kubernetes_aws_secret_access_key'],
   'master_hostname' => kubernetes_master_instance['private_hostname'],
