@@ -3,7 +3,8 @@ Description=kube-apiserver
 Documentation=man page
 
 [Service]
-EnvironmentFile=-/etc/default/%p
+EnvironmentFile=/root/.aws/env
+EnvironmentFile=/etc/default/%p
 ExecStart=/usr/bin/kube-apiserver $DAEMON_ARGS
 Restart=always
 RestartSec=10s
