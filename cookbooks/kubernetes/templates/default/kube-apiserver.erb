@@ -1,13 +1,17 @@
 # TODO: generate and distribute tokens for other cloud providers.
-DAEMON_ARGS="--insecure_bind_address=0.0.0.0 \
---etcd_servers=http://127.0.0.1:2379 \
---service-cluster-ip-range=10.254.0.0/16 \
+DAEMON_ARGS="--insecure-bind-address=0.0.0.0 \
+--etcd-servers=http://127.0.0.1:2379 \
+--service-cluster-ip-range=<%= @service_cluster_ip_range %> \
 --v=2 \
 --port=8080 \
 --allow-privileged=False \
 --kubelet-port=10250 \
 --admission-control=NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota \
---service-account-key-file=/data/kubernetes/tls/kubernetes-key.pem \
+--client-ca-file=/etc/kubernetes/pki/ca.pem \
+--service-account-key-file=/etc/kubernetes/pki/kubernetes-key.pem \
+--tls-cert-file=/etc/kubernetes/pki/kubernetes.pem \
+--tls-private-key-file=/etc/kubernetes/pki/kubernetes-key.pem \
+--secure-port=443 \
 --cloud-provider=aws"
 #--admission_control=NamespaceLifecycle,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota \
 #--service_account_key_file=/srv/kubernetes/kube-serviceaccount.key \

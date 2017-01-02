@@ -1,0 +1,23 @@
+{
+  "CN": "kubernetes",
+  "hosts": [
+    "<%= @private_hostname %>",
+    "<%= @private_ip %>",
+    "<%= @public_hostname %>",
+    "<%= @public_ip %>",
+    "<%= @kubernetes_service_ip %>"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "L": "San Francisco",
+      "O": "Kubernetes",
+      "OU": "Cluster",
+      "ST": "California"
+    }
+  ]
+}

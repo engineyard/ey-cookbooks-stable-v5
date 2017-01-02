@@ -12,6 +12,20 @@ execute "install packages" do
   #"kubelet kubeadm kubectl kubernetes-cni"
 end
 
+execute "move /etc/kubernetes" do
+  command "mv /etc/kubernetes /etc/kubernetes.bak" 
+  not_if { File.symlink?("/etc/kubernetes") }
+end
+
+directory "/data/kubernetes" do
+  owner "root"
+  group "root"
+  mode 0775
+end
+
+link "/etc/kubernetes" do
+  to "/data/kubernetes"
+end
 
 if node['dna']['instance_role'] == "app_master"
   include_recipe "kubernetes::master"
