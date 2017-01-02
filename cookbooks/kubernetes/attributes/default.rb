@@ -17,5 +17,6 @@ default['kubernetes'] = {
   'kubernetes_cluster_tag' => 'kubernetes', # Change this if you want to use a different cluster name. Usually that's done if you want to set up a second kubernetes cluster on the same VPC.
   'kubernetes_service_ip' => '10.254.0.1',
   'service_cluster_ip_range' => '10.254.0.0/16',
+  'cluster_cidr' =>  environment_metadata['cluster_cidr'] || '10.244.0.0/16',
   'vpc_cidr' => '172.31.0.0/16' # Default on EY Cloud. Do not change this.
 }

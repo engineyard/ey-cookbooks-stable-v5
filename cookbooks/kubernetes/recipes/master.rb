@@ -21,7 +21,11 @@ end
 
   template "/etc/default/#{k8s}" do
     source "#{k8s}.erb"
-    variables :kubernetes_cluster_tag => node['kubernetes']['kubernetes_cluster_tag'], :service_cluster_ip_range => node['kubernetes']['service_cluster_ip_range']
+    variables({
+      :kubernetes_cluster_tag => node['kubernetes']['kubernetes_cluster_tag'],
+      :service_cluster_ip_range => node['kubernetes']['service_cluster_ip_range'],
+      :cluster_cidr => node['kubernetes']['cluster_cidr']
+    })
     notifies :run, resources(:execute => "service-#{k8s}-restart"), :delayed
   end
 

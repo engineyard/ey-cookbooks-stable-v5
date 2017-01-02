@@ -1,1 +1,1 @@
-DAEMON_ARGS="--master=127.0.0.1:8080 --v=2 --root-ca-file=/etc/kubernetes/pki/ca.pem --service-account-private-key-file=/etc/kubernetes/pki/kubernetes-key.pem --cluster-name=<%= @kubernetes_cluster_tag %> --cluster-cidr=10.244.0.0/16 --cloud-provider=aws --allocate-node-cidrs=true"
+DAEMON_ARGS="--master=127.0.0.1:8080 --v=2 --root-ca-file=/etc/kubernetes/pki/ca.pem --service-account-private-key-file=/etc/kubernetes/pki/kubernetes-key.pem --cluster-name=<%= @kubernetes_cluster_tag %> --cluster-cidr=<%= @cluster_cidr %> --cloud-provider=aws --allocate-node-cidrs=true"
