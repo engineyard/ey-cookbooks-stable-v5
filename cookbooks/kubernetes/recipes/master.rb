@@ -3,27 +3,6 @@ include_recipe "kubernetes::aws_credentials"
 include_recipe "kubernetes::aws_tags"
 include_recipe "kubernetes::pki"
 
-=begin
-execute "kubeadm init" do
-  command "kubeadm init --token kubey --cloud-provider aws"
-end
-=end
-
-=begin
-directory "/data/kubernetes/tls" do
-  owner "root"
-  group "root"
-  mode 0755
-  action :create
-  recursive true
-end
-
-execute "generate key" do
-  command "openssl genrsa -out /data/kubernetes/tls/kubernetes-key.pem 2048"
-  not_if { File.exist? "/data/kubernetes/tls/kubernetes-key.pem" }
-end
-=end
-
 %w[kube-apiserver kube-controller-manager kube-scheduler kubectl].each do |k8s_file|
   #execute "copy file to /usr/bin/#{k8s_file}" do
   #  command "cp /tmp/kubernetes-1.3.0/kubernetes/server/bin/#{k8s_file} /usr/bin/#{k8s_file}"
@@ -52,10 +31,4 @@ end
     notifies :run, resources(:execute => "service-#{k8s}-restart"), :delayed
   end
 
-=begin
-  execute "start kubernetes component #{k8s}" do
-    command "service #{k8s} start"
-    not_if "service #{k8s} status"
-  end
-=end
 end
