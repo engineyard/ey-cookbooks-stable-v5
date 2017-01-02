@@ -62,50 +62,8 @@ execute "generate the kubectl certificate and key" do
   only_if { File.exists?("/etc/kubernetes/pki/cfssl/ca-config.json") && File.exists?("/etc/kubernetes/pki/cfssl/kubernetes-csr.json") }
 end
 
-=begin
-ruby_block "generate kubeconfig" do
-  block do
-    pem = File.read("/etc/kubernetes/pki/kubectl.pem")
-    encoded_pem = Base64.strict_encode64(pem)
-    key = File.read("/etc/kubernetes/pki/kubectl-key.pem")
-    encoded_key = Base64.strict_encode64(key)
-    ca_pem = File.read("/etc/kubernetes/pki/ca.pem")
-    encoded_ca_pem = Base64.strict_encode64(ca_pem)
-
-    etc = {'apiVersion' => 'v1', 'kind' => 'Config', 'preferences' => {}}
-    users = {'users' => [{'name' => 'kubey', 'user' => {'client-certificate-data' => encoded_pem, 'client-key-data' => encoded_key}}]}
-    context = {'contexts' => ['name' => 'kubey', 'context' => {'user' => 'kubey', 'cluster' => 'kubey'}]}
-    clusters = {'clusters' => ['name' => 'kubey', 'cluster' => {'server' => "https://#{node['ec2']['public_hostname']}", 'certificate-authority-data' => encoded_ca_pem}]}
-    hash = etc.merge(users).merge(context).merge(clusters)
-    Chef::Log.info(hash.to_yaml)
-  end
-end
-=end
-ruby_block "kubeconfig" do
-  block do
-    pem = File.read("/etc/kubernetes/pki/kubectl.pem")
-    encoded_pem = Base64.strict_encode64(pem)
-    key = File.read("/etc/kubernetes/pki/kubectl-key.pem")
-    encoded_key = Base64.strict_encode64(key)
-    ca_pem = File.read("/etc/kubernetes/pki/ca.pem")
-    encoded_ca_pem = Base64.strict_encode64(ca_pem)
-
-    etc = {'apiVersion' => 'v1', 'kind' => 'Config', 'preferences' => {}, 'current-context' => 'kubey'}
-    users = {'users' => [{'name' => 'kubey', 'user' => {'client-certificate-data' => encoded_pem, 'client-key-data' => encoded_key}}]}
-    contexts = {'contexts' => ['name' => 'kubey', 'context' => {'user' => 'kubey', 'cluster' => 'kubey'}]}
-    clusters = {'clusters' => ['name' => 'kubey', 'cluster' => {'server' => "https://#{node['ec2']['public_hostname']}", 'certificate-authority-data' => encoded_ca_pem}]}
-    kubeconfig_hash = etc.merge(users).merge(contexts).merge(clusters)
-    #node.run_state['kubeconfig_yaml'] = kubeconfig_hash.to_yaml
-    
-    #f = Chef::Resource::File.new("/etc/kubernetes/pki/kubey.conf")
-    #f.content(kubeconfig_hash.to_yaml)
-    #f.run_action(:create)
-    Chef::Log.info(kubeconfig_hash.to_yaml)
-  end
-end
 file "/etc/kubernetes/pki/kubey.conf" do
-  #content node.run_state['kubeconfig_yaml']
-  content lazy do
+  content(lazy do
     pem = File.read("/etc/kubernetes/pki/kubectl.pem")
     encoded_pem = Base64.strict_encode64(pem)
     key = File.read("/etc/kubernetes/pki/kubectl-key.pem")
@@ -119,6 +77,6 @@ file "/etc/kubernetes/pki/kubey.conf" do
     clusters = {'clusters' => ['name' => 'kubey', 'cluster' => {'server' => "https://#{node['ec2']['public_hostname']}", 'certificate-authority-data' => encoded_ca_pem}]}
     kubeconfig_hash = etc.merge(users).merge(contexts).merge(clusters)
     kubeconfig_hash.to_yaml
-  end 
+  end)
 end
 
