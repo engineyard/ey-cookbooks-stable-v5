@@ -14,7 +14,7 @@ end
 
 execute "move /etc/kubernetes" do
   command "mv /etc/kubernetes /etc/kubernetes.bak" 
-  not_if { File.symlink?("/etc/kubernetes") }
+  only_if { File.exists?("/etc/kubernetes") && !File.symlink?("/etc/kubernetes") }
 end
 
 directory "/data/kubernetes" do
