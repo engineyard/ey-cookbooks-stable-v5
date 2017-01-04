@@ -103,6 +103,15 @@ default['delayed_job4']['worker_count'] = worker_count
 default['delayed_job4']['worker_count'] = 4
 ```
 
+### Set the worker memory limit
+
+Monit keeps track of your DJ workers and by default, it restarts workers exceeding 300MB of memory.
+
+```ruby
+# specify custom memory limit
+default['delayed_job4']['worker_memory'] = 400
+```
+
 ## Restarting your workers
 
 This recipe does NOT restart your workers. The reason for this is that shipping your application and rebuilding your instances (i.e. running chef) are not always done at the same time. It is best to restart your Delayed Job workers when you ship (deploy) your application code.

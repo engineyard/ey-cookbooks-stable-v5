@@ -1,0 +1,46 @@
+
+<% if @app_master.length > 0 %>
+# Application Master
+<%= @app_master %>        ey-app-master
+<% end %>
+<% if @app_slaves.length > 0 %>
+
+# Application Slaves
+  <% @app_slaves.each_with_index do |host, index| %>
+<%= host %>        ey-app-slave<%= @app_slaves.count > 1 ? "-#{index}" : '' %>   
+  <% end %>
+<% end %>
+<% if @db_master.length > 0 %>
+
+# Database Master
+<%= @db_master %>         ey-db-master
+<% end %>
+<% if @db_replicas.length > 0 or @db_replicas_ordered.length > 0 %>
+
+# Database Replicas
+<% end %>
+<% @db_replicas.each do |key, value| %>
+  <% if value.is_a? String %>
+<%= value %>        <%= key %>
+  <% else %>
+    <% value.each_with_index do |host, index| %>
+<%= host %>        <%= key %>-<%= index %>
+    <% end %>
+  <% end %>
+<% end %>
+<% @db_replicas_ordered.each_with_index do |host, index| %>
+<%= host %>        ey-db-slave<%= @db_replicas_ordered.count > 1 ? "-#{index}" : '' %>    
+<% end %>
+<% if @utility_nodes.length > 0 %>
+
+# Utility Instances
+<% end %>
+<% @utility_nodes.each do |key, value| %>
+  <% if value.is_a? String %>
+<%= value %>        <%= key %>
+  <% else %>
+    <% value.each_with_index do |host, index| %>
+<%= host %>        <%= key %>-<%= index %>
+    <% end %>
+  <% end %>
+<% end %>

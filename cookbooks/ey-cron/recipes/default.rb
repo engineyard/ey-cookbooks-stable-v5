@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: cron
+# Cookbook Name:: ey-cron
 # Recipe:: default
 #
 # Copyright 2009, Engine Yard, Inc.

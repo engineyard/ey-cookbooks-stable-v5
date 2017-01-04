@@ -1,4 +1,4 @@
-cron
+ey-cron
 ========
 
 Sets up cron jobs specific to the EY Stack on top of whatever ones are defined on the AMI:
