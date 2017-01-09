@@ -14,7 +14,6 @@ redis_config_file_version = redis_version[0..2]
 redis_download_url = node['redis']['download_url']
 redis_installer_directory = '/opt/redis-source'
 redis_base_directory = node['redis']['basedir']
-bin_path = '/usr/local/bin'
 
 run_installer = !FileTest.exists?(redis_installer_directory) || node['redis']['force_upgrade']
 setup_basedir = !FileTest.exists?(redis_base_directory) || node['redis']['force_upgrade']
@@ -26,33 +25,12 @@ if node['redis']['is_redis_instance']
   end
 
   if run_installer
-    remote_file "/opt/redis-#{redis_version}.tar.gz" do
-      source "#{redis_download_url}"
-      owner node[:owner_name]
-      group node[:owner_name]
-      mode 0644
-      backup 0
-    end
-
-    execute "unarchive Redis installer" do
-      cwd "/opt"
-      command "tar zxf redis-#{redis_version}.tar.gz && sync"
-    end
-
-    execute "Remove old redis-source" do
-      command "rm -rf /opt/redis-source"
-    end
-
-    execute "rename /opt/redis-#{redis_version} to /opt/redis-source" do
-      command "mv /opt/redis-#{redis_version} #{redis_installer_directory}"
-    end
-
-    execute "run redis-source/make install" do
-      cwd redis_installer_directory
-      command "make install"
+    if node['redis']['install_from_source']
+      include_recipe 'redis::install_from_source'
+    else
+      include_recipe 'redis::install_from_package'
     end
   end
-
 
   if setup_basedir
     directory redis_base_directory do
@@ -84,6 +62,11 @@ if node['redis']['is_redis_instance']
     })
   end
 
+  if node['redis']['install_from_source']
+    bin_path = '/usr/local/bin'
+  else
+    bin_path = '/usr/sbin'
+  end
   template "/data/monit.d/redis.monitrc" do
     owner 'root'
     group 'root'
