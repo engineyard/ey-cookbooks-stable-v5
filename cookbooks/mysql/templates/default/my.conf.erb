@@ -38,11 +38,12 @@ character-sets-dir=/usr/share/mysql/charsets
 
 [mysqld_safe]
 err-log				= <%= @logbase %>mysql.err
-# NOTICE: We no longer set open-file-limit here, this is specified in /etc/init.d/mysql.
-# To allow table cache to be raised
-# open-file-limit = 4096
 
 [mysqld]
+open_files_limit = 65535
+<% if @mysql_version == @mysql_5_6 %>
+show_old_temporals = 1
+<% end %>
 max_connections			= 300
 innodb_file_per_table		= 1
 
@@ -97,7 +98,9 @@ language			= /usr/share/mysql/english
 <% else %>
 key_buffer_size = 32M
 thread_cache_size			= 512
-table_open_cache			= 1024
+<% if @mysql_version == @mysql_5_5 %>
+table_open_cache			= 2000
+<% end %>
 lc-messages-dir = /usr/share/mysql
 lc-messages                    = en_US
 explicit_defaults_for_timestamp 
