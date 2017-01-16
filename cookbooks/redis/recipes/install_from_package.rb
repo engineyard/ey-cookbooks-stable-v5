@@ -9,5 +9,5 @@ end
 
 package redis_package do
   version redis_version
-  action :upgrade
+  action :install
 end

@@ -3,7 +3,7 @@
 # Recipe:: default
 #
 # Download and install redis if one of the following is true:
-# - the redis installer directory does not exist
+# - the redis base directory does not exist
 # - force_upgrade == true
 #
 # Create the redis basedir if the redis basedir does not exist
@@ -12,11 +12,9 @@
 redis_version = node['redis']['version']
 redis_config_file_version = redis_version[0..2]
 redis_download_url = node['redis']['download_url']
-redis_installer_directory = '/opt/redis-source'
 redis_base_directory = node['redis']['basedir']
 
-run_installer = !FileTest.exists?(redis_installer_directory) || node['redis']['force_upgrade']
-setup_basedir = !FileTest.exists?(redis_base_directory) || node['redis']['force_upgrade']
+run_installer = !FileTest.exists?(redis_base_directory) || node['redis']['force_upgrade']
 
 if node['redis']['is_redis_instance']
 
@@ -30,9 +28,7 @@ if node['redis']['is_redis_instance']
     else
       include_recipe 'redis::install_from_package'
     end
-  end
 
-  if setup_basedir
     directory redis_base_directory do
       owner 'redis'
       group 'redis'
