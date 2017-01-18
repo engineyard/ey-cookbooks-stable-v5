@@ -5,14 +5,7 @@ default['redis'].tap do |redis|
   redis['install_from_source'] = false
 
   # If you're installing from the portage tree, only the following versions are available:
-  # 2.8.17-r1
-  # 2.8.21
-  # 2.8.23
   # 2.8.23-r1
-  # 3.0.4
-  # 3.0.5
-  # 3.0.6
-  # 3.0.7
   # 3.2.0
   #
   # If you're installing from source, see http://download.redis.io/releases/ for the available versions
