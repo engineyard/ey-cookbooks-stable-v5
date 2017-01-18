@@ -33,7 +33,7 @@ if node['sidekiq']['is_sidekiq_instance']
         :app_name => app_name, 
         :workers => node['sidekiq']['workers'],
         :rails_env => node.dna['environment']['framework_env'],
-        :memory_limit => 400 # MB
+        :memory_limit => node['sidekiq']['worker_memory']
       })
       notifies :run, "execute[restart-sidekiq-for-#{app_name}]"
     end

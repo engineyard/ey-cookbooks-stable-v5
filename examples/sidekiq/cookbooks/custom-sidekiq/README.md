@@ -90,6 +90,15 @@ larger instance type with more memory and CPU:
     # specify the number of workers
     default['sidekiq']['workers'] = 4
 
+### Set the worker memory limit
+
+Monit keeps track of your Sidekiq workers and by default, it restarts workers exceeding 400MB of memory.
+
+```ruby
+# specify custom memory limit
+default['sidekiq']['worker_memory'] = 450
+```
+
 ## Restarting your workers
 
 This recipe does NOT restart your workers. The reason for this is that shipping

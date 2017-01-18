@@ -22,6 +22,9 @@ default['sidekiq'].tap do |sidekiq|
     # :queue_name => priority
     :default => 1
   }
+
+  # Memory limit
+  sidekiq['worker_memory'] = 400 # MB
   
   # Verbose
   sidekiq['verbose'] = false
