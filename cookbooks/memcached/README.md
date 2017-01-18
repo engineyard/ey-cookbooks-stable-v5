@@ -1,4 +1,7 @@
-memcached
-========
+# Memcached
 
-This is a placeholder stub for memcached that can be overridden.
+This recipe is used to run memcached on the stable-v5 stack.
+
+The memcached recipe is managed by Engine Yard. You should not copy this recipe to your repository but instead copy custom-memcached. Please check the [custom-memcached readme](../../examples/memcached/cookbooks/custom-memcached) for the complete instructions.
+
+We accept contributions for changes that can be used by all customers.
