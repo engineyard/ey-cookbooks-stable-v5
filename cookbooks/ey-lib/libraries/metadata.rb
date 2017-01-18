@@ -6,7 +6,7 @@ class Chef
     #
     def metadata_account_get(name)
       data = node.engineyard.environment.components.select {|e| e['key'] == 'environment_metadata'} if node.engineyard.environment.component?('environment_metadata')
-      data.first[name] if data
+      data.first[name.to_s] if data
     end
 
     def metadata_account_get_with_default(name, default)
@@ -16,7 +16,9 @@ class Chef
     def metadata_env_get(name)
       environment = node.engineyard.environment['name']
       data = node.engineyard.environment.components.select {|e| e['key'] == 'environment_metadata'} if node.engineyard.environment.component?('environment_metadata')
-      data.first["#{name}[#{environment}]"] if data
+      if data
+        data.first[name.to_s] || data.first["#{name}[#{environment}]"]
+      end
     end
 
     def metadata_env_get_with_default(name, default)

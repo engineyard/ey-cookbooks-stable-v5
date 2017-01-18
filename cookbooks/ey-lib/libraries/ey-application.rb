@@ -78,7 +78,7 @@ class Chef
             detect {|c| c['key'] == 'app_metadata'}.
             dup.reject {|k| k == 'key'}
         end
-        key.nil? ? @component_metadata.dup : @component_metadata.fetch(key,default)
+        key.nil? ? @component_metadata.dup : @component_metadata.fetch(key.to_s,default)
       end
 
       def metadata?(key)
