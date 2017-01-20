@@ -102,7 +102,6 @@ if ['solo', 'db_master'].include?(node.dna['instance_role'])
     backup 0
     notifies :reload, "service[postgresql-#{postgres_version}]"
     variables(
-      :temp_tablespaces => postgres_temp,
       :pg_port => "5432",
       :wal_level => "hot_standby",
       :shared_buffers => node['shared_buffers'],
@@ -158,7 +157,6 @@ if ['db_slave'].include?(node.dna['instance_role'])
     backup 0
     notifies :reload, "service[postgresql-#{postgres_version}]"
     variables(
-      :temp_tablespaces => postgres_temp,
       :pg_port => "5432",
       :wal_level => "hot_standby",
       :shared_buffers => node['shared_buffers'],
