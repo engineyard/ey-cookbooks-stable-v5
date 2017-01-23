@@ -89,6 +89,10 @@ define :nginx_vhost, :stack_config => false, :upstream_ports => [] do
       mode 0644
     end
 
+    sslmeta = node.engineyard.apps.detect {|a| a.metadata?(:nginx_https_port) }
+    nginx_https_port = ( sslmeta and meta.metadata?(:nginx_https_port) ) || 8444
+
+
     managed_template "/data/nginx/servers/#{app.name}.ssl.conf" do
       owner node.engineyard.environment.ssh_username
       group node.engineyard.environment.ssh_username
