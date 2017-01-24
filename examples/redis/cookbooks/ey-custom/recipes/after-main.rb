@@ -1,1 +1,1 @@
-include_recipe "redis"
+include_recipe "custom-redis"

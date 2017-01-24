@@ -1,6 +1,6 @@
 # Redis
 
-This recipe installs version Redis 2.8 or later using the Redis installer from redis.io.
+This recipe installs version Redis 2.8 or later using either the package from the Engine Yard portage treee (recommended) or the Redis installer from redis.io.
 
 
 ## Installation
@@ -66,14 +66,14 @@ By default, the redis recipe runs on a utility instance named "redis". You can c
 redis['is_redis_instance'] = ( ['solo', 'app_master'].include?(node['dna']['instance_role']) )
 ```
 
-#### B. Run Redis on app_master or on a solo environment
+#### B. Run Redis on a solo environment
 
 Note that this is not recommended for production environments. Running Redis on a solo environment can potentially increase swap usage and slow down the instance.
 
 * Uncomment this line:
 
 ```
-redis['is_redis_instance'] = ( ['solo', 'app_master'].include?(node['dna']['instance_role']) )
+#redis['is_redis_instance'] = (node['dna']['instance_role'] == 'solo')
 ```
 
 * Make sure these lines are commented out:
@@ -105,24 +105,24 @@ This custom chef recipe has been verified using these test cases:
 ```
 A. Run Redis 3.2.6 for the first time on a solo instance
   A.1. Redis should be running on the solo instance
-  A.2. `/etc/hosts` should have a redis-instance entry that points to the solo instance public hostname
-  A.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the solo instance public hostname
+  A.2. `/etc/hosts` should have a redis-instance entry that points to the solo instance private IP address
+  A.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the solo instance private hostname
 B. Run Redis 3.2.6 for the first time on a utility instance named 'redis'
   B.1. Redis should be running on the redis instance
-  B.2. `/etc/hosts` should have a redis-instance entry that points to the redis instance public hostname
-  B.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the redis instance public hostname
+  B.2. `/etc/hosts` should have a redis-instance entry that points to the redis instance private IP address
+  B.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the redis instance private hostname (ip-10-x-x-x.ec2.internal)
 C. Run Redis 3.2.6 for the first time on a utility instance named 'sidekiq
   C.1. Redis should be running on the sidekiq instance
-  C.2. `/etc/hosts` should have a redis-instance entry that points to the sidekiq instance public hostname
-  C.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the sidekiq instance public hostname
+  C.2. `/etc/hosts` should have a redis-instance entry that points to the sidekiq instance private IP address
+  C.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the sidekiq instance private hostname (ip-10-x-x-x.ec2.internal)
 D. Upgrade a solo instance from Redis 3.2.6 to Redis 4.0-rc2
   D.1. Redis 4.0-rc2 should be running on the solo instance
-  D.2. `/etc/hosts` should have a redis-instance entry that points to the solo instance public hostname
-  D.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the solo instance public hostname
+  D.2. `/etc/hosts` should have a redis-instance entry that points to the solo instance private IP address
+  D.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the solo instance private hostname (ip-10-x-x-x.ec2.internal)
   D.4. After restarting Redis, data that was stored on the Redis 2.8.21 database should be available on the Redis 4.0-rc2 database
 E. Upgrade a cluster from Redis 3.2.6 to Redis 4.0-rc2
   D.1. Redis 4.0.rc2 should be running on the redis instance
-  D.2. `/etc/hosts` should have a redis-instance entry that points to the redis instance public hostname
-  D.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the redis instance public hostname
+  D.2. `/etc/hosts` should have a redis-instance entry that points to the redis instance private IP address
+  D.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the redis instance private hostname (ip-10-x-x-x.ec2.internal)
   D.4. After restarting Redis, data that was stored on the Redis 3.2.6 database should be available on the Redis 4.0-rc2 database
 ```

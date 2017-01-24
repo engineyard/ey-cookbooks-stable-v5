@@ -1,3 +1,3 @@
 name "ey-custom"
 
-depends "redis"
+depends "custom-redis"
