@@ -66,14 +66,14 @@ By default, the redis recipe runs on a utility instance named "redis". You can c
 redis['is_redis_instance'] = ( ['solo', 'app_master'].include?(node['dna']['instance_role']) )
 ```
 
-#### B. Run Redis on app_master or on a solo environment
+#### B. Run Redis on a solo environment
 
 Note that this is not recommended for production environments. Running Redis on a solo environment can potentially increase swap usage and slow down the instance.
 
 * Uncomment this line:
 
 ```
-redis['is_redis_instance'] = ( ['solo', 'app_master'].include?(node['dna']['instance_role']) )
+#redis['is_redis_instance'] = (node['dna']['instance_role'] == 'solo')
 ```
 
 * Make sure these lines are commented out:
