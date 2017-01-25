@@ -3,7 +3,7 @@ ssh_username  = node['owner_name']
 config = "/home/#{ssh_username}/your_app.config"
 name = `hostname`.chomp + "@" + node['ipaddress']
 
-node.engineyard.apps.each do |app|
+
 managed_template "/home/#{node["owner_name"]}/vm.args" do
   owner ssh_username
   group ssh_username
