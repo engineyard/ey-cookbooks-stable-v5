@@ -44,7 +44,7 @@ node.engineyard.apps.each do |app|
     })
   end
 
-  directory '/data/#{app.name}/shared/config/deps' do
+  directory "/data/#{app.name}/shared/config/deps" do
     owner ssh_username
     group ssh_username
     mode '0755'
