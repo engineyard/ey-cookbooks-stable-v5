@@ -3,12 +3,7 @@ ssh_username  = node['owner_name']
 config = "/home/#{ssh_username}/your_app.config"
 name = `hostname`.chomp + "@" + node['ipaddress']
 
-directory '/data/#{app.name}/shared/config/deps' do
-  owner ssh_username
-  group ssh_username
-  mode '0755'
-  action :create
-end
+
 
 managed_template "/home/#{node["owner_name"]}/vm.args" do
   owner ssh_username
@@ -35,6 +30,7 @@ end
 
 
 node.engineyard.apps.each do |app|
+
   managed_template "/data/#{app.name}/shared/config/prod.secret.exs" do
     owner node.engineyard.environment.ssh_username
     group node.engineyard.environment.ssh_username
@@ -46,5 +42,12 @@ node.engineyard.apps.each do |app|
       :dbpass => node.engineyard.environment.ssh_password,
       :dbname => app.database_name,
     })
+  end
+
+  directory '/data/#{app.name}/shared/config/deps' do
+    owner ssh_username
+    group ssh_username
+    mode '0755'
+    action :create
   end
 end
