@@ -13,7 +13,6 @@ end
 
 include_recipe "collectd"
 include_recipe "app-logs"
-include_recipe "memcached"
 include_recipe "newrelic"
 include_recipe "deploy"
 include_recipe "deploy::restart"
