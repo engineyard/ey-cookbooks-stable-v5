@@ -10,9 +10,9 @@ For simplicity, we recommend that you create the `cookbooks/` directory at the
 root of your application. If you prefer to keep the infrastructure code separate
 from application code, you can create a new repository.
 
-Our main recipes have the `memcached_custom` cookbook but it is not included by default.
-To use the `memcached_custom` cookbook, you should copy the cookbook
-`custom-memcached`. You should not copy the actual `memcached_custom` recipe as
+Our main recipes have the `memcached` cookbook but it is not included by default.
+To use the `memcached` cookbook, you should copy the cookbook
+`custom-memcached`. You should not copy the actual `memcached` recipe as
 that is managed by Engine Yard.
 
   1. Edit `cookbooks/ey-custom/recipes/after-main.rb` and add
@@ -51,7 +51,7 @@ All customizations go to `cookbooks/custom-memcached/attributes/default.rb`.
 
 ### Choose the instances that run the recipe
 
-By default, the recipe runs on a utility instance named 'memcached'. This is configured in `attributes/default.rb`. This will run the memcached daemon on the utility instance named 'memcached' and create a `/data/appname/shared/config/memcached_custom.yml` file that points to the private IP of the memcached instance.
+By default, the recipe runs on a utility instance named 'memcached'. This is configured in `attributes/default.rb`. This will run the memcached daemon on the utility instance named 'memcached' and create a `/data/appname/shared/config/memcached.yml` file that points to the private IP of the memcached instance.
 
 ```
   # Install memcached on a utility instance named 'memcached'
@@ -87,7 +87,9 @@ _NOTE: This recipe does not uninstall memcached. If you use the ALL\_APP\_INSTAN
   # See https://blog.engineyard.com/2015/fine-tuning-memcached
 ```
 
-## Adding new memcached instances
+## Running on multiple instances
+
+The recipe will create a `memcached.yml` for you. This contains the list of hostnames of the memcached instances. It is up to you to parse this configuration file and initialize your memcached client accordingly - please consult your memcached client's documentation.
 
 If you have a running memcached cluster and add a new memcached node, (e.g. `memcached['install_type'] = 'ALL_APP_INSTANCES'` and you add a new app instance), the recipe will update `memcached.yml` for you but you need to restart the application to load the new `memcached.yml`.
 
@@ -112,9 +114,9 @@ B. Enable the perform_install flag. Install from source
   B1.2. memcached should be running on app instances
   B1.3. memcached should not be running on utility or database instances
   B1.4. /data/app_name/shared/config/memcached.yml should list all the app instances in the environment
-  B2. Install on a utility instance named 'memcached'
-  B2.1. memcached should be running on the utility instance named memcached
-  B2.2. memcached should not be running on app_master, app, and database instances
+  B2. Install utility instances named 'memcached' - Boot 2 utility instances named 'memcached' and one utility instance named 'redis'
+  B2.1. memcached should be running on the utility instances named memcached
+  B2.2. memcached should not be running on app_master, app, database instances, and utility instances not named 'memcached'
   B2.3. /data/app_name/shared/config/memcached.yml should list all the utility instances named memcached in the environment
 C. Enable the perform_install flag. Install from package
   C1. Install on all app instances
@@ -122,8 +124,8 @@ C. Enable the perform_install flag. Install from package
   C1.2. memcached should be running on app instances
   C1.3. memcached should not be running on utility or database instances
   C1.4. /data/app_name/shared/config/memcached.yml should list all the app instances in the environment
-  C2. Install on a utility instance named 'memcached'
-  C2.1. memcached should be running on the utility instance named memcached
-  C2.2. memcached should not be running on app_master, app, and database instances
+  C2. Install utility instances named 'memcached' - Boot 2 utility instances named 'memcached' and one utility instance named 'redis'
+  C2.1. memcached should be running on the utility instances named memcached
+  C2.2. memcached should not be running on app_master, app, database instances, and utility instances not named 'memcached'
   C2.3. /data/app_name/shared/config/memcached.yml should list all the utility instances named memcached in the environment
 ```
