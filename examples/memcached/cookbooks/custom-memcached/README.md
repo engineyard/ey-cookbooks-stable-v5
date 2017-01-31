@@ -87,6 +87,10 @@ _NOTE: This recipe does not uninstall memcached. If you use the ALL\_APP\_INSTAN
   # See https://blog.engineyard.com/2015/fine-tuning-memcached
 ```
 
+## Adding new memcached instances
+
+If you have a running memcached cluster and add a new memcached node, (e.g. `memcached['install_type'] = 'ALL_APP_INSTANCES'` and you add a new app instance), the recipe will update `memcached.yml` for you but you need to restart the application to load the new `memcached.yml`.
+
 ## Restarting your application
 
 This recipe does NOT restart your application. The reason for this is that shipping

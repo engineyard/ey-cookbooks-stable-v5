@@ -3,9 +3,7 @@ case node.dna[:instance_role]
 when 'app', 'app_master'
   include_recipe 'ey-monitor'
   include_recipe 'haproxy'
-  include_recipe 'memcached'
 when 'util'
-  include_recipe 'memcached'
 when /^db/
   if node.engineyard.environment['db_stack_name'][/^postgres/]
     include_recipe 'ey-backup::postgres'
