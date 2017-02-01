@@ -127,7 +127,7 @@ end
 On the other hand, if you'r running Delayed Job on a dedicated utility instance, the deploy hook should be like:
 
 ```
-on_utilities :delayed_job do
+on_utilities("delayed_job") do
   sudo "monit -g dj_#{config.app} restart all"
 end
 ```
