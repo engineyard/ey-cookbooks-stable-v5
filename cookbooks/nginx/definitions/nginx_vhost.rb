@@ -90,7 +90,7 @@ define :nginx_vhost, :stack_config => false, :upstream_ports => [] do
     end
 
     sslmeta = node.engineyard.apps.detect {|a| a.metadata?(:nginx_https_port) }
-    nginx_https_port = ( sslmeta and meta.metadata?(:nginx_https_port) ) || 8444
+    nginx_https_port = ( sslmeta and meta.metadata?(:nginx_https_port) ) || 8082
 
 
     managed_template "/data/nginx/servers/#{app.name}.ssl.conf" do
