@@ -34,8 +34,30 @@ this is managed by Engine Yard.
     cd ey-cookbooks-stable-v5
     cp examples/sidekiq/cookbooks/custom-sidekiq /path/to/app/cookbooks/
 
-If you do not have `cookbooks/ey-custom` on your app repository, you can copy
+	If you do not have `cookbooks/ey-custom` on your app repository, you can copy
 `examples/sidekiq/cookbooks/ey-custom` to `/path/to/app/cookbooks` as well.
+
+4. Create or modify `config/initializers/sidekiq.rb`:
+
+```
+redis_config = YAML.load_file(Rails.root + 'config/redis.yml')[Rails.env]
+
+Sidekiq.configure_server do |config|
+  config.redis = {
+    url: "redis://#{redis_config['host']}:#{redis_config['port']}"
+  }
+end
+
+Sidekiq.configure_client do |config|
+  config.redis = {
+    url: "redis://#{redis_config['host']}:#{redis_config['port']}"
+  }
+end
+```
+
+The above code parses `config/redis.yml` to determine the Redis host. If you're using the [Redis recipe](https://github.com/engineyard/ey-cookbooks-stable-v5/tree/next-release/examples/redis), it creates a `/data/<app_name>/shared/config/redis.yml` for you. 
+
+During deployment, the file `/data/<app_name>/current/config/redis.yml` is automatically symlinked to `/data/<app_name>/shared/config/redis.yml`.
 
 ## Customizations
 
