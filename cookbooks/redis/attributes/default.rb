@@ -30,12 +30,20 @@ default['redis'].tap do |redis|
   redis['port'] = '6379'
   redis['basedir'] = '/data/redis'
 
+  # Collect the redis instances in this array
+  redis_instances = []
+
+  # Configure a Redis slave instance
+  #redis['slave_name'] = 'redis_slave'
+  #redis_instances << redis['slave_name']
+
   # Run Redis on a named util instance
   # This is the default
   redis['utility_name'] = 'redis'
+  redis_instances << redis['utility_name']
   redis['is_redis_instance'] = (
     node['dna']['instance_role'] == 'util' &&
-    node['dna']['name'] == redis['utility_name']
+    redis_instances.include?(node['dna']['name'])
   )
 
   # Run redis on a solo instance
