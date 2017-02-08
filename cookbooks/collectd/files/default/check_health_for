@@ -46,6 +46,36 @@ function alert() {
     exit
 }
 
+always_alert() {
+    SEVERITY="$1"
+    MESSAGE="$2"
+    CHECK_TYPE="$3"
+    timestamp=$(date '+%s')
+
+    echo "PUTNOTIF Time=${timestamp} TYPE=${CHECK_TYPE}-${ACTION} severity=${SEVERITY} message=\"raw_message: $(date +'%T') ${MESSAGE}\""
+
+    STATUS_FILE="${STATUS_DIR}/${ACTION}_OKAY"
+    if [ "${SEVERITY}" != "OKAY" ]
+    then
+        STATUS_FILE="${STATUS_DIR}/${ACTION}_${SEVERITY}"
+    fi
+    echo -e "Time: $(date)\nStatus: ${SEVERITY}\nType: ${CHECK_TYPE}-${ACTION}\nMessage: ${MESSAGE}" > $STATUS_FILE
+}
+
+clear_last_check_after() {
+  local days_count=$1
+  find ${STATUS_FILE} -type f -mtime +${days_count} -delete
+}
+
+join() {
+  # joins arrays with the delimiter passed
+  local d=$1
+  shift
+  echo -n "$1"
+  shift
+  printf "%s" "${@/#/$d}"
+}
+
 # This function is not appropriate for checks that need to run every minute or need to run
 #  at the top of the hour (0 minutes). This was necessary since 0 % {anything} is 0
 function check_interval {
@@ -178,6 +208,86 @@ function check_fs-type {
     alert "OKAY" "FileSystem checks OK." "${check_type}"
   }
   
+}
+
+check_primary-ebs() {
+  # This doesn't actually use WARN and CRIT, but we use them to optionally get check interval (months) and mount count instead
+  [[ -z ${WARN} ]] && WARN=12
+  [[ -z ${CRIT} ]] && CRIT=30
+  months_interval="${WARN}"
+  mount_count_check="${CRIT}"
+  
+  STATUS_FILE="$(ls ${STATUS_DIR}/${ACTION}_* 2> /dev/null)"
+  prior_status=$(echo "${STATUS_FILE}" | awk -F '_' '{print $NF}')
+  check_type='device'
+  clear_last_check_after '7' # clear last check after 7 days
+  
+  if [[ ! -f ${STATUS_FILE} ]] && [[ ! -f '/etc/engineyard/skip_fsck_check' ]]
+  then
+    warning=0
+    failure=0
+    message=()
+    
+    # get filesystems
+    egrep '/db|/data' /proc/mounts | 
+    {
+      while read i
+      do
+        vol_msg=()
+        device=$(echo "${i}" | awk '{print $1}')
+        volume=$(echo "${i}" | awk '{print $2}')
+        tune2fs_out=$(sudo /sbin/tune2fs -l ${device})
+        mount_count=$(echo "${tune2fs_out}" | grep 'Mount count' | awk -F: '{print $2}' | xargs)
+        last_check=$(echo "${tune2fs_out}" | grep 'Last checked' | awk -F': ' '{print $2}' | xargs )
+        fs_state=$(echo "${tune2fs_out}" | grep 'Filesystem state' | awk -F: '{print $2}' | xargs)
+        last_check=$(date -d "${last_check}" '+%Y%m%d')
+        check_due=$(date -d "${last_check}+${months_interval} months" '+%Y%m%d')
+        
+        if [[ $(date '+%Y%m%d') -gt check_due ]]
+        then
+          warning=1
+          vol_msg+=("Last Check: $(date -d ${last_check} '+%Y-%m-%d') Check Due: $(date -d ${check_due} '+%Y-%m-%d')")
+        fi
+    
+        if [[ ${mount_count} -gt ${mount_count_check} ]]
+        then
+          warning=1
+          vol_msg+=("Mount Count: ${mount_count} Check After: ${mount_count_check}")
+        fi
+    
+        if [[ ${fs_state} != 'clean' ]]
+        then
+          failure=1
+          if [[ ${fs_state} == '' ]]
+          then
+            vol_msg+=("An unknown error has occurred.")
+          else
+            vol_msg+=("Unclean Volume State: ${fs_state}")
+          fi
+        fi
+              
+        if [[ ${warning} -gt 0 || ${failure} -gt 0 ]] && [[ ${#vol_msg[@]} -gt 0 ]]
+        then
+          vol_msg=$(join ", " "${vol_msg[@]}")
+          vol_msg="Filesystem Check Warning ${volume} (${device}): ${vol_msg}"
+          message+=("${vol_msg}")
+        fi 
+      done
+    
+      if [[ $failure -eq 1 ]]
+      then
+        message=$(join ', ' "${message[@]}")
+        always_alert "FAILURE" "${message}" "${check_type}"
+      elif [[ $warning -eq 1 ]]
+      then
+        message=$(join ', ' "${message[@]}")
+        always_alert "WARNING" "${message}" "${check_type}"
+      elif [[ ${prior_status} != 'OKAY' ]]
+      then
+        always_alert "OKAY" "FileSystem FSCK checks clean." "${check_type}"
+      fi
+    }
+  fi
 }
 
 eval "check_${ACTION}"

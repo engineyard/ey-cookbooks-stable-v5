@@ -46,6 +46,7 @@ if data_mounted.stdout == ""
       mount "/data" do
         fstype node['data_filesystem']
         device node['data_volume'].device
+        pass 0
         action :mount
       end
 
