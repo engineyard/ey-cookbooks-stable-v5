@@ -1,5 +1,5 @@
-name 'resque-scheduler'
-description 'Configuration & deployment of resque-scheduleron Engine Yard'
+name 'resque_scheduler'
+description 'Configuration & deployment of resque-scheduler on Engine Yard'
 maintainer 'Engine Yard'
 maintainer_email 'support@engineyard.com'
 version '1.0'
