@@ -41,15 +41,15 @@ if ES['is_elasticsearch_instance']
   end
 
   bash "unzip elasticsearch" do
-    cwd Chef::Config[:file_cache_path]
-    code %(unzip #{Chef::Config[:file_cache_path]}/elasticsearch-#{ES['version']}.zip)
-    not_if { File.directory? "#{Chef::Config[:file_cache_path]}/elasticsearch-#{ES['version']}" }
+    cwd ES['tmp_dir']
+    code %(unzip #{ES['tmp_dir']}/elasticsearch-#{ES['version']}.zip)
+    not_if { File.directory? "#{ES['tmp_dir']}/elasticsearch-#{ES['version']}" }
   end
 
   bash "copy elasticsearch root" do
     user "elasticsearch"
-    cwd Chef::Config[:file_cache_path]
-    code %(cp -r #{Chef::Config[:file_cache_path]}/elasticsearch-#{ES['version']}/* /usr/lib/elasticsearch-#{ES['version']})
+    cwd ES['tmp_dir']
+    code %(cp -r #{ES['tmp_dir']}/elasticsearch-#{ES['version']}/* /usr/lib/elasticsearch-#{ES['version']})
     not_if { File.exists? "/usr/lib/elasticsearch-#{ES['version']}/lib" }
   end
 

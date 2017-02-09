@@ -11,15 +11,27 @@ default['elasticsearch'].tap do |elasticsearch|
   # Set to false if you're running on a solo or app_master
   elasticsearch['configure_cluster'] = true
 
+  # Where to download and extract the installer
+  elasticsearch['tmp_dir'] = '/mnt/tmp'
+
   # Elasticsearch version to install
-  elasticsearch['version'] = '2.4.0'
+  # Go to https://www.elastic.co/downloads/past-releases to see the available version
+  elasticsearch['version'] = '2.4.4'
+  # This is the SHA256 checksum. Note that this is different from the SHA1 checksum in the Elastic website
+  elasticsearch['checksum'] = 'bee3ca3d5b2103e09b18e1791d1cc504388b992cc4ebf74869568db13c3d4372'
+
+  # NOTE: Elasticsearch 5.x.x does not yet work on EY Cloud. Feel free to open a Pull Request to address this!
+  # Use this URL for the 5.x.x versions
+  #elasticsearch['download_url'] = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-#{elasticsearch['version']}.zip"
+  # Use this URL for the 2.4.x versions
+  elasticsearch['download_url'] = "https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/zip/elasticsearch/#{elasticsearch['version']}/elasticsearch-#{elasticsearch['version']}.zip"
 
   # Gentoo Java package name to use
   elasticsearch['java_package_name'] = 'dev-java/icedtea-bin'
 
   # Which version of the java package to use
   elasticsearch['java_version'] = '3.0.1'
-  
+
   # After installing the Java version we also need to eselect it
   # The version below tells chef what java package to specify in eselect
   elasticsearch['java_eselect_version'] = 'icedtea-bin-8'
