@@ -4,6 +4,6 @@
 :verbose: <%= @verbose %>
 :concurrency: <%= @concurrency %>
 :queues:
-<% @queues.to_a.each do |q| %>
-  - [<%= q.join(', ') %>]
+<% @queues.each do |queue, priority| %>
+  - [<%= queue.to_s.inspect %>, <%= priority %>]
 <% end %>
