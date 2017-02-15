@@ -1,1 +1,1 @@
-node.default.haproxy_version = '1.6.2'
+node.default.haproxy_version = '1.6.5'
