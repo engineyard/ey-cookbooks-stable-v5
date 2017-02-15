@@ -141,6 +141,7 @@ LoadPlugin threshold
   Exec "<%= @user %>" "/engineyard/bin/check_readonly.sh"
   Exec "<%= @user %>" "/engineyard/bin/check_health_for" "ntpd"
   Exec "<%= @user %>" "/engineyard/bin/check_health_for" "fs-type"
+  Exec "<%= @user %>" "/engineyard/bin/check_health_for" "primary-ebs"
 </Plugin>
 <Plugin exec>
   NotificationExec "<%= @user %>" "<%= @alert_script %>"
