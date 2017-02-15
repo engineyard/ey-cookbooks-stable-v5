@@ -38,24 +38,37 @@ if node['redis']['is_redis_instance']
     end
   end
 
+  redis_config_variables = {
+    'basedir' => node['redis']['basedir'],
+    'basename' => node['redis']['basename'],
+    'logfile' => node['redis']['logfile'],
+    'loglevel' => node['redis']['loglevel'],
+    'port'  => node['redis']['port'],
+    'saveperiod' => node['redis']['saveperiod'],
+    'timeout' => node['redis']['timeout'],
+    'databases' => node['redis']['databases'],
+    'rdbcompression' => node['redis']['rdbcompression'],
+    'rdb_filename' => node['redis']['rdb_filename'],
+    'hz' => node['redis']['hz']
+  }
+  if node['dna']['name'] == node['redis']['slave_name']
+    redis_config_template = "redis-#{redis_config_file_version}-slave.conf.erb"
+
+    # TODO: Move this to a function
+    instances = node['dna']['engineyard']['environment']['instances']
+    redis_master_instance = instances.find{|i| i['name'] == node['redis']['utility_name']}
+
+    redis_config_variables['master_ip'] = redis_master_instance['private_hostname']
+  else
+    redis_config_template = "redis-#{redis_config_file_version}.conf.erb"
+  end
+
   template "/etc/redis.conf" do
     owner 'root'
     group 'root'
     mode 0644
-    source "redis-#{redis_config_file_version}.conf.erb"
-    variables({
-      'basedir' => node['redis']['basedir'],
-      'basename' => node['redis']['basename'],
-      'logfile' => node['redis']['logfile'],
-      'loglevel' => node['redis']['loglevel'],
-      'port'  => node['redis']['port'],
-      'saveperiod' => node['redis']['saveperiod'],
-      'timeout' => node['redis']['timeout'],
-      'databases' => node['redis']['databases'],
-      'rdbcompression' => node['redis']['rdbcompression'],
-      'rdb_filename' => node['redis']['rdb_filename'],
-      'hz' => node['redis']['hz']
-    })
+    source redis_config_template
+    variables redis_config_variables
   end
 
   if node['redis']['install_from_source']

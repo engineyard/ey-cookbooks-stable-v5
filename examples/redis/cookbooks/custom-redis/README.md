@@ -50,21 +50,21 @@ By default, the redis recipe runs on a utility instance named "redis". You can c
 
 * Ensure that these lines are not commented out:
 
-```
-  redis['utility_name'] = 'redis'
-  redis['is_redis_instance'] = (
-    node['dna']['instance_role'] == 'util' &&
-    node['dna']['name'] == redis['utility_name']
-  )
-```
+	```
+	  redis['utility_name'] = 'redis'
+	  redis['is_redis_instance'] = (
+	    node['dna']['instance_role'] == 'util' &&
+	    node['dna']['name'] == redis['utility_name']
+	  )
+	```
 
 * Specify the redis instance name. If the instance is not yet running, boot an instance with that name.
 
 * Make sure this line is commented out:
 
-```
-redis['is_redis_instance'] = ( ['solo', 'app_master'].include?(node['dna']['instance_role']) )
-```
+	```
+	redis['is_redis_instance'] = ( ['solo', 'app_master'].include?(node['dna']['instance_role']) )
+	```
 
 #### B. Run Redis on a solo environment
 
@@ -72,19 +72,51 @@ Note that this is not recommended for production environments. Running Redis on 
 
 * Uncomment this line:
 
-```
-#redis['is_redis_instance'] = (node['dna']['instance_role'] == 'solo')
-```
+	```
+	#redis['is_redis_instance'] = (node['dna']['instance_role'] == 'solo')
+	```
 
 * Make sure these lines are commented out:
 
-```
-  redis['utility_name'] = 'redis'
-  redis['is_redis_instance'] = (
-    node['dna']['instance_role'] == 'util' &&
-    node['dna']['name'] == redis['utility_name']
-  )
-```
+	```
+	  redis['utility_name'] = 'redis'
+	  redis['is_redis_instance'] = (
+	    node['dna']['instance_role'] == 'util' &&
+	    node['dna']['name'] == redis['utility_name']
+	  )
+	```
+
+### Master-Slave Replication
+
+Master-Slave replication can be used for redundancy, or to minimize the downtime when upgrading the Redis instance.
+
+#### Setup
+
+To setup master-slave replication, follow these steps:
+
+1. Uncomment these lines:
+
+	```
+	#redis['slave_name'] = 'redis_slave'
+	#redis_instances << redis['slave_name']
+	```
+
+2. Boot a utility instance named 'redis_slave'.
+
+3. Upload and run chef.
+
+4. After the chef run, the new utility instance 'redis_slave' will be replicating from the redis instance.
+
+#### Promotion
+
+As of now, the dashboard does not provide an automated promotion for the Redis slave instance. To promote the slave instance, follow these steps:
+
+1. Stop all processes connected to Redis. You can do this by putting the application in maintenance mode and stopping all background workers.
+2. Terminate the 'redis' instance
+2. Rename the 'redis_slave' instance to 'redis'
+3. Click Apply on the environment
+4. Restart the application and all processes that use Redis (e.g. background workers like Resque and Sidekiq). If you have deploy hooks for restarting background workers in place, then performing a deploy should do the restart for you.
+5. From the 'redis' instance, run `redis-cli -h localhost slaveof no one`
 
 ## Upgrading
 
@@ -121,8 +153,14 @@ D. Upgrade a solo instance from Redis 3.2.6 to Redis 4.0-rc2
   D.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the solo instance private hostname (ip-10-x-x-x.ec2.internal)
   D.4. After restarting Redis, data that was stored on the Redis 2.8.21 database should be available on the Redis 4.0-rc2 database
 E. Upgrade a cluster from Redis 3.2.6 to Redis 4.0-rc2
-  D.1. Redis 4.0.rc2 should be running on the redis instance
-  D.2. `/etc/hosts` should have a redis-instance entry that points to the redis instance private IP address
-  D.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the redis instance private hostname (ip-10-x-x-x.ec2.internal)
-  D.4. After restarting Redis, data that was stored on the Redis 3.2.6 database should be available on the Redis 4.0-rc2 database
+  E.1. Redis 4.0.rc2 should be running on the redis instance
+  E.2. `/etc/hosts` should have a redis-instance entry that points to the redis instance private IP address
+  E.3. `/data/appname/shared/config/redis.yml` should have a host entry that points to the redis instance private hostname (ip-10-x-x-x.ec2.internal)
+  E.4. After restarting Redis, data that was stored on the Redis 3.2.6 database should be available on the Redis 4.0-rc2 database
+F. Verify Replication
+  F.1. Setup Redis on a cluster with 2 utility instances, 'redis' and 'redis_slave'. Setup master-slave replication between 'redis' and 'redis-slave'
+  F.2. Verify that the redis role of the redis instance is master
+  F.3. Verify that the redis role of the redis_slave instance is slave
+  F.4. Save data on the redis and verify that it's replicated on redis_slave. 
+  F.5. Follow the [promotion steps](https://github.com/engineyard/ey-cookbooks-stable-v5/tree/next-release/examples/redis/cookbooks/custom-redis#promotion). After the promotion, verify that the role of the redis instance (renamed from redis_slave) is master. 
 ```
