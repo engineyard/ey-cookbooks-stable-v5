@@ -76,6 +76,26 @@ using `node['dna']['instance_role']` and `node['dna']['name'] `.
 
     # run the recipe on a solo instance
     default['sidekiq']['is_sidekiq_instance'] = (node['dna']['instance_role'] == 'solo')
+    
+    
+### Specify the Redis instance
+
+In a clustered environment you need to tell Sidekiq where to find Redis. You can do this by enabling the Redis recipe and adding a Sidekiq initializer in `config/initializers/sidekiq.rb` with the following information:
+
+```
+Sidekiq.configure_server do |config|
+  config.redis = { :url => "redis://redis-instance", :namespace => 'sidekiq' }
+end
+
+Sidekiq.configure_client do |config|
+  config.redis = { :url => "redis://redis-instance", :namespace => 'sidekiq' }
+end
+``` 
+
+The reference to the Redis instance works because the Redis recipe adds a `redis-instance` entry in `/etc/hosts`.
+
+More information on setting the location of your server can be found at: 
+https://github.com/mperham/sidekiq/wiki/Advanced-Options 
 
 ### Choose the number of Sidekiq processes
 
