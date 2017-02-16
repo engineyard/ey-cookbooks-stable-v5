@@ -41,6 +41,7 @@ node.engineyard.apps.each do |app|
       :dbuser => node.engineyard.environment.ssh_username,
       :dbpass => node.engineyard.environment.ssh_password,
       :dbname => app.database_name,
+      :app_name => app.name
     })
   end
 
