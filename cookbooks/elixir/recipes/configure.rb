@@ -72,6 +72,7 @@ node.engineyard.apps.each do |app|
       :app => app.name,
       :user => node["owner_name"]
     )
+  end
 
     nginx_http_port = 8081
     nginx_https_port = 8082
