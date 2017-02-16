@@ -2,6 +2,8 @@
 ssh_username  = node['owner_name']
 config = "/home/#{ssh_username}/your_app.config"
 name = `hostname`.chomp + "@" + node['ipaddress']
+port  = node['elixir']['port']
+secret = node['elixir']['secret']
 
 
 
@@ -41,7 +43,9 @@ node.engineyard.apps.each do |app|
       :dbuser => node.engineyard.environment.ssh_username,
       :dbpass => node.engineyard.environment.ssh_password,
       :dbname => app.database_name,
-      :app_name => app.name
+      :app_name => app.name,
+      :secret => secret,
+      :port => port
     })
   end
 
@@ -51,4 +55,43 @@ node.engineyard.apps.each do |app|
     mode '0755'
     action :create
   end
+
+  directory "/var/run/engineyard" do
+    owner ssh_username
+    group ssh_username
+    mode '0755'
+    action :create
+  end
+
+  template "/etc/monit.d/phoenix_#{app.name}.monitrc" do
+    owner node["owner_name"]
+    group node["owner_name"]
+    mode 0600
+    source "phoenix.monitrc.erb"
+    variables(
+      :app => app.name,
+      :user => node["owner_name"]
+    )
+
+    nginx_http_port = 8081
+    nginx_https_port = 8082
+    base_port = node['elixir']['port'].to_i
+    stepping = 200
+    app_base_port = base_port
+
+  template "/data/nginx/servers/#{app.name}.conf" do
+    owner ssh_username
+    group ssh_username
+    mode 0644
+    source "nginx_app.conf.erb"
+    cookbook "elixir"
+    variables({
+      :vhost => app.vhosts.first,
+      :port => nginx_http_port,
+      :upstream_port => port,
+      :framework_env => framework_env
+    })
+    notifies :restart, resources(:service => "nginx"), :delayed
+  end
+
 end
