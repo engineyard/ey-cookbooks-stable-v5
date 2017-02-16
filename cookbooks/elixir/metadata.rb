@@ -6,3 +6,4 @@ source_url 'https://engineyard.com'
 issues_url 'https://support.engineyard.com'
 
 depends 'ey-lib'
+depends 'nginx'
