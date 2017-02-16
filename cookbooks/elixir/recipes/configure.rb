@@ -61,12 +61,6 @@ node.engineyard.apps.each do |app|
     action :create
   end
 
-  directory "/var/run/engineyard" do
-    owner ssh_username
-    group ssh_username
-    mode '0755'
-    action :create
-  end
 
   template "/etc/monit.d/phoenix_#{app.name}.monitrc" do
     owner node["owner_name"]

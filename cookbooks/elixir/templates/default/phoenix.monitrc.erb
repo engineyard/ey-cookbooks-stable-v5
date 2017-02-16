@@ -1,5 +1,5 @@
 check process phoenix_<%= @app %>
-  with pidfile /var/run/engineyard/<%= @app %>.pid
+  matching "/data\/<%= @app %>\/current\/rel\/<%= @app %>\/bin\/<%= @app %>"
   group phoenix_<%= @app %>
   start program = "/bin/bash -c '/data/<%= @app %>/current/rel/<%= @app %>/bin/<%= @app %> start'"
     as uid <%= @user %> and gid <%= @user %>
