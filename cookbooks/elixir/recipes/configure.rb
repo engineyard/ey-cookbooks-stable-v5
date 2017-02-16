@@ -4,8 +4,13 @@ config = "/home/#{ssh_username}/your_app.config"
 name = `hostname`.chomp + "@" + node['ipaddress']
 port  = node['elixir']['port']
 secret = node['elixir']['secret']
+framework_env = node.dna['environment']['framework_env']
 
 
+service "nginx" do
+  action :nothing
+  supports :status => false, :restart => true
+end
 
 managed_template "/home/#{node["owner_name"]}/vm.args" do
   owner ssh_username
