@@ -148,7 +148,4 @@ File.open(bin_recipe_revision_file, 'w+') do |rev|
   rev.write("\n")
 end
 
-# Make sure our god config is up to date with any changes
-puts `god load /etc/god/config`
-
 exit 1 unless success
