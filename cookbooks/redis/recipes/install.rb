@@ -51,7 +51,8 @@ if node['redis']['is_redis_instance']
     'rdb_filename' => node['redis']['rdb_filename'],
     'hz' => node['redis']['hz']
   }
-  if node['dna']['name'] == node['redis']['slave_name']
+  if ((node['dna']['instance_role'] != 'solo') &&
+      (node['dna']['name'] == node['redis']['slave_name']))
     redis_config_template = "redis-#{redis_config_file_version}-slave.conf.erb"
 
     # TODO: Move this to a function
