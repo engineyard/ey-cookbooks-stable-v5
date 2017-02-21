@@ -54,6 +54,15 @@ node.engineyard.apps.each do |app|
     })
   end
 
+  cookbook_file "/data/#{app.name}/shared/config/customer.secret.exs" do
+    source "customer.secret.exs"
+    owner node["owner_name"]
+    group node["owner_name"]
+    mode 0644
+    backup 0
+    not_if { FileTest.exists?("/data/#{app_name}/shared/config/customer.secret.exs") }
+  end
+
   directory "/data/#{app.name}/shared/config/deps" do
     owner ssh_username
     group ssh_username
