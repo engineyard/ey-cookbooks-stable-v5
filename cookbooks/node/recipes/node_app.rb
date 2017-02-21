@@ -235,6 +235,14 @@ node.engineyard.apps.each_with_index do |app, app_index|
     end
   end
 
+  template "/data/#{app_name}/shared/bin/load_god_config" do
+    source "load_god_config.erb"
+    owner node["owner_name"]
+    group node["owner_name"]
+    backup 0
+    mode 0755
+  end
+
   template "/data/#{app_name}/shared/bin/build_node_app_environment" do
     source "build_node_app_environment.erb"
     owner node["owner_name"]
