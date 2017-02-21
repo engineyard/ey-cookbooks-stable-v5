@@ -9,6 +9,7 @@
 set -e
 
 /data/<%= @app_name %>/shared/bin/build_node_app_environment
+/data/<%= @app_name %>/shared/bin/load_god_config
 
 source /data/<%= @app_name %>/shared/config/env
 source /data/<%= @app_name %>/shared/config/env.custom
