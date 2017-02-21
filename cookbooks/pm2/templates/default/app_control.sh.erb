@@ -1,0 +1,50 @@
+#!/bin/bash
+# Author: Mikong Galero
+
+/data/<%= @app_name %>/shared/bin/build_node_app_environment
+
+source /data/<%= @app_name %>/shared/config/env
+source /data/<%= @app_name %>/shared/config/env.custom
+
+node_start_app() {
+  # TODO: dynamic start script
+  cd ${current_path}
+  pm2 start ${current_path}/app.js --name="${application}"
+}
+
+node_start_or_reload() {
+  pm2 describe ${application} > /dev/null
+  RUNNING=$?
+
+  if [ "${RUNNING}" -ne 0 ]; then
+    node_start_app
+  else
+    pm2 -a reload ${application}
+  fi;
+}
+
+case "$1" in
+status)
+  pm2 show ${application}
+  ;;
+start)
+  # TODO: cluster mode
+  node_start_app
+  ;;
+stop)
+  pm2 stop ${application}
+  ;;
+reload)
+  pm2 -a reload ${application}
+  ;;
+deploy)
+  node_start_or_reload
+  ;;
+restart)
+  pm2 -a restart ${application}
+  ;;
+*)
+  echo "Usage: $0 {status|start|stop|reload|restart|deploy}"
+  exit 1
+  ;;
+esac
