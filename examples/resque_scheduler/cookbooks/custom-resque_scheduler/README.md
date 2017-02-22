@@ -36,7 +36,7 @@ Our main recipes have the `resque_scheduler` recipe but it is not included by de
 
       ```
       gem install ey-core
-      ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
+      ey-core recipes upload --environment <nameofenvironment> --apply
       ```
 
 If you do not have `cookbooks/ey-custom` on your app repository, you can copy `examples/resque_scheduler/cookbooks/ey-custom` to `/path/to/app/cookbooks`.

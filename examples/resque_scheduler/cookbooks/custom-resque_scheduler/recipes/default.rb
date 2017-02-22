@@ -1,1 +1,1 @@
-include_recipe 'resque'
+include_recipe 'resque_scheduler'
