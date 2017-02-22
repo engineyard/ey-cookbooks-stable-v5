@@ -80,11 +80,12 @@ Note that this is not recommended for production environments. Running Redis on 
 * Make sure these lines are commented out:
 
 	```
-	  redis['utility_name'] = 'redis'
-	  redis['is_redis_instance'] = (
-	    node['dna']['instance_role'] == 'util' &&
-	    node['dna']['name'] == redis['utility_name']
-	  )
+	redis['utility_name'] = 'redis'
+ 	redis_instances << redis['utility_name']
+ 	redis['is_redis_instance'] = (
+   		node['dna']['instance_role'] == 'util' &&
+   		redis_instances.include?(node['dna']['name'])
+ 	)
 	```
 
 ### Master-Slave Replication
