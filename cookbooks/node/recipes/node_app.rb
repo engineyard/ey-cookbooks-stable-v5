@@ -5,6 +5,10 @@ service "nginx" do
   supports :status => false, :restart => true
 end
 
+if node.engineyard.environment["stack_name"] == "node_pm2"
+  include_recipe 'pm2'
+end
+
 node.engineyard.apps.each_with_index do |app, app_index|
 
   possible_exts = ['conf', 'tcp_conf'] # remove both styles to allow switching
@@ -40,20 +44,6 @@ node.engineyard.apps.each_with_index do |app, app_index|
       mode 0755
       recursive true
     end
-  end
-
-  template "/engineyard/bin/app_#{app_name}" do
-    source "app_control.sh.erb"
-    owner node["owner_name"]
-    group node["owner_name"]
-    backup 0
-    mode 0755
-    variables(
-      :user => node['owner_name'],
-      :framework_env => node.engineyard.environment['framework_env'],
-      :home => "/home/#{app_user}",
-      :app_name => app_name
-    )
   end
 
   template "/data/#{app_name}/shared/config/env" do
@@ -138,37 +128,63 @@ node.engineyard.apps.each_with_index do |app, app_index|
     mode 0644
   end
 
-  ey_cloud_report "god" do
-    message "configuring god to monitor #{app_name}"
-  end
+  unless node.engineyard.environment["stack_name"] == "node_pm2"
 
-  include_recipe 'god'
+    ey_cloud_report "god" do
+      message "configuring god to monitor #{app_name}"
+    end
 
-  directory "/etc/god/#{app_name}" do
-    action :create
-    recursive true
-  end
+    template "/engineyard/bin/app_#{app_name}" do
+      source "app_control.sh.erb"
+      owner node["owner_name"]
+      group node["owner_name"]
+      backup 0
+      mode 0755
+      variables(
+        :user => node['owner_name'],
+        :framework_env => node.engineyard.environment['framework_env'],
+        :home => "/home/#{app_user}",
+        :app_name => app_name
+      )
+    end
 
-  worker_memory_size = app.metadata(:worker_memory_size, 350)
+    include_recipe 'god'
 
-  app_config = "/etc/god/#{app_name}/node.rb"
-  managed_template app_config  do
-    owner node["owner_name"]
-    group node["owner_name"]
-    mode 0644
-    source "node.god.erb"
-    backup 0
-    variables(
-      :app_name => app_name,
-      :owner => node["owner_name"],
-      :port => app_port,
-      :framework_env => node.engineyard.environment['framework_env'],
-      :db_user => app_user,
-      :db_password => app_password,
-      :db_host => node.dna['db_host'],
-      :db_slaves => node.dna['db_slaves'],
-      :memory_limit => worker_memory_size
-    )
+    directory "/etc/god/#{app_name}" do
+      action :create
+      recursive true
+    end
+
+    worker_memory_size = app.metadata(:worker_memory_size, 350)
+
+    app_config = "/etc/god/#{app_name}/node.rb"
+    managed_template app_config  do
+      owner node["owner_name"]
+      group node["owner_name"]
+      mode 0644
+      source "node.god.erb"
+      backup 0
+      variables(
+        :app_name => app_name,
+        :owner => node["owner_name"],
+        :port => app_port,
+        :framework_env => node.engineyard.environment['framework_env'],
+        :db_user => app_user,
+        :db_password => app_password,
+        :db_host => node.dna['db_host'],
+        :db_slaves => node.dna['db_slaves'],
+        :memory_limit => worker_memory_size
+      )
+    end
+
+    template "/data/#{app_name}/shared/bin/load_god_config" do
+      source "load_god_config.erb"
+      owner node["owner_name"]
+      group node["owner_name"]
+      backup 0
+      mode 0755
+    end
+
   end
 
   # if there is an ssl vhost
@@ -233,14 +249,6 @@ node.engineyard.apps.each_with_index do |app, app_index|
         rm -f /data/nginx/servers/#{app.name}.ssl.tcp_conf;true
       }
     end
-  end
-
-  template "/data/#{app_name}/shared/bin/load_god_config" do
-    source "load_god_config.erb"
-    owner node["owner_name"]
-    group node["owner_name"]
-    backup 0
-    mode 0755
   end
 
   template "/data/#{app_name}/shared/bin/build_node_app_environment" do
