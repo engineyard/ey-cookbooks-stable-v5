@@ -3,11 +3,6 @@
 # Recipe:: default
 #
 if node['resque_scheduler']['is_resque_scheduler_instance']
-  execute 'install resque gem' do
-    command 'gem install resque redis redis-namespace yajl-ruby -r'
-    not_if { 'gem list | grep resque' }
-  end
-
   node['dna']['applications'].each do |app, _data|
     template "/etc/monit.d/resque_scheduler_#{app}.monitrc" do
       owner 'root'
