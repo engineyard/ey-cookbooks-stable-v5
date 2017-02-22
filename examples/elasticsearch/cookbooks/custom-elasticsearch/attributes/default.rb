@@ -12,7 +12,7 @@ default['elasticsearch'].tap do |elasticsearch|
   elasticsearch['configure_cluster'] = true
 
   # Where to download and extract the installer
-  elasticsearch['tmp_dir'] = '/mnt/tmp'
+  elasticsearch['tmp_dir'] = '/tmp'
 
   # Elasticsearch version to install
   # Go to https://www.elastic.co/downloads/past-releases to see the available version
