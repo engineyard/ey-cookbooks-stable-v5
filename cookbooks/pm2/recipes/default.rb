@@ -1,3 +1,5 @@
+include_recipe "node::common"
+
 execute "install pm2" do
   command "npm install -g pm2"
   notifies :create, "link[/usr/bin/pm2]"
