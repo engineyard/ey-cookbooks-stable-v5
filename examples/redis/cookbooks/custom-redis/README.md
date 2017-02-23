@@ -112,11 +112,11 @@ To setup master-slave replication, follow these steps:
 As of now, the dashboard does not provide an automated promotion for the Redis slave instance. To promote the slave instance, follow these steps:
 
 1. Stop all processes connected to Redis. You can do this by putting the application in maintenance mode and stopping all background workers.
-2. Terminate the 'redis' instance
 2. Rename the 'redis_slave' instance to 'redis'
-3. Click Apply on the environment
-4. Restart the application and all processes that use Redis (e.g. background workers like Resque and Sidekiq). If you have deploy hooks for restarting background workers in place, then performing a deploy should do the restart for you.
-5. From the 'redis' instance, run `redis-cli -h localhost slaveof no one`
+3. Terminate the old 'redis' instance
+4. Click Apply on the environment
+5. Restart the application and all processes that use Redis (e.g. background workers like Resque and Sidekiq). If you have deploy hooks for restarting background workers in place, then performing a deploy should do the restart for you.
+6. From the 'redis' instance, run `redis-cli -h localhost slaveof no one`
 
 ## Upgrading
 
