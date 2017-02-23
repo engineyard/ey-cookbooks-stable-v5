@@ -19,6 +19,8 @@ execute "start pm2 at boot" do
   action :nothing
 end
 
+worker_count = get_pool_size
+
 node.engineyard.apps.each_with_index do |app, app_index|
 
   app_name = app.name
@@ -30,7 +32,8 @@ node.engineyard.apps.each_with_index do |app, app_index|
     backup 0
     mode 0755
     variables(
-      :app_name => app_name
+      :app_name => app_name,
+      :worker_count => worker_count
     )
   end
 end
