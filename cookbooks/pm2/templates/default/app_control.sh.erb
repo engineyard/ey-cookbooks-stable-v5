@@ -9,7 +9,7 @@ source /data/<%= @app_name %>/shared/config/env.custom
 node_start_app() {
   # TODO: dynamic start script
   cd ${current_path}
-  pm2 start ${current_path}/app.js --name="${application}"
+  pm2 start ${current_path}/app.js --name="${application}" -i <%= @worker_count %>
 }
 
 node_start_or_reload() {
@@ -28,7 +28,6 @@ status)
   pm2 show ${application}
   ;;
 start)
-  # TODO: cluster mode
   node_start_app
   ;;
 stop)
