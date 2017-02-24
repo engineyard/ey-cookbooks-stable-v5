@@ -36,10 +36,14 @@ Our main recipes have the `resque_scheduler` recipe but it is not included by de
 
       ```
       gem install ey-core
-      ey-core recipes upload --environment <nameofenvironment> --apply
+      ey-core recipes upload --environment <nameofenvironment>
       ```
 
 If you do not have `cookbooks/ey-custom` on your app repository, you can copy `custom-cookbooks/resque_scheduler/cookbooks/ey-custom` to `/path/to/app/cookbooks`.
+
+## Dependencies
+
+`resque-scheduler` depends on Redis. We recommend using the [Redis recipe](https://github.com/engineyard/ey-cookbooks-stable-v5/tree/master/cookbooks/redis) to setup Redis on the environment.
 
 ## Customizations
 

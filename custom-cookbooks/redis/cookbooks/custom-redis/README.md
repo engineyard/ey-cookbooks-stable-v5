@@ -87,7 +87,80 @@ Note that this is not recommended for production environments. Running Redis on 
    		redis_instances.include?(node['dna']['name'])
  	)
 	```
+	
+#### C. Run Redis on the same instance as Sidekiq
 
+On staging environments, or in a production environment with a low job volume, you might want to run Sidekiq and Redis within the same instance.
+
+* Ensure that these lines are not commented out:
+
+	```
+	redis['utility_name'] = 'redis'
+ 	redis_instances << redis['utility_name']
+ 	redis['is_redis_instance'] = (
+  	  node['dna']['instance_role'] == 'util' &&
+   	  redis_instances.include?(node['dna']['name'])
+ 	)
+	```
+
+* Specify the same instance name for Redis and Sidekiq. 
+
+  On `custom-redis/attributes/default.rb`:
+  
+  ```
+  redis['utility_name'] = 'sidekiq'
+  ```
+  
+  On `custom-sidekiq/attributes/default.rb`:
+  
+  ```
+  default['sidekiq']['is_sidekiq_instance'] = (node['dna']['instance_role'] == 'util' && node['dna']['name'] == 'sidekiq')
+  ```
+
+* If the instance is not yet running, boot an instance with that name.
+
+* Make sure this line is commented out:
+
+	```
+	redis['is_redis_instance'] = ( ['solo', 'app_master'].include?(node['dna']['instance_role']) )
+	```
+	
+#### D. Run Redis on the same instance as Resque
+
+On staging environments, or in a production environment with a low job volume, you might want to run Resque and Redis within the same instance.
+
+* Ensure that these lines are not commented out:
+
+	```
+	redis['utility_name'] = 'redis'
+ 	redis_instances << redis['utility_name']
+ 	redis['is_redis_instance'] = (
+  	  node['dna']['instance_role'] == 'util' &&
+   	  redis_instances.include?(node['dna']['name'])
+ 	)
+	```
+
+* Specify the same instance name for Redis and Resque. 
+
+  On `custom-redis/attributes/default.rb`:
+  
+  ```
+  redis['utility_name'] = 'resque'
+  ```
+  
+  On `custom-resque/attributes/default.rb`:
+  
+  ```
+  default['resque']['is_resque_instance'] = (node['dna']['instance_role'] == 'util' && node['dna']['name'] == 'resque')
+  ```
+
+* If the instance is not yet running, boot an instance with that name.
+
+* Make sure this line is commented out:
+
+	```
+	redis['is_redis_instance'] = ( ['solo', 'app_master'].include?(node['dna']['instance_role']) )
+	
 ### Master-Slave Replication
 
 Master-Slave replication can be used for redundancy, or to minimize the downtime when upgrading the Redis instance.

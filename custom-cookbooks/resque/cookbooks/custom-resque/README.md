@@ -41,6 +41,10 @@ Our main recipes have the `resque` recipe but it is not included by default. To 
 
 If you do not have `cookbooks/ey-custom` on your app repository, you can copy `custom-cookbooks/resque/cookbooks/ey-custom` to `/path/to/app/cookbooks`.
 
+## Dependencies
+
+`resque` depends on Redis. We recommend using the [Redis recipe](https://github.com/engineyard/ey-cookbooks-stable-v5/tree/master/cookbooks/redis) to setup Redis on the environment.
+
 ## Customizations
 
 All customizations go to `cookbooks/custom-resque/attributes/default.rb`.
