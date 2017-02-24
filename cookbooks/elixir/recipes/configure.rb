@@ -6,6 +6,20 @@ port  = node['elixir']['port']
 secret = node['elixir']['secret']
 framework_env = node.dna['environment']['framework_env']
 
+execute "install brunch" do
+  command "npm install -g brunch"
+  action :run
+end
+
+execute "install rebar" do
+  command "mix local.rebar --force"
+  action :run
+end
+
+execute "install hex" do
+  command "mix local.hex --force"
+  action :run
+end
 
 service "nginx" do
   action :nothing
