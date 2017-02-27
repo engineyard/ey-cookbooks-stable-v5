@@ -12,7 +12,7 @@ Please use this repository:
 
 ### 3. As a reference for implementing custom cookbooks ###
  * [Customizing your environment with Chef](#customize-your-environment-with-custom-chef)
- * Use the [redis](examples/redis) or [hello_world](examples/hello_world) examples for a quick reference.
+ * Use the [redis](custom-cookbooks/redis) or [hello_world](custom-cookbooks/hello_world) examples for a quick reference.
 
 ### 4. As a way to contribute back. ###
  * Bugs fixes, New features, or basic hooks to simplify your own customizations are all welcome.
@@ -42,7 +42,7 @@ The file `/etc/dna.json` is the main input to the Chef run, telling the cookbook
 
 Each environment managed by Engine Yard supports the ability to upload a folder of custom cookbooks. When you run "Apply", before the chef run begins, the process pulls down both the exact cookbooks version your environment is running (e.g. `stable-v5-3.0.11`), and (if they exist) the latest custom cookbooks for that environment.
 
-See also: example custom cookbooks in [/examples](/examples).
+See also: example custom cookbooks in [/custom-cookbooks](/custom-cookbooks).
 
 The custom cookbooks folder is extracted on top of the main cookbooks folder. If a file exists in both folders, the custom one will overwrite the main one. This means you could literally replace the entire cookbooks run with your own code, or just customize 1 file.
 
@@ -74,4 +74,3 @@ If your pull request is purely a documentation change, it may be OK to just subm
 2. Pull Requests accumulate against the `next-release` branch (and merged as deemed appropriate)
 3. Once a week, our QA team will cut a release from the `next-release` branch and run through test plan. During this time now new PRs should be merged unless they are addressing issues found in the QA review.
 4. After QA completes, a release will be pushed to production, `next-release` will be merged into `master`, and PRs will again be accepted.
-
