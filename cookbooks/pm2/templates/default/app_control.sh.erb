@@ -9,6 +9,7 @@ source /data/<%= @app_name %>/shared/config/env.custom
 node_start_app() {
   # TODO: dynamic start script
   pm2 start ${current_path}/app.js --name="${application}" -i <%= @worker_count %>
+  pm2 save
 }
 
 node_start_or_reload() {

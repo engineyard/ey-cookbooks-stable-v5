@@ -19,6 +19,16 @@ execute "start pm2 at boot" do
   action :nothing
 end
 
+template "/etc/monit.d/pm2.monitrc" do
+  source "pm2.monitrc.erb"
+  owner "root"
+  group "root"
+  mode 0644
+  variables({
+    :user => node[:owner_name]
+  })
+end
+
 worker_count = get_pool_size
 
 node.engineyard.apps.each_with_index do |app, app_index|
