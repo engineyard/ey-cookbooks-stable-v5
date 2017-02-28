@@ -17,7 +17,7 @@ username = node['dna']['engineyard']['environment']['ssh_username']
 if node['solr']['is_solr_instance']
 
   unless use_default_java
-    Chef::Log.info "Updating Java JDK"
+    Chef::Log.info "Updating Java JDK to version #{java_version}"
     enable_package java_package_name do
       version java_version
       unmask true
@@ -25,7 +25,7 @@ if node['solr']['is_solr_instance']
 
     package java_package_name do
       version java_version
-      action :upgrade
+      action :install
     end
 
     execute "Set the default Java version to #{java_eselect_version}" do
