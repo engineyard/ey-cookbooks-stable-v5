@@ -9,7 +9,7 @@ source /data/<%= @app_name %>/shared/config/env.custom
 node_start_app() {
   # TODO: dynamic start script
   cd ${current_path}
-  pm2 start ${current_path}/app.js --name="${application}" -i <%= @worker_count %>
+  pm2 start ${current_path}/app.js --name="${application}" -i <%= @worker_count %> -o /var/log/engineyard/apps/${application}/out.log -e /var/log/engineyard/apps/${application}/error.log
   pm2 save
 }
 
