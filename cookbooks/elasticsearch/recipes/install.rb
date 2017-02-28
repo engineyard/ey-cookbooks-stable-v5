@@ -8,7 +8,7 @@ if ES['is_elasticsearch_instance']
 
   # Update JAVA as the Java on the AMI can sometimes crash
   #
-  Chef::Log.info "Updating Java JDK"
+  Chef::Log.info "Updating Java JDK to #{ES['java_version']}"
   enable_package ES['java_package_name'] do
     version ES['java_version']
     unmask true

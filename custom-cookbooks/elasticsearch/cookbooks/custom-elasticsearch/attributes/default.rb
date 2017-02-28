@@ -30,7 +30,7 @@ default['elasticsearch'].tap do |elasticsearch|
   elasticsearch['java_package_name'] = 'dev-java/icedtea-bin'
 
   # Which version of the java package to use
-  elasticsearch['java_version'] = '3.0.1'
+  elasticsearch['java_version'] = '3.3.0'
 
   # After installing the Java version we also need to eselect it
   # The version below tells chef what java package to specify in eselect
