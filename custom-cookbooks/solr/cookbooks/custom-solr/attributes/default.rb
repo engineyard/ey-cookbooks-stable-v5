@@ -1,5 +1,5 @@
 default['solr'].tap do |solr|
-  solr['java_version'] = '3.0.1'
+  solr['java_version'] = '3.3.0'
   solr['java_eselect_version']  = 'icedtea-bin-8'
   solr['solr_version'] = '6.1.0'
   solr['core_name'] = 'default'
