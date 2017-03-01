@@ -1,5 +1,3 @@
-include_recipe "ebs::default"
-
 ey_cloud_report "mysql" do
   message "processing mysql"
 end
