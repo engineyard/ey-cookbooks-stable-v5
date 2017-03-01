@@ -1,4 +1,3 @@
-include_recipe "ebs::default"
 include_recipe 'mysql::client'
 
 mysql_slave node.dna['db_host'] do
