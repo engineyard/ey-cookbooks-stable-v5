@@ -30,10 +30,14 @@ template "/etc/monit.d/pm2.monitrc" do
 end
 
 worker_count = get_pool_size
+default_worker_memory = 250
 
 node.engineyard.apps.each_with_index do |app, app_index|
 
   app_name = app.name
+
+  worker_memory_size = metadata_app_get_with_default(app_name, :worker_memory_size, default_worker_memory)
+  memory_option = "#{worker_memory_size.to_i}M"
 
   template "/engineyard/bin/app_#{app_name}" do
     source "app_control.sh.erb"
@@ -43,7 +47,8 @@ node.engineyard.apps.each_with_index do |app, app_index|
     mode 0755
     variables(
       :app_name => app_name,
-      :worker_count => worker_count
+      :worker_count => worker_count,
+      :worker_memory => memory_option
     )
   end
 end
