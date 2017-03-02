@@ -1,0 +1,1 @@
+The custom chef recipes have moved! You can find them [here](https://github.com/engineyard/ey-cookbooks-stable-v5/tree/master/custom-cookbooks).
