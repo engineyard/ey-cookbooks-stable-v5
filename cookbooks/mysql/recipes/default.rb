@@ -5,6 +5,7 @@
 # Copyright 2008, Engine Yard, Inc.
 #
 # All rights reserved - Do Not Redistribute
+include_recipe "ebs::default"
 innodb_buff = calc_innodb_buffer_pool()
 
 # these are both 32-bit unique values, so why not?
@@ -30,17 +31,19 @@ managed_template "/etc/mysql/my.cnf" do
   mode 0644
   source "my.conf.erb"
   notifies :run, "bash[adjust-mysql-server-id]", :delayed
-  variables({
-    :datadir => node['mysql']['datadir'],
-    :mysql_version => Gem::Version.new(node['mysql']['short_version']),
-    :mysql_5_5 => Gem::Version.new('5.5'),
-    :mysql_5_6 => Gem::Version.new('5.6'),
-    :mysql_full_version => node['mysql']['full_version'],
-    :logbase => node['mysql']['logbase'],
-    :innodb_buff => innodb_buff,
-    :replication_master => node.dna['instance_role'] == 'db_master',
-    :replication_slave  => node.dna['instance_role'] == 'db_slave',
-    :server_id    => server_id,
+  variables(lazy {
+    {
+      :datadir => node['mysql']['datadir'],
+      :mysql_version => Gem::Version.new(node['mysql']['short_version']),
+      :mysql_5_5 => Gem::Version.new('5.5'),
+      :mysql_5_6 => Gem::Version.new('5.6'),
+      :mysql_full_version => %x{[[ -f "/db/.lock_db_version" ]] && grep -E -o '^[0-9]+\.[0-9]+\.[0-9]+' /db/.lock_db_version || echo #{node['mysql']['latest_version']} }.chomp,
+      :logbase => node['mysql']['logbase'],
+      :innodb_buff => innodb_buff,
+      :replication_master => node.dna['instance_role'] == 'db_master',
+      :replication_slave  => node.dna['instance_role'] == 'db_slave',
+      :server_id    => server_id,
+    }
   })
 end
 
