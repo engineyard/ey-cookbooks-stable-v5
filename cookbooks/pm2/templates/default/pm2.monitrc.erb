@@ -1,0 +1,4 @@
+check process pm2
+  with pidfile /home/<%= @user %>/.pm2/pm2.pid
+  start program = "/usr/bin/env PM2_HOME=/home/<%= @user %>/.pm2 /usr/bin/pm2 resurrect" as uid "<%= @user %>" with timeout 60 seconds
+  stop program = "/usr/bin/env PM2_HOME=/home/<%= @user %>/.pm2 /usr/bin/pm2 kill" as uid "<%= @user %>" with timeout 60 seconds

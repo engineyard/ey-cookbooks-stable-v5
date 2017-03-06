@@ -7,3 +7,4 @@ issues_url 'https://support.engineyard.com'
 
 depends 'ey-lib'
 depends 'god'
+depends 'pm2'

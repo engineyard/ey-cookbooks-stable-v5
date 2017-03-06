@@ -11,6 +11,7 @@ shared_dir = "#{app_dir}/shared"
 # Make sure Node app environment is built.
 if File.exist?(node_root)
   puts `/data/#{app_name}/shared/bin/build_node_app_environment`
+  puts `/data/#{app_name}/shared/bin/load_god_config`
 end
 
 port = '<%= @port %>'
