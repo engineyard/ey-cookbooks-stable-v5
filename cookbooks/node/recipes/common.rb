@@ -130,6 +130,9 @@ managed_template "/opt/nodejs/nodejs_available_versions.json" do
   })
 end
 
+# Install yarn
+include_recipe "node::yarn"
+
 if node.engineyard.environment.component?('nodejs')
   include_recipe "node::ey_node_app_info"
 end
