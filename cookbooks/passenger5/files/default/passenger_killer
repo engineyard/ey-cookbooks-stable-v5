@@ -37,7 +37,7 @@ shift `expr $OPTIND - 1`
 app=$1
 [ -n "$app" ] || { echo "$USAGE"; exit 1; }
 kills=0
-passenger-memory-stats | egrep -i " Ra(ils|ck)(App)?:.*\\b$app\\b" > /tmp/$$.tmp
+passenger-memory-stats | egrep -i "Passenger RubyApp:.*\\b$app\\b" > /tmp/$$.tmp
 while read app_pid app_total foo app_real bar baz appdir; do
     app_real=`echo $app_real | sed 's/\..*//'`
     if [ $app_real -gt $LIMIT ]; then
