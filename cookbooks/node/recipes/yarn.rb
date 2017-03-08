@@ -1,50 +1,34 @@
-# Installs latest Yarn and sets up links properly
-# TODO:  Execute the recipe only if a newer version of yarn is available
-# (checking by hitting https://github.com/yarnpkg/yarn/releases/latest and grabbing the redirection
+# Installs Yarn and sets up links properly
+# TODO:  create a 'custom-yarn' recipe where customer can specify the version
 
-yarn_download_url = "https://yarnpkg.com/latest.tar.gz"
+yarn_version = node['yarn']['version']
 
-directory "/tmp/yarn" do
+directory "/engineyard/portage/engineyard/sys-apps/yarn" do
+  owner "root"
+  group "root"
+  mode "0755"
   recursive true
-  action :delete
-end
-
-directory "/tmp/yarn" do
-  mode 0755
   action :create
 end
 
-remote_file "/tmp/yarn/yarn-latest.tar.gz" do
-  source "#{yarn_download_url}"
-  mode 0644
-  backup 0
+cookbook_file "/engineyard/portage/engineyard/sys-apps/yarn/yarn-#{yarn_version}.ebuild" do
+  source "yarn-#{yarn_version}.ebuild"
+  mode "0644"
 end
 
-execute "unarchive Yarn" do
-  cwd "/tmp/yarn"
-  command "tar zxf yarn-latest.tar.gz"
+execute "ebuild yarn-#{yarn_version}.ebuild digest" do
+  command "ebuild yarn-#{yarn_version}.ebuild digest"
+  cwd "/engineyard/portage/engineyard/sys-apps/yarn/"
+  # only_if { `eix dev-util/le -O` =~ /No matches found./ }
 end
 
-yarn_version = `grep version /tmp/yarn/dist/package.json | awk -F: {'print $2'} | sed -e 's/ //' -e 's/\"//g' -e 's/,//'`.chomp
-
-#create yarn installation folder
-directory "/opt/yarn-#{yarn_version}" do
-  mode 0755
-  action :create
+enable_package 'sys-apps/yarn' do
+  version "#{yarn_version}"
 end
 
-execute "move Yarn to its folder under /opt" do
-  cwd "/tmp/yarn/dist"
-  command "mv * /opt/yarn-#{yarn_version}"
+package 'sys-apps/yarn' do
+  version "#{yarn_version}"
+  action :install
 end
-
-link "/usr/bin/yarn" do
-  to "/opt/yarn-#{yarn_version}/bin/yarn"
-end
-
-link "/usr/bin/yarnpkg" do
-  to "/opt/yarn-#{yarn_version}/bin/yarnpkg"
-end
-
 
 
