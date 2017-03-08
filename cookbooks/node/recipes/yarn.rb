@@ -19,7 +19,6 @@ end
 execute "ebuild yarn-#{yarn_version}.ebuild digest" do
   command "ebuild yarn-#{yarn_version}.ebuild digest"
   cwd "/engineyard/portage/engineyard/sys-apps/yarn/"
-  # only_if { `eix dev-util/le -O` =~ /No matches found./ }
 end
 
 enable_package 'sys-apps/yarn' do
