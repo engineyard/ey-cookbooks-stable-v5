@@ -63,7 +63,7 @@ node.engineyard.apps.each do |app|
       :dbpass => node.engineyard.environment.ssh_password,
       :dbname => app.database_name,
       :app_name => app.name,
-      :secret => secret,
+      :db_host => node.dna['db_host'] ,
       :port => port
     })
   end
