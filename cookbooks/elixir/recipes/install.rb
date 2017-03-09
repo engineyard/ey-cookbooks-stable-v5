@@ -29,4 +29,5 @@ end
 #Install hex
 execute "install hex" do
   command "mix local.hex --force"
+  user node.engineyard.environment.ssh_username
 end
