@@ -25,3 +25,8 @@ package node['elixir']['full_atom'] do
   version node['elixir']['version']
   action :install
 end
+
+#Install hex
+execute "install hex" do
+  command "mix local.hex --force"
+end
