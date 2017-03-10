@@ -1,6 +1,6 @@
 check process phoenix_<%= @app %>
   matching "/data\/<%= @app %>\/shared\/rel\/<%= @app %>\/bin\/<%= @app %>"
-  group phoenix_<%= @app %>
+  group <%= @app %>
   start program = "/bin/bash -c '/data/<%= @app %>/shared/rel/<%= @app %>/bin/<%= @app %> start'"
     as uid <%= @user %> and gid <%= @user %>
  stop program = "/bin/bash -c '/data/<%= @app %>/shared/rel/<%= @app %>/bin/<%= @app %> stop'"
