@@ -112,4 +112,14 @@ node.engineyard.apps.each do |app|
     notifies :restart, resources(:service => "nginx"), :delayed
   end
 
+  template "/engineyard/bin/app_#{app.name}" do
+    source "app_control.erb"
+    mode 0755
+    owner node.engineyard.environment.ssh_username
+    group node.engineyard.environment.ssh_username
+    backup 0
+    variables({
+      :app_name      => app.name
+    })
+
 end
