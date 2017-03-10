@@ -26,8 +26,12 @@ package node['elixir']['full_atom'] do
   action :install
 end
 
+#Install rebar
+execute "install rebar" do
+  command "su - -c 'mix local.rebar --force' #{node.engineyard.environment.ssh_username}"
+end
+
 #Install hex
 execute "install hex" do
-  command "mix local.hex --force"
-  user node.engineyard.environment.ssh_username
+  command "su - -c 'mix local.hex --force' #{node.engineyard.environment.ssh_username}"
 end
