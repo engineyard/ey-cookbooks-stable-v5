@@ -6,19 +6,14 @@ port  = node['elixir']['port']
 secret = node['elixir']['secret']
 framework_env = node.dna['environment']['framework_env']
 
-execute "install brunch" do
-  command "npm install -g brunch"
-  action :run
-end
-
+#Install rebar
 execute "install rebar" do
-  command "mix local.rebar --force"
-  action :run
+  command "su - -c 'mix local.rebar --force' #{node.engineyard.environment.ssh_username}"
 end
 
+#Install hex
 execute "install hex" do
-  command "mix local.hex --force"
-  action :run
+  command "su - -c 'mix local.hex --force' #{node.engineyard.environment.ssh_username}"
 end
 
 service "nginx" do
