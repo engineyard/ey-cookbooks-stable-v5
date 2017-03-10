@@ -121,5 +121,6 @@ node.engineyard.apps.each do |app|
     variables({
       :app_name      => app.name
     })
+  end
 
 end
