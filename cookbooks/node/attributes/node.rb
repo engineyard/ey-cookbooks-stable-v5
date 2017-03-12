@@ -15,11 +15,11 @@ fuzzy_version = begin
 
 fallback_nodejs_version = case (fuzzy_version || hard_version)
                            when 'nodejs_6'
-                             '6.4.0'
+                             '6.9.5'
                            when 'nodejs_5'
                              '5.11.0'
                            else
-                             '4.4.5'
+                             '4.7.3'
                            end
 
 default['nodejs']['version'] = node.engineyard.environment.metadata('nodejs_version', fallback_nodejs_version)
@@ -27,18 +27,22 @@ default['nodejs']['version'] = node.engineyard.environment.metadata('nodejs_vers
 default['nodejs']['available_versions'] = [
   '4.4.5', # net-libs/nodejs-4.4.5
   '4.6.0', # net-libs/nodejs-4.6.0
+  '4.7.3', # net-libs/nodejs-4.7.3
   '5.11.0', # net-libs/nodejs-5.11.0
   '6.4.0', # net-libs/nodejs-6.4.0
   '6.7.0' # net-libs/nodejs-6.7.0
+  '6.9.5' # net-libs/nodejs-6.9.5
 ]
 
 if (node.engineyard.metadata('openssl_ebuild_version','1.0.1') =~ /1\.0\.1/)
   default['nodejs']['available_versions'].concat ([
     '4.4.5', # net-libs/nodejs-4.4.5
     '4.6.0', # net-libs/nodejs-4.6.0
+    '4.7.3', # net-libs/nodejs-4.7.3
     '5.11.0', # net-libs/nodejs-5.11.0
     '6.4.0', # net-libs/nodejs-6.4.0
     '6.7.0' # net-libs/nodejs-6.7.0
+    '6.9.5' # net-libs/nodejs-6.9.5
 
   ])
 end
