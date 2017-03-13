@@ -136,6 +136,7 @@ SELECT 'ALTER ' || CASE t.relkind
                     WHEN 'r' THEN 'TABLE '
                     WHEN 'S' THEN 'SEQUENCE '
                     WHEN 'v' THEN 'VIEW '
+                    WHEN 'm' THEN 'MATERIALIZED VIEW '
                     END || n.nspname || '.' || t.relname || ' OWNER TO ${db_user};'
 FROM pg_class t, pg_namespace n
 WHERE t.relnamespace=n.oid
