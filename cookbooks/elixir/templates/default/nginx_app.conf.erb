@@ -82,7 +82,6 @@ server {
   error_log /var/log/engineyard/nginx/<%= @vhost.app.name %>.error.log notice;
   <% end %>
 
-  rewrite ^/public/(.*) http://api.<%= @vhost.domain_name %>/$1 permanent;
 
   #
   # Expire header on assets. For more information on the reasoning behind

@@ -3,6 +3,11 @@ include_recipe "nginx"
 ssh_username  = node['owner_name']
 framework_env = node.dna['environment']['framework_env']
 
+service "nginx" do
+  action :nothing
+  supports :status => false, :restart => true
+end
+
 node.engineyard.apps.each_with_index do |app, index|
 
   nginx_http_port = 8081

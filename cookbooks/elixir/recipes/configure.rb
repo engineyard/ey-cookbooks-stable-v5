@@ -20,21 +20,6 @@ elixir_map = node['dna']['engineyard']['environment']['instances'].
     map {|instance| "#{instance['name']}@#{instance['private_hostname']}"}
 
 
-#Install rebar
-execute "install rebar" do
-  command "su - -c 'mix local.rebar --force' #{node.engineyard.environment.ssh_username}"
-end
-
-#Install hex
-execute "install hex" do
-  command "su - -c 'mix local.hex --force' #{node.engineyard.environment.ssh_username}"
-end
-
-service "nginx" do
-  action :nothing
-  supports :status => false, :restart => true
-end
-
 managed_template "/home/#{node["owner_name"]}/vm.args" do
   owner ssh_username
   group ssh_username
@@ -61,8 +46,6 @@ end
 
 node.engineyard.apps.each_with_index do |app, index|
 
-  nginx_http_port = 8081
-  nginx_https_port = 8082
   base_port = node['elixir']['port'].to_i
   stepping = 200
   app_base_port = base_port + ( stepping * index )
