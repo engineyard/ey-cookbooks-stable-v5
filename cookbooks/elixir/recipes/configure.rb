@@ -4,7 +4,6 @@ config = "/home/#{ssh_username}/your_app.config"
 name = `hostname`.chomp + "@" + node['ipaddress']
 cookie = node['elixir']['cookie']
 port  = node['elixir']['port']
-secret = node['elixir']['secret']
 framework_env = node.dna['environment']['framework_env']
 
 #Install rebar
