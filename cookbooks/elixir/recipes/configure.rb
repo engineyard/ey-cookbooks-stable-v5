@@ -1,7 +1,14 @@
 #create the vm.args File
 ssh_username  = node['owner_name']
 config = "/home/#{ssh_username}/your_app.config"
-name = `hostname`.chomp + "@" + node['ipaddress']
+
+set_name = begin
+    node['dna']['name'] + "@" + node['ipaddress']
+  rescue NoMethodError
+    nil
+  end
+default_name = `hostname`.chomp + "@" + node['ipaddress']
+real_name = set_name or default_name
 cookie = node['elixir']['cookie']
 port  = node['elixir']['port']
 framework_env = node.dna['environment']['framework_env']
@@ -27,7 +34,7 @@ managed_template "/home/#{node["owner_name"]}/vm.args" do
   mode 0644
   source "vmargs.erb"
   variables({
-    :name => name,
+    :name => real_name,
     :cookie => cookie,
     :config => config
   })
