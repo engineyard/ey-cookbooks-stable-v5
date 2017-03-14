@@ -2,6 +2,7 @@
 ssh_username  = node['owner_name']
 config = "/home/#{ssh_username}/your_app.config"
 name = `hostname`.chomp + "@" + node['ipaddress']
+cookie = node['elixir']['cookie']
 port  = node['elixir']['port']
 secret = node['elixir']['secret']
 framework_env = node.dna['environment']['framework_env']
@@ -28,7 +29,7 @@ managed_template "/home/#{node["owner_name"]}/vm.args" do
   source "vmargs.erb"
   variables({
     :name => name,
-    :cookie => node.engineyard.environment['apps'],
+    :cookie => cookie,
     :config => config
   })
 end
@@ -95,7 +96,7 @@ node.engineyard.apps.each do |app|
     nginx_https_port = 8082
     base_port = node['elixir']['port'].to_i
     stepping = 200
-    app_base_port = base_port
+    app_base_port = base_port + ( stepping * index )
 
   template "/data/nginx/servers/#{app.name}.conf" do
     owner ssh_username
