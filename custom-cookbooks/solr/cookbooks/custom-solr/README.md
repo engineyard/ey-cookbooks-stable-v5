@@ -35,7 +35,7 @@ Our main recipes have the solr recipe but it is not included by default. To use 
 
   ```
   gem install ey-core
-  ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
+  ey-core recipes upload --environment=<nameofenvironment> --file=<pathtocookbooksfolder> --apply
   ```
 
 <a name="usage"></a>

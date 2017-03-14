@@ -35,7 +35,7 @@ Our main recipes have the `elasticsearch` recipe but it is not included by defau
 
   ```
   gem install ey-core
-  ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
+  ey-core recipes upload --environment=<nameofenvironment> --file=<pathtocookbooksfolder> --apply
   ```
 
 5. After running chef, ssh to an elasticsearch instance to verify that it's running.

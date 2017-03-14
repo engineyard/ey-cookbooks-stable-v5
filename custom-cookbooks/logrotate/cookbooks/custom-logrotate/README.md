@@ -34,7 +34,7 @@ Our main recipes have the `logrotate` recipe that defines the `logrotate` resour
 
     ```
     gem install ey-core
-    ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
+    ey-core recipes upload --environment=<nameofenvironment> --file=<pathtocookbooksfolder> --apply
     ```
 
 5. After running chef, check the new logrotate configuration in /etc/logrotate.d/.

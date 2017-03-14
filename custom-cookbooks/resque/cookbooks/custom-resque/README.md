@@ -36,7 +36,7 @@ Our main recipes have the `resque` recipe but it is not included by default. To 
 
       ```
       gem install ey-core
-      ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
+      ey-core recipes upload --environment=<nameofenvironment> --file=<pathtocookbooksfolder> --apply
       ```
 
 If you do not have `cookbooks/ey-custom` on your app repository, you can copy `custom-cookbooks/resque/cookbooks/ey-custom` to `/path/to/app/cookbooks`.
