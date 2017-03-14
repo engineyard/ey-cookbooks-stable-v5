@@ -12,6 +12,13 @@ real_name = set_name or default_name
 cookie = node['elixir']['cookie']
 port  = node['elixir']['port']
 framework_env = node.dna['environment']['framework_env']
+elixir_map = node['dna']['engineyard']['environment']['instances'].
+    compact.
+    reject {|instance| instance['id'] == node['dna']['engineyard']['this']}.
+    reject {|instance| instance['name'].nil? }.
+    select {|instance| ['util', 'app', 'app_master', 'solo'].include? instance['role']}.
+    map {|instance| "#{instance['name']}@#{instance['private_hostname']}"}
+
 
 #Install rebar
 execute "install rebar" do
@@ -46,7 +53,7 @@ managed_template "/home/#{node["owner_name"]}/elixir_app.config" do
   mode 0644
   source "elixir_app.config.erb"
   variables({
-    :optional_nodes => node.engineyard.environment['apps'],
+    :optional_nodes => elixir_map,
     :sync_timeout => 3000
   })
 end
