@@ -45,7 +45,7 @@ managed_template "/home/#{node["owner_name"]}/elixir_app.config" do
 end
 
 
-node.engineyard.apps.each do |app|
+node.engineyard.apps.each_with_index do |app, index|
 
   managed_template "/data/#{app.name}/shared/config/prod.secret.exs" do
     owner node.engineyard.environment.ssh_username
