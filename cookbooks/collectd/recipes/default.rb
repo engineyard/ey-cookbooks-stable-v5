@@ -106,7 +106,7 @@ package 'dev-perl/HTML-Parser' do
   version '3.710.0-r1'
 end
 
-memcached = ['solo','app_master','app'].include?(node.dna['instance_role'])
+memcached = node['memcached']['perform_install']
 managed_template "/etc/engineyard/collectd.conf" do
   owner 'root'
   group 'root'

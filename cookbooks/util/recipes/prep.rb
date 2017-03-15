@@ -19,6 +19,5 @@ end
 include_recipe 'app::remove'
 include_recipe 'app::create'
 include_recipe "app-logs"
-include_recipe "memcached"
 include_recipe "deploy"
 include_recipe "db_admin_tools"

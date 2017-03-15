@@ -15,7 +15,6 @@ else
   raise "I don't know how to provide databases for #{node.engineyard.environment['db_stack_name']}!"
 end
 include_recipe "app-logs"
-include_recipe "memcached"
 include_recipe "newrelic"
 include_recipe "deploy"
 include_recipe "deploy::restart"

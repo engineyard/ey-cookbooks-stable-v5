@@ -13,7 +13,6 @@
 #   "app_name": {
 #     "database_name": "app_name",
 #     "recipes": [
-#       "memcached",
 #       "monit",
 #       "nginx",
 #       "passenger3"
