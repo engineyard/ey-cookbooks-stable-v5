@@ -9,7 +9,7 @@ package "sys-libs/timezone-data" do
 end
 
 zonepath = '/usr/share/zoneinfo/'
-zone = "#{node[:engineyard][:environment][:timezone]}"
+zone = "#{node.engineyard.environment['timezone']}"
 
 has_nginx = ['solo','app','app_master'].include?(node['instance_role'])
 
