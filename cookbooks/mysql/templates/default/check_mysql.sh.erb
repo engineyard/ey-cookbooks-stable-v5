@@ -120,7 +120,7 @@ function check_replication {
 
     if [ -n "$(ps aux | grep [m]ysqldump | grep -v single-transaction)" ]
     then
-        alert "OKAY" "MySQL Replication: Replication is running. Not checking lag because a locking backup is running."
+        # don't alert for replica lag while locking backups are running as we then expect lag
         return
     fi
 
