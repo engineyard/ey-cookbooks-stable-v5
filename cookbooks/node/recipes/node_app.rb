@@ -110,7 +110,7 @@ node.engineyard.apps.each_with_index do |app, app_index|
       :application => app,
       :port => app_port,
       :http_bind_port => 8081,
-      :server_names => app[:vhosts].first[:domain_name] ? [app[:vhosts].first[:domain_name]] : [],
+      :server_names => app.vhosts.first.domain_name.empty? ? [] : [app.vhosts.first.domain_name],
       :app_name => app_name
     })
     notifies :restart, resources(:service => "nginx"), :delayed
@@ -237,7 +237,7 @@ node.engineyard.apps.each_with_index do |app, app_index|
         :app_name     => app_name,
         :port         => app_port,
         :https_bind_port => 8082,
-        :server_names =>  app[:vhosts][1][:domain_name] ? [app[:vhosts][1][:domain_name]] : [],
+        :server_names => app[:vhosts][1][:name].empty? ? [] : [app[:vhosts][1][:name]],
       })
       notifies :restart, resources(:service => "nginx"), :delayed
     end
