@@ -30,7 +30,7 @@ default['nodejs']['available_versions'] = [
   '4.7.3', # net-libs/nodejs-4.7.3
   '5.11.0', # net-libs/nodejs-5.11.0
   '6.4.0', # net-libs/nodejs-6.4.0
-  '6.7.0' # net-libs/nodejs-6.7.0
+  '6.7.0', # net-libs/nodejs-6.7.0
   '6.9.5' # net-libs/nodejs-6.9.5
 ]
 
@@ -41,7 +41,7 @@ if (node.engineyard.metadata('openssl_ebuild_version','1.0.1') =~ /1\.0\.1/)
     '4.7.3', # net-libs/nodejs-4.7.3
     '5.11.0', # net-libs/nodejs-5.11.0
     '6.4.0', # net-libs/nodejs-6.4.0
-    '6.7.0' # net-libs/nodejs-6.7.0
+    '6.7.0', # net-libs/nodejs-6.7.0
     '6.9.5' # net-libs/nodejs-6.9.5
 
   ])
