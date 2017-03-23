@@ -76,7 +76,7 @@ node.engineyard.apps.each_with_index do |app, index|
     not_if { FileTest.exists?("/data/#{app.name}/shared/config/customer.secret.exs") }
   end
 
-  directory "/data/#{app.name}/shared/config/deps" do
+  directory "/data/#{app.name}/shared/deps" do
     owner ssh_username
     group ssh_username
     mode '0755'
