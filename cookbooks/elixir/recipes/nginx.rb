@@ -16,7 +16,6 @@ node.engineyard.apps.each_with_index do |app, index|
   stepping = 200
   app_base_port = base_port + ( stepping * index )
 
-
   template "/data/nginx/servers/#{app.name}.conf" do
     owner ssh_username
     group ssh_username

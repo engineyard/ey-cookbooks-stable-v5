@@ -50,6 +50,7 @@ node.engineyard.apps.each_with_index do |app, index|
   stepping = 200
   app_base_port = base_port + ( stepping * index )
 
+  elixir_name = app.metadata('elixir_app_name', nil) || app.name
 
   managed_template "/data/#{app.name}/shared/config/prod.secret.exs" do
     owner node.engineyard.environment.ssh_username
@@ -61,6 +62,7 @@ node.engineyard.apps.each_with_index do |app, index|
       :dbuser => node.engineyard.environment.ssh_username,
       :dbpass => node.engineyard.environment.ssh_password,
       :dbname => app.database_name,
+      :elixir_name => elixir_name,
       :app_name => app.name,
       :db_host => node.dna['db_host'] ,
       :port => app_base_port
@@ -91,6 +93,7 @@ node.engineyard.apps.each_with_index do |app, index|
     source "phoenix.monitrc.erb"
     variables(
       :app => app.name,
+      :elixir_name => elixir_name,
       :user => node["owner_name"]
     )
   end

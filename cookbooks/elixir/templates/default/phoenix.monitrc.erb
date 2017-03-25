@@ -1,7 +1,7 @@
 check process phoenix_<%= @app %>
-  matching "/data\/<%= @app %>\/shared\/rel\/<%= @app %>\/bin\/<%= @app %>"
+  matching "/data\/<%= @app %>\/shared\/rel\/<%= @elixir_name %>\/bin\/<%= @elixir_name %>"
   group <%= @app %>
-  start program = "/bin/bash -c '/data/<%= @app %>/shared/rel/<%= @app %>/bin/<%= @app %> start'"
+  start program = "/bin/bash -c '/data/<%= @app %>/shared/rel/<%= @elixir_name %>/bin/<%= @elixir_name %> start'"
     as uid <%= @user %> and gid <%= @user %>
- stop program = "/bin/bash -c '/data/<%= @app %>/shared/rel/<%= @app %>/bin/<%= @app %> stop'"
+ stop program = "/bin/bash -c '/data/<%= @app %>/shared/rel/<%= @elixir_name %>/bin/<%= @elixir_name %> stop'"
     as uid <%= @user %> and gid <%= @user %>
