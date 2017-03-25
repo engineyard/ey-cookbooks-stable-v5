@@ -43,6 +43,25 @@ if component[:version] =~ /^2\.3[\d\.]*\b/
   }
 end
 
+if component[:version] =~ /^2\.4[\d\.]*\b/
+  ruby_mask = '-ruby_targets_ruby24'
+  ruby_dependencies = {
+    "dev-ruby/json"          => "2.0.3",
+    "dev-ruby/racc"          => "1.4.14-r1",
+    "dev-ruby/rake"          => "12.0.0",
+    "dev-ruby/rdoc"          => "5.1.0",
+    "dev-ruby/rubygems"      => "2.6.11",
+    "dev-ruby/did_you_mean"  => "1.1.0",
+    "dev-ruby/kpeg"          => "1.1.0",
+    "dev-ruby/minitest"      => "5.10.1",
+    "dev-ruby/net-telnet"    => "0.1.1-r2",
+    "dev-ruby/power_assert"  => "0.4.1",
+    "dev-ruby/test-unit"     => "3.2.3",
+    "dev-ruby/xmlrpc"        => "0.2.1",
+    "virtual/rubygems"       => "12",
+  }
+end
+
 unmask_package component[:package] do
   version component[:version]
   unmaskfile "ruby"
