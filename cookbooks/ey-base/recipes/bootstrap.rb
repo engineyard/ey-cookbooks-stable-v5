@@ -119,6 +119,7 @@ cookbook_file '/etc/env.d/26history' do
   group 'root'
 end
 
+
 template '/etc/env.d/05framework_env' do
   owner 'root'
   group 'root'

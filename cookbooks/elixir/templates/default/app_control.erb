@@ -1,0 +1,31 @@
+#!/bin/bash
+
+  case "$1" in
+
+  deploy)
+    /usr/bin/sudo monit restart all -g <%= @app_name %>
+  ;;
+  stop)
+    /usr/bin/sudo monit stop all -g <%= @app_name %>
+  ;;
+  start)
+    /usr/bin/sudo monit start all -g <%= @app_name %>
+  ;;
+  restart)
+    /usr/bin/sudo monit start all -g <%= @app_name %>
+  ;;
+  status)
+    if [ `/usr/bin/sudo monit summary | grep "Process 'phoenix_<%= @app_name %>'" | awk '{ print $3 }'` == 'running' ] ; then
+      echo "<%= @app_name %> is running"
+    else
+      echo "<%= @app_name %> is not running!"
+      exit 1
+    fi
+  ;;
+  *)
+  echo "Usage: $0 {status|start|stop|restart|deploy}"
+  exit 1
+  ;;
+esac
+
+exit 0
