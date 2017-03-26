@@ -17,33 +17,33 @@ that is managed by Engine Yard.
 
   1. Edit `cookbooks/ey-custom/recipes/after-main.rb` and add
 
-	```
-	    include_recipe 'custom-memcached'
-	```
+  ```
+    include_recipe 'custom-memcached'
+  ```
 
   2. Edit `cookbooks/ey-custom/metadata.rb` and add
 
-	```
-	    depends 'custom-memcached'
-	```
+  ```
+    depends 'custom-memcached'
+  ```
 
   3. Copy `custom-cookbooks/memcached/cookbooks/custom-memcached` to `cookbooks/`
 
-	```
-	    cd ~ # Change this to your preferred directory. Anywhere but inside the
-	         # application
+  ```
+    cd ~ # Change this to your preferred directory. Anywhere but inside the
+         # application
 
-	    git clone https://github.com/engineyard/ey-cookbooks-stable-v5
-	    cd ey-cookbooks-stable-v5
-	    cp custom-cookbooks/memcached/cookbooks/custom-memcached /path/to/app/cookbooks/
-	```
+    git clone https://github.com/engineyard/ey-cookbooks-stable-v5
+    cd ey-cookbooks-stable-v5
+    cp custom-cookbooks/memcached/cookbooks/custom-memcached /path/to/app/cookbooks/
+  ```
 
   4. Download the ey-core gem on your local machine and upload the recipes
 
-  	```
-  	gem install ey-core
+  ```
+    gem install ey-core
     ey-core recipes upload --environment=<nameofenvironment> --file=<pathtocookbooksfolder> --apply
-  	```
+  ```
 
 ## Customizations
 
