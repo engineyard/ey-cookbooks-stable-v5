@@ -38,7 +38,7 @@ Our main recipes have the `thinking_sphinx_3` recipe but it does not run by defa
 
       ```
       gem install ey-core
-      ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
+      ey-core recipes upload --environment=<nameofenvironment> --file=<pathtocookbooksfolder> --apply
       ```
 
 5. Add a deploy hook to your application. Create the `deploy/` directory if it doesn't exist.

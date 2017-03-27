@@ -34,7 +34,7 @@ Our main recipes have the `packages` recipe but it is not included by default. T
 
   ```
   gem install ey-core
-  ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
+  ey-core recipes upload --environment=<nameofenvironment> --file=<pathtocookbooksfolder> --apply
   ```
 
 ## Customizations

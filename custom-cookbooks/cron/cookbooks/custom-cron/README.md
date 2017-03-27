@@ -47,7 +47,7 @@ Yard.
 
   ```
   gem install ey-core
-  ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
+  ey-core recipes upload --environment=<nameofenvironment> --file=<pathtocookbooksfilder> --apply
   ```
 
 ## Customizations

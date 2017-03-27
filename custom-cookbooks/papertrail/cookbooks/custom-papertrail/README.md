@@ -35,7 +35,7 @@ That is managed by Engine Yard.
 
   ```
   gem install ey-core
-  ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply
+  ey-core recipes upload --environment=<nameofenvironment> --file=<pathtocookbooksfolder> --apply
   ```
 
 5. Specify the papertrail port and endpoint in

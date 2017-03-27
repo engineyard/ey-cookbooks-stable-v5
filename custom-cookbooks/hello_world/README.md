@@ -5,7 +5,7 @@ This example demonstrates the minimum effort required to add a NEW custom cookbo
 Steps to use this example:
 
 1. Setup an environment
-2. Run `ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder> --apply --verbose`
+2. Run `ey-core recipes upload --environment=<nameofenvironment> --file=<pathtocookbooksfolder> --apply --verbose`
     * The `ey-core` executable can be obtained by installing the [ey-core](https://github.com/engineyard/core-client-rb) gem locally.
 
 This example consists of 2 cookbooks:
