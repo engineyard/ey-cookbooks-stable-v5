@@ -1,9 +1,7 @@
-# Cookbook to setup LogEntries for EY Cloud
+# Logentries
 
-This is an exploratory EY Cloud Cookbook to install and setup LogEntries when it is enabled as a Service.
+This recipe is used to run Logentries on the stable-v5 stack.
 
-Ultimately, the cookbooks/le folder will be a standalone recipe that customers will install into their environments via the `ey-recipe clone` command.
+The Logentries recipe is managed by Engine Yard. You should not copy this recipe to your repository but instead copy custom-le. Please check the [custom-le readme](../../custom-cookbooks/le/cookbooks/custom-le) for the complete instructions.
 
-Updated to use newer version of Logentries. 
-
-#### Requires Stable V4 Stack.
+We accept contributions for changes that can be used by all customers.
