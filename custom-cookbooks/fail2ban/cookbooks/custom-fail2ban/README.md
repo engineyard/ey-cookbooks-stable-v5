@@ -37,6 +37,10 @@ Our main recipes have the `fail2ban` recipe but it is not included by default. T
   gem install ey-core
   ey-core recipes upload --environment <nameofenvironment> --path <pathtocookbooksfolder>
   ```
+  
+## Dependencies
+
+If you need email alerting, you need to enable the [custom-ssmtp recipe](../../../ssmtp/cookbooks/custom-ssmtp).
 
 ## Customizations
 
