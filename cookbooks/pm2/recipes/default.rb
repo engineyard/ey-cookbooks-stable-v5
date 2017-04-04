@@ -1,3 +1,5 @@
+recipe = self
+
 include_recipe "node::common"
 
 execute "install pm2" do
@@ -29,7 +31,6 @@ template "/etc/monit.d/pm2.monitrc" do
   })
 end
 
-worker_count = get_pool_size
 default_worker_memory = 250
 
 node.engineyard.apps.each_with_index do |app, app_index|
@@ -45,10 +46,10 @@ node.engineyard.apps.each_with_index do |app, app_index|
     group node["owner_name"]
     backup 0
     mode 0755
-    variables(
+    variables(lazy {{
       :app_name => app_name,
-      :worker_count => worker_count,
+      :worker_count => recipe.get_pool_size,
       :worker_memory => memory_option
-    )
+    }})
   end
 end
