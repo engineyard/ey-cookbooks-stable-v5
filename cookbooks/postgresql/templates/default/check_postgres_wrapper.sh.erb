@@ -52,7 +52,7 @@ function in_recovery() {
 function run_check() {
     if [ "${ACTION}" = "checkpoint" -a "$(in_recovery)" -eq "0" -a -n "$(ps aux | grep [p]g_dump)" ]
     then
-        alert "OKAY" "POSTGRES_CHECKPOINT OK: Replication is running. Not checking checkpointing because a backup is running."
+        # don't alert while backups are running on replicas since they can block checkpoints on replicas
         return
     fi
 
