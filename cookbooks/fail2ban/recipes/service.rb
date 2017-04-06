@@ -11,7 +11,7 @@ end
 # enabling the service
 service 'fail2ban' do
   supports [:status => true, :restart => true]
-  action [:enable, :start]
+  action [:enable]
   status_command "/etc/init.d/fail2ban status | grep -q 'status: started'"
 end
 
