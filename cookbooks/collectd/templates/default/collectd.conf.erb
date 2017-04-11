@@ -25,7 +25,9 @@ LoadPlugin df
 LoadPlugin disk
 LoadPlugin interface
 LoadPlugin load
+<% if @memcached %>
 LoadPlugin memcached
+<% end %>
 LoadPlugin memory
 <% if @has_db && @db_type[/mysql/] %>
   LoadPlugin mysql
