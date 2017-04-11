@@ -215,10 +215,13 @@ file "#{postgres_root}/#{postgres_version}/custom_pg_hba.conf" do
   not_if { FileTest.exists?("#{postgres_root}/#{postgres_version}/custom_pg_hba.conf") }
 end
 
-cidr = '10.0.0.0/8'
 ip = %x{ifconfig eth0 | grep inet | awk '{print $2}' | awk -F: '{print $NF}'}
-if ip =~ /^172\.31\./
-  cidr = '172.31.0.0/16'
+if ip =~ /^10\./
+  cidr = '10.0.0.0/8'
+elsif ip =~ /^172\./
+  cidr = '172.16.0.0/12'
+elsif ip =~ /^192\./
+  cidr = '192.168.0.0/16'
 end
 
 # Chef versions that don't support the lazy evaluation keyword
