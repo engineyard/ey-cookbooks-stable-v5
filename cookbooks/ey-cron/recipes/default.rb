@@ -23,6 +23,7 @@ update_file "/tmp/cron_update_header" do
 PATH=/bin:/usr/bin:/usr/local/bin:/usr/local/ey_resin/bin
 RAILS_ENV="#{node.engineyard.environment['framework_env']}"
 RACK_ENV="#{node.engineyard.environment['framework_env']}"
+PHP_ENV="#{node.engineyard.environment['framework_env']}"
 CRON
 end
 
