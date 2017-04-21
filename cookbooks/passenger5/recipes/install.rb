@@ -163,6 +163,15 @@
     backup 0
   end
 
+  cookbook_file "/data/#{app_name}/shared/config/env.custom" do
+    source "env.custom"
+    owner node["owner_name"]
+    group node["owner_name"]
+    mode 0644
+    backup 0
+    not_if { FileTest.exists?("/data/#{app_name}/shared/config/env.custom") }
+  end
+
   # Reload monit after making changes
   execute "monit-reload" do
     command "monit quit && telinit q"
