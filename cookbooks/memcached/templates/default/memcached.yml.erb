@@ -1,7 +1,15 @@
+defaults:
+  <% if !@server_names.nil? && !@server_names.empty? %>
+  servers:
+  <% @server_names.each do |server_name| %>
+    - <%= server_name %>:11211
+  <% end %>
+  <% end %>
+
 <%= @framework_env %>:
   <% if !@server_names.nil? && !@server_names.empty? %>
   servers:
   <% @server_names.each do |server_name| %>
-  - <%= server_name %>:11211
+    - <%= server_name %>:11211
   <% end %>
   <% end %>
