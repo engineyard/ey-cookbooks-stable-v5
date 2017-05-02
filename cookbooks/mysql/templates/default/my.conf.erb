@@ -46,6 +46,7 @@ show_old_temporals = 1
 <% end %>
 max_connections			= 300
 innodb_file_per_table		= 1
+secure_file_priv = ''
 
 <% if @mysql_version < @mysql_5_6 %>
 log-slow-queries		= <%= @logbase %>slow_query.log
