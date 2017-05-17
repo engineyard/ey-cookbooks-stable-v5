@@ -19,15 +19,21 @@ if [ "`whoami`" != "root" ]; then
   exit 1
 fi
 
-## Default limit - override with -l <limit in MB>
-limit=250
+## Defaults
+# limit - memory limit. override with -l <limit in MB>
+# grace_time - how long to wait before doing a kill -9. override with -w <grace_time in seconds>
+limit=800
+grace_time=30
 
 shift
-while getopts "l:" opt; do
+while getopts "l:w:" opt; do
   case $opt in
     l)
       limit=$OPTARG
-    ;;
+      ;;
+    w)
+      grace_time=$OPTARG
+      ;;
   esac
 done
 
@@ -60,8 +66,22 @@ for record in `passenger-memory-stats | egrep -i "Passenger RubyApp:" | sed -r '
 
   ## Check the against the limit, if it exceeds the memory amount, KILL IT.
   if [[ $app_real -gt $limit ]]; then
-    kill -USR1 $app_pid
     logger -t passenger_monitor -s "Killing PID $app_pid (app $app_name) - memory $app_real MB exceeds $limit MB"
+    kill -USR1 $app_pid
+    SLEEP_COUNT=0
+    while [ -e /proc/$app_pid ]; do
+      sleep .25
+      let "SLEEP_COUNT+=1"
+      let "REPORT_TIME = $SLEEP_COUNT%4"
+      if (( "$SLEEP_COUNT" > $grace_time )); then
+        logger -t passenger_monitor -s "Stopping Passenger worker Process $app_pid wait exceeded, killing it"
+        kill -9 $app_pid 2>/dev/null; true
+        break
+      elif (( $REPORT_TIME == 0 )); then
+        let "RUNTIME = $SLEEP_COUNT/4"
+        logger -t passenger_monitor -s "Waiting for $app_pid to die ( for $RUNTIME seconds now)"
+      fi
+    done
   fi
 done
 
