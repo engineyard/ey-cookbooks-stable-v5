@@ -23,7 +23,8 @@ service "nginx"
 
 link '/etc/localtime' do
   to "#{File.join(zonepath, zone)}"
-  notifies :restart, resources(:service => ["vixie-cron", "sysklogd"]), :delayed
+  notifies :restart, 'service[vixie-cron]', :delayed
+  notifies :restart, 'service[sysklogd]', :delayed
   if has_nginx
     notifies :restart, 'service[nginx]', :delayed
   end
