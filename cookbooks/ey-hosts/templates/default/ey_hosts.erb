@@ -18,29 +18,29 @@
 <% if @db_replicas.length > 0 or @db_replicas_ordered.length > 0 %>
 
 # Database Replicas
-<% end %>
-<% @db_replicas.each do |key, value| %>
-  <% if value.is_a? String %>
+  <% @db_replicas.each do |key, value| %>
+    <% if value.is_a? String %>
 <%= value %>        <%= key %>
-  <% else %>
-    <% value.each_with_index do |host, index| %>
+    <% elsif value.is_a? Array %>
+      <% value.each_with_index do |host, index| %>
 <%= host %>        <%= key %>-<%= index %>
+      <% end %>
     <% end %>
   <% end %>
-<% end %>
-<% @db_replicas_ordered.each_with_index do |host, index| %>
+  <% @db_replicas_ordered.each_with_index do |host, index| %>
 <%= host %>        ey-db-slave<%= @db_replicas_ordered.count > 1 ? "-#{index}" : '' %>    
+  <% end %>
 <% end %>
 <% if @utility_nodes.length > 0 %>
 
 # Utility Instances
-<% end %>
-<% @utility_nodes.each do |key, value| %>
-  <% if value.is_a? String %>
+  <% @utility_nodes.each do |key, value| %>
+    <% if value.is_a? String %>
 <%= value %>        <%= key %>
-  <% else %>
-    <% value.each_with_index do |host, index| %>
+    <% elsif value.is_a? Array %>
+      <% value.each_with_index do |host, index| %>
 <%= host %>        <%= key %>-<%= index %>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>
