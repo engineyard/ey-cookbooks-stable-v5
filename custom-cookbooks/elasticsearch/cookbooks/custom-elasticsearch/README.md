@@ -50,14 +50,15 @@ Results should be simlar to:
 
 ```
 {
-  "name" : "Bloodlust",
+  "name" : "PcF22DZ",
   "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "4QH3ZKEFTo6E0NP6G5Y9Jw",
   "version" : {
-    "number" : "2.4.0",
-    "build_hash" : "ce9f0c7394dee074091dd1bc4e9469251181fc55",
-    "build_timestamp" : "2016-08-29T09:14:17Z",
+    "number" : "5.4.0",
+    "build_hash" : "780f8c4",
+    "build_date" : "2017-04-28T17:43:27.229Z",
     "build_snapshot" : false,
-    "lucene_version" : "5.5.2"
+    "lucene_version" : "6.5.0"
   },
   "tagline" : "You Know, for Search"
 }
@@ -108,6 +109,24 @@ elasticsearch['is_elasticsearch_instance'] = ( ['solo', 'app_master'].include?(n
 ```
 #elasticsearch['is_elasticsearch_instance'] = ( node['dna']['instance_role'] == 'util' && node['dna']['name'].include?('elasticsearch_') )
 ```
+
+### Configure JVM Options
+
+You can configure the JVM minimum and maximum heap size, and the stack size setting by editing the jvm_options key in `attributes/default.rb`:
+
+```
+elasticsearch['jvm_options'] = {
+  :Xms => '2g',
+  :Xmx => '2g',
+  :Xss => '1m'
+}
+```
+
+For guidelines on how to calculate the optimal JVM memory settings, see [https://www.elastic.co/guide/en/elasticsearch/reference/master/heap-size.html](https://www.elastic.co/guide/en/elasticsearch/reference/master/heap-size.html).
+
+You can also hard-code other JVM options by editing `custom-elasticsearch/templates/default/jvm.options.erb`.
+
+After updating the JVM options, you need to restart Elasticsearch by running `sudo monit restart elasticsearch` on all Elasticsearch instances. The recipe does not automatically restart Elasticsearch as that can cause downtime.
 
 ## Upgrading
 

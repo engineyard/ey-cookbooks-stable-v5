@@ -1,6 +1,6 @@
 check process elasticsearch
 with pidfile /var/run/elasticsearch/elasticsearch.pid
-  start program = "/usr/lib/elasticsearch/bin/elasticsearch -d -p /var/run/elasticsearch/elasticsearch.pid" as uid <%= @owner %> with timeout 90 seconds
+  start program = "/opt/elasticsearch/bin/elasticsearch -d -p /var/run/elasticsearch/elasticsearch.pid" as uid <%= @owner %> with timeout 90 seconds
   stop program = "/bin/bash -c '/bin/kill `cat /var/run/elasticsearch/elasticsearch.pid`'" with timeout 90 seconds
   group elasticsearch
   if failed

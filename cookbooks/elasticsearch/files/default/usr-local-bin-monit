@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# set process limits
+# NOTE: These changes are needed by Elasticsearch 5.x
+ulimit -n 65536
+sysctl -w vm.max_map_count=262144
+
+# launch monit with the arguments passed to us
+exec /usr/bin/monit $@
