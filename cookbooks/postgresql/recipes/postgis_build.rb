@@ -20,4 +20,5 @@ end
 package "dev-db/postgis" do
   version node[:postgis_version]
   action :install
+  timeout 1200
 end
