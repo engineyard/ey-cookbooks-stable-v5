@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# -- generate server keys
+datadir=<%= @datadir %>           # db data directory
+admin_pass=<%= @db_admin_pass %>  # from DNA
+owner=<%= @db_owner %>            # postgres or mysql
+max_age=<%= @max_age %>           # Five years in days
+
+cd ${datadir}
+openssl genrsa -des3 -passout pass:${admin_pass} -out server.key 1024
+openssl rsa -passin pass:${admin_pass} -in server.key -out server.key
+chmod 400 server.key
+chown ${owner}.${owner} server.key
+openssl req -new -key server.key -days ${max_age} -out server.crt -x509 -subj '/C=US/ST=California/L=San Francisco/O=Engine Yard/CN=engineyard.com/emailAddress=support@engineyard.com'
+cp server.crt root.crt

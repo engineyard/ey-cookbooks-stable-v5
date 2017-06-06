@@ -1,3 +1,5 @@
+include_recipe 'db-ssl::setup'
+
 cookbook_file "/engineyard/bin/mysql_start" do
   source "mysql_start"
   mode "744"

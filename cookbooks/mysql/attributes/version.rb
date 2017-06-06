@@ -28,3 +28,5 @@ end
 default['mysql']['short_version'] = major_version
 default['mysql']['logbase'] = "/db/mysql/#{major_version}/log/"
 default['mysql']['datadir'] = "/db/mysql/#{major_version}/data/"
+default['mysql']['dbroot'] = '/db/mysql/'
+default['mysql']['owner'] = 'mysql'

@@ -12,6 +12,10 @@ template "/root/.my.cnf" do
   variables ({
     :username => 'root',
     :password => node['owner_pass'],
+    :home_dir => '/root/',
+    :mysql_version => Gem::Version.new(node['mysql']['short_version']),
+    :mysql_5_7 => Gem::Version.new('5.7'),
+    :host => node.dna['instance_role'][/^(db|solo)/] ? '127.0.0.1' : node.dna['db_host'],
   })
   source "user_my.cnf.erb"
 end
@@ -22,6 +26,10 @@ template "/home/#{node["owner_name"]}/.my.cnf" do
   variables ({
     :username => node["owner_name"],
     :password => node['owner_pass'],
+    :home_dir => "/home/#{node['owner_name']}/",
+    :mysql_version => Gem::Version.new(node['mysql']['short_version']),
+    :mysql_5_7 => Gem::Version.new('5.7'),
+    :host => node.dna['instance_role'][/^(db|solo)/] ? '127.0.0.1' : node.dna['db_host'],
   })
   source "user_my.cnf.erb"
 end

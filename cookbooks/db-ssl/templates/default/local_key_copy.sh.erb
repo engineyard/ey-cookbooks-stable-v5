@@ -1,0 +1,39 @@
+#!/bin/bash
+
+user=$1
+dbroot=<%= @dbroot %>
+keyname=<%= @keyname %>
+keypath="${dbroot}/keygen/${user}/"
+
+function usage {
+  echo "Usage: $0 username db_datadir"
+  echo
+  echo "  Copies keys from the EBS volume to the appropriate local location on db instances."
+  exit 127
+}
+
+function copy_keys () {
+  loc_user=$1
+  user_home=$(cat /etc/passwd|grep ^${loc_user} |awk -F: '{print $6}')
+  mkdir -p ${user_home}/.${keyname}
+  rsync -a ${keyname}.crt ${user_home}/.${keyname}/
+  rsync -a ${keyname}.key ${user_home}/.${keyname}/
+  rsync -a root.crt ${user_home}/.${keyname}/
+}
+
+if [[ -z $user ]]
+then 
+  usage
+fi
+
+cd ${keypath}
+if [[ "${user}" == 'postgres' ]]
+then
+  copy_keys ${user}
+  copy_keys 'root'
+elif [[ "${user}" == 'mysql' ]]
+then
+  copy_keys 'root'
+else
+  copy_keys ${user}
+fi
