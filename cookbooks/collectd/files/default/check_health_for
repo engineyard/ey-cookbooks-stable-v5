@@ -285,6 +285,9 @@ check_primary-ebs() {
       elif [[ ${prior_status} != 'OKAY' ]]
       then
         always_alert "OKAY" "FileSystem FSCK checks clean." "${check_type}"
+      elif [[ ${prior_status} == 'OKAY' ]]
+      then
+        echo -e "Time: $(date)\nStatus: OKAY\nType: ${check_type}-primary-ebs\nMessage: FileSystem FSCK checks clean." > ${STATUS_FILE}
       fi
     }
   fi
