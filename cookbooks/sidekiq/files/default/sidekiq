@@ -21,6 +21,7 @@ worker_ref="sidekiq_${worker_id}"
 pid_dir="/var/run/engineyard/sidekiq/${app_name}"
 pid_file="${pid_dir}/${worker_ref}.pid"
 log_file="${app_root}/log/${worker_ref}.log"
+stdout_file="${app_root}/log/${worker_ref}.stdout.log"
 conf_file="/data/${app_name}/shared/config/${worker_ref}.yml"
 app_user=$(stat -L -c"%U" "${app_root}")
 custom_env="/data/${app_name}/shared/config/env.custom"
@@ -66,7 +67,7 @@ start ()
   fi
 
   # start sidekiq
-  sudo -u "${app_user}" -E -H "${sidekiq}" -d -C "${conf_file}" -e "${rails_env}" -r "${app_root}" -P "${pid_file}" -L "${log_file}" -i ${worker_id} >> ${log_file} 2>&1 &
+  sudo -u "${app_user}" -E -H "${sidekiq}" -d -C "${conf_file}" -e "${rails_env}" -r "${app_root}" -P "${pid_file}" -L "${log_file}" -i ${worker_id} >> ${stdout_file} 2>&1 &
   exit $?
 }
 
