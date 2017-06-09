@@ -136,11 +136,12 @@ SELECT 'ALTER ' || CASE t.relkind
                     WHEN 'r' THEN 'TABLE '
                     WHEN 'S' THEN 'SEQUENCE '
                     WHEN 'v' THEN 'VIEW '
+                    WHEN 'm' THEN 'MATERIALIZED VIEW '
                     END || n.nspname || '.' || t.relname || ' OWNER TO ${db_user};'
 FROM pg_class t, pg_namespace n
 WHERE t.relnamespace=n.oid
     AND n.nspname != 'information_schema' AND n.nspname NOT LIKE E'pg\_%'
-    AND (t.relkind IN ('r', 'v') OR
+    AND (t.relkind IN ('r', 'v', 'm') OR
          -- this is a filter for sequences not owned by tables
          (t.relkind = 'S'
             AND t.oid NOT IN (SELECT d.objid
