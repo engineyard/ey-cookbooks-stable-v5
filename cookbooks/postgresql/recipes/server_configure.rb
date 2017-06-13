@@ -250,6 +250,8 @@ template "#{postgres_root}/#{postgres_version}/data/pg_hba.conf" do
   })
 end
 
+include_recipe 'db-ssl::setup'
+
 service "postgresql-#{postgres_version}" do
   action [:enable, :start]
   timeout 7200

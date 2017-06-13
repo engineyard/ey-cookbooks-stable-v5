@@ -1,0 +1,48 @@
+#!/bin/bash
+
+user=$1
+password=$2
+max_age=$3
+
+# -- generate keys for users
+datadir=<%= @datadir %>
+dbroot=<%= @dbroot %>
+keyname=<%= @keyname %>
+keypath="${dbroot}/keygen/<user>/"
+
+function usage {
+  echo "Usage: $0 username user_pword [expire_in_days]"
+  echo
+  echo "  Generates SSL keys for the database at ${keypath}. Hint: create keys on the db_master."
+  echo "  expire_in_days defaults to 5 years (1825) if not set."
+  exit 127
+}
+
+if [[ -z $user ]]
+then 
+  usage
+fi
+
+# update keypath now that user has been validated
+keypath="${dbroot}/keygen/${user}/"
+
+if [[ -z $password ]]
+then
+  usage
+elif [[ -z $max_age ]]
+then
+  max_age=1825
+fi
+
+organization='Engine Yard'     # don't change this, customer names can change, we'd have to re-generate the server key
+
+mkdir -p ${keypath}
+cd ${keypath}
+openssl genrsa -des3 -passout pass:${password} -out ${keyname}.key 1024
+openssl rsa -passin pass:${password} -in ${keyname}.key -out ${keyname}.key
+openssl req -new -key ${keyname}.key -out ${keyname}.csr -subj "/C=US/ST=California/L=San Francisco/O=${organization}/CN=${user}"
+openssl x509 -req -in ${keyname}.csr -CA ${datadir}/root.crt -CAkey ${datadir}/server.key -days ${max_age} -out ${keyname}.crt -CAcreateserial
+cp ${datadir}/root.crt ./
+# need to chmod and chown at this point
+chmod 0400 ${keyname}.key
+chown -R ${user}.${user} ./

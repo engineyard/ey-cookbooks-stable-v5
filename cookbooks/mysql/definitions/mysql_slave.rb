@@ -143,7 +143,12 @@ define :mysql_slave, mysql_slave_default_params do
         change_master_command << " MASTER_USER='replication',"
         change_master_command << " MASTER_PASSWORD='#{password}',"
         change_master_command << " MASTER_LOG_FILE='#{node['master_log_file']}',"
-        change_master_command << " MASTER_LOG_POS=#{node['master_log_pos']}"
+        change_master_command << " MASTER_LOG_POS=#{node[:master_log_pos]},"
+        # Setup SSL
+        change_master_command << " MASTER_SSL=1,"
+        change_master_command << " MASTER_SSL_CA='#{node['mysql']['datadir']}/root.crt',"
+        change_master_command << " MASTER_SSL_CERT='#{node['mysql']['datadir']}/server.crt',"
+        change_master_command << " MASTER_SSL_KEY='#{node['mysql']['datadir']}/server.key'"
 
         Chef::Log.info "executing change master command"
         `mysql -e "#{change_master_command}"`

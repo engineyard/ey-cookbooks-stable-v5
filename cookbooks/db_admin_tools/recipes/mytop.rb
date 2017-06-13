@@ -10,7 +10,7 @@ template "/root/.mytop" do
     :username => 'root',
     :password => node['owner_pass'],
     :database => 'mysql',
-    :host => node.dna['instance_role'][/^(db|solo)/] ? 'localhost' : node.dna['db_host'],
+    :host => node.dna['instance_role'][/^(db|solo)/] ? '127.0.0.1' : node.dna['db_host'],
   })
   source "mytop.erb"
 end
@@ -22,7 +22,7 @@ template "/home/#{node["owner_name"]}/.mytop" do
     :username => node["owner_name"],
     :password => node['owner_pass'],
     :database => node.engineyard.apps.map {|app| app.database_name }.first, 
-    :host => node.dna['instance_role'][/^(db|solo)/] ? 'localhost' : node.dna['db_host'],
+    :host => node.dna['instance_role'][/^(db|solo)/] ? '127.0.0.1' : node.dna['db_host'],
   })
   source "mytop.erb"
 end

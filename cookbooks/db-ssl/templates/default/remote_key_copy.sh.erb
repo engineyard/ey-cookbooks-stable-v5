@@ -1,0 +1,67 @@
+#!/bin/bash
+
+user=$1
+dbroot=<%= @dbroot %>
+datadir=<%= @datadir %>
+keyname=<%= @keyname %>
+instances='<%= @instances %>'
+replicas='<%= @replicas %>'
+keypath="${dbroot}/keygen/${user}/"
+ssh_options='ssh -i /root/.ssh/internal -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+
+function usage {
+  echo "Usage: $0 user"
+  echo
+  echo "  Copies keys from the db master to all instances in the environment."
+  exit 127
+}
+
+function push_keys {
+  if [[ "$user" != 'mysql' ]]
+  then
+    eval ${ssh_options} ${instance} "mkdir -p ${user_home}/.${keyname}"
+    rsync -a -e "${ssh_options}" ${keyname}.crt ${instance}:${user_home}/.${keyname}/
+    rsync -a -e "${ssh_options}" ${keyname}.key ${instance}:${user_home}/.${keyname}/
+    rsync -a -e "${ssh_options}" root.crt ${instance}:${user_home}/.${keyname}/
+  fi
+}
+
+if [[ -z $user ]]
+then
+  usage
+fi
+
+# Copy user keys to all instances
+user_home=$(cat /etc/passwd|grep ^${user} |awk -F: '{print $6}')
+cd ${keypath}
+# copy keys to other instances
+for instance in ${instances}
+do
+  push_keys
+done
+
+# Copy keys to replicas
+for replica in ${replicas}
+do
+  eval ${ssh_options} ${replica} 'date'
+  if [[ $? -eq 0 ]]
+  then
+    # Copy Server Keys to replica data dir
+    cd ${datadir}
+    rsync -a -e "${ssh_options}" root.crt ${replica}:${datadir}/
+    rsync -a -e "${ssh_options}" server.crt ${replica}:${datadir}/
+    rsync -a -e "${ssh_options}" server.key ${replica}:${datadir}/
+    
+    # Copy User Keys to replica EBS
+    cd ${dbroot}
+    # needs to be an rsync to preserve priveleges and ownership
+    rsync -a -e "${ssh_options}" 9.srl ${replica}:${dbroot}/
+    rsync -a -e "${ssh_options}" keygen ${replica}:${dbroot}/
+    
+    # Copy User Keys to replica Users
+    cd ${keypath}
+    push_keys
+  else
+    echo 'Replica DB not accessible, skipping.'
+  fi
+done

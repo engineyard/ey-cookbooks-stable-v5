@@ -72,11 +72,12 @@ max_connections = 512			# (change requires restart)
 # - Security and Authentication -
 
 #authentication_timeout = 1min		# 1s-600s
-#ssl = off				# (change requires restart)
+ssl = on				# (change requires restart)
+ssl_ca_file = 'root.crt'
 #ssl_ciphers = 'ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH'	# allowed SSL ciphers
 					# (change requires restart)
 <% if @postgres_version < "9.5" %>
-#ssl_renegotiation_limit = 512MB	# amount of data between renegotiations
+ssl_renegotiation_limit = 0	# amount of data between renegotiations
 <% end %>
 #password_encryption = on
 #db_user_namespace = off

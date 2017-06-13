@@ -9,6 +9,7 @@ dependencies
 - ebs - manages the attachment and formatting of EBS volumes, and physical backup scheduling
 - ey-lib - provides internal stack functionality
 - ey-backup - establishes logical backup scheduling
+- db-ssl - generates and distributes ssl keys for database connection encryption _(off by default)_
 
 Extensions
 ==========
