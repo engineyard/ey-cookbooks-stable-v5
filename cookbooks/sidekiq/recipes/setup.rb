@@ -59,5 +59,14 @@ if node['sidekiq']['is_sidekiq_instance']
         notifies :run, "execute[restart-sidekiq-for-#{app_name}]"
       end
     end
+
+    # chown log files
+    node['sidekiq']['workers'].times do |count|
+      file "/data/#{app_name}/shared/log/sidekiq_#{count}.log" do
+        owner node['owner_name']
+        group node['owner_name']
+        action :touch
+      end
+    end
   end 
 end
