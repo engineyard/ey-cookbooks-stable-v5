@@ -51,7 +51,7 @@ include_recipe "mysql::startup"
 
 execute "set-root-mysql-pass" do
   command %Q{
-    /usr/bin/mysqladmin -u root password '#{node['owner_pass']}'; true
+    /usr/bin/mysqladmin -u root password '#{node['owner_pass']}' || /usr/bin/mysqladmin -u root --password='' password '#{node['owner_pass']}'; true
   }
 end
 
