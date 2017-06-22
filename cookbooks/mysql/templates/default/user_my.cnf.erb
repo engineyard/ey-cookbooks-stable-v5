@@ -1,6 +1,6 @@
 [client]
 <% if @mysql_version >= @mysql_5_7 %>
-ssl-mode=preferred
+ssl-mode=VERIFY_CA
 <% end %>
 ssl-ca=<%= File.join(@home_dir, '.mysql/root.crt') %>
 ssl-cert=<%= File.join(@home_dir, '.mysql/mysql.crt') %>
@@ -12,7 +12,7 @@ host=<%= @host %>
 <% if @username == 'root' %>
 [mysqladmin]
 <% if @mysql_version >= @mysql_5_7 %>
-ssl-mode=preferred
+ssl-mode=VERIFY_CA
 <% end %>
 ssl-ca=<%= File.join(@home_dir, '.mysql/root.crt') %>
 ssl-cert=<%= File.join(@home_dir, '.mysql/mysql.crt') %>
