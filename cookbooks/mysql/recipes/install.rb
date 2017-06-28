@@ -9,15 +9,17 @@ known_versions = {
   'dev-db/percona-server' => ['5.6.28.76.1', '5.6.29.76.2-r1', '5.6.32.78.1', '5.6.35.81.0', '5.7.13.6', '5.7.14.8', '5.7.17.13']
 }
 
-execute "dropping lock version file" do
-  command "echo $(mysql --version | grep -E -o 'Distrib [0-9]+\.[0-9]+\.[0-9]+' | awk '{print $NF}') > #{lock_version_file}"
-  action :run
-  only_if { lock_db_version and not File.exists?(lock_version_file) and db_running }
-end
+if node.dna['instance_role'][/^(db|solo)/]
+  execute "dropping lock version file" do
+    command "echo $(mysql --version | grep -E -o 'Distrib [0-9]+\.[0-9]+\.[0-9]+' | awk '{print $NF}') > #{lock_version_file}"
+    action :run
+    only_if { lock_db_version and not File.exists?(lock_version_file) and db_running }
+  end
 
-execute "remove lock version file" do
-  command "rm #{lock_version_file}"
-  only_if { not lock_db_version and File.exists?(lock_version_file) }
+  execute "remove lock version file" do
+    command "rm #{lock_version_file}"
+    only_if { not lock_db_version and File.exists?(lock_version_file) }
+  end
 end
 
 unmask_package "virtual/mysql" do
