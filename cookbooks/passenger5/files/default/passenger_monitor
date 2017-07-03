@@ -37,6 +37,9 @@ while getopts "l:w:" opt; do
   esac
 done
 
+# Multiply grace_time by 4 because our clock tick is 0.25 seconds
+let "grace_time=$grace_time*4"
+
 ## Get output from passenger-memory-stats, egrep for Rails: OR Rack:.
 ## Sed explained:
 ##  /MB/!d; - Do not delete lines with MB in them. All others are removed (check for memory output)
