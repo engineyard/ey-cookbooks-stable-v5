@@ -35,10 +35,10 @@ action :install do
             quoted_ext_name = "'#{ext_name}'"
           else
             cmd = 'CREATE EXTENSION IF NOT EXISTS'
-            quoted_ext_name = ext_name
+            quoted_ext_name = '"' + ext_name + '"'
           end
           execute "Postgresql loading #{use_load ? 'library': 'extension'} #{ext_name}" do
-            command %Q(psql -U postgres -d #{db_name} -c "#{cmd} #{quoted_ext_name} #{"SCHEMA #{schema_name}" if !schema_name.nil? } #{"VERSION #{version}" if !version.nil?} #{"FROM #{old_version}" if !old_version.nil?};")
+            command %Q(psql -U postgres -d #{db_name} -c '#{cmd} #{quoted_ext_name} #{"SCHEMA #{schema_name}" if !schema_name.nil? } #{"VERSION #{version}" if !version.nil?} #{"FROM #{old_version}" if !old_version.nil?};')
           end
       
           # and a couple follow up commands for Postgis
