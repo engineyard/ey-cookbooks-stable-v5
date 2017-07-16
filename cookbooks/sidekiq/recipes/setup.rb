@@ -39,11 +39,13 @@ if node['sidekiq']['is_sidekiq_instance']
     end
     
     # database.yml
+    worker_count = node['sidekiq']['workers'] || 1
+    concurrency = node['sidekiq']['concurrency']
+    db_connection_pool_size = worker_count * concurrency
     execute "update-database-yml-pg-pool-for-#{app_name}" do
       db_yaml_file = "/data/#{app_name}/shared/config/database.yml"
-      command "sed -ibak --follow-symlinks 's/reconnect/pool:      #{node['sidekiq']['concurrency']}\\\n  reconnect/g' #{db_yaml_file}"
+      command "sed -ibak --follow-symlinks 's/reconnect/pool:      #{db_connection_pool_size}\\\n  reconnect/g' #{db_yaml_file}"
       action :run
-      only_if "test -f #{db_yaml_file} && ! grep 'pool: *#{node['sidekiq']['concurrency']}' #{db_yaml_file}"
       notifies :run, "execute[restart-sidekiq-for-#{app_name}]"
     end
 
