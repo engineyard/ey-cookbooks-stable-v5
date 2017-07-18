@@ -157,14 +157,31 @@ if [ -d $RAILS_ROOT ]; then
        kill -15 $PID $WORKER_PID; # kill worker and any child that it may have at this very moment
        logger -t "monit-dj:$WORKER[$$]" "Stopping DJ Worker Process $PID $PPID"
 
+       # In case the worker stubbornly ignored the kill -15 signal
+       SLEEP_COUNT=0
+       while [ -e /proc/$WORKER_PID ]; do
+         sleep .25
+         let "SLEEP_COUNT+=1"
+         let "REPORT_TIME = $SLEEP_COUNT%4"
+         if(( "$SLEEP_COUNT" > $GRACE_TIME )); then
+           logger -t "monit-dj:$WORKER[$$]" "Stopping DJ Worker Child Process $WORKER_PID wait exceeded, killing it"
+           kill -9 $WORKER_PID 2>/dev/null; true
+           break
+         elif(( $REPORT_TIME == 0 ));then
+           let "RUNTIME = $SLEEP_COUNT/4"
+           logger -t "monit-dj:$WORKER[$$]" "Waiting for $WORKER_PID to die ( for $RUNTIME seconds now)"
+         fi
+       done
+
+       # In case the bash process that started the dj worker is still around
        SLEEP_COUNT=0
        while [ -e /proc/$PID ]; do
          sleep .25
          let "SLEEP_COUNT+=1"
          let "REPORT_TIME = $SLEEP_COUNT%4"
          if(( "$SLEEP_COUNT" > $GRACE_TIME )); then
-           logger -t "monit-dj:$WORKER[$$]" "Stopping DJ Worker Child Process $PID wait exceeded, killing it"
-           kill -9 $PID $WORKER_PID 2>/dev/null; true
+           logger -t "monit-dj:$WORKER[$$]" "Stopping DJ bash process $PID wait exceeded, killing it"
+           kill -9 $PID 2>/dev/null; true
            break
          elif(( $REPORT_TIME == 0 ));then
            let "RUNTIME = $SLEEP_COUNT/4"
