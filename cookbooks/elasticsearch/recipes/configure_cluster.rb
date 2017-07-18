@@ -12,7 +12,7 @@ else
     end
   end
 
-  template "/usr/lib/elasticsearch-#{ES['version']}/config/elasticsearch.yml" do
+  template "/opt/elasticsearch/config/elasticsearch.yml" do
     source "elasticsearch.yml.erb"
     owner "elasticsearch"
     group "nogroup"
@@ -22,7 +22,8 @@ else
       :elasticsearch_expected => elasticsearch_expected,
       :elasticsearch_defaultshards => ES['defaultshards'],
       :elasticsearch_clustername => ES['clustername'],
-      :elasticsearch_host => node['fqdn']
+      :elasticsearch_host => node['fqdn'],
+      :is_V2 => ES['version'].match(/^2/)
     )
     mode 0600
     backup 0
