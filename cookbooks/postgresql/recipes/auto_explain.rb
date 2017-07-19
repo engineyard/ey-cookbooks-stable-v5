@@ -19,12 +19,6 @@ EOF
   not_if "[ -e #{custom_conf} ] && grep auto_explain #{custom_conf}"
 end
 
-# file "configure auto_explain" do
-#   action :create
-#   path custom_conf
-#   content lazy { body }
-#   not_if "[ -e #{custom_conf} ] && grep auto_explain #{custom_conf}"
-# end
 
 execute "reload postgres service" do
   command "/etc/init.d/postgresql-#{node[:postgresql][:short_version]} reload"
