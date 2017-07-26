@@ -103,7 +103,7 @@ if ['solo', 'db_master'].include?(node.dna['instance_role'])
     notifies :reload, "service[postgresql-#{postgres_version}]"
     variables(
       :pg_port => "5432",
-      :wal_level => "hot_standby",
+      :wal_level => postgres_version >= '9.6' ? 'replica' : 'hot_standby',
       :shared_buffers => node['shared_buffers'],
       :maintenance_work_mem => node['maintenance_work_mem'],
       :work_mem => node['work_mem'],
