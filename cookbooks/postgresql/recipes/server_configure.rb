@@ -306,12 +306,15 @@ node.engineyard.apps.each do |app|
   end
 end
 
-if ::File.exist?(node[:pg_extensions_file])
-  exts = JSON.parse(::File.read(node[:pg_extensions_file]))
-  exts.each do |db_name, exts|
-    pg_extension "loading extensions #{exts} to database #{db_name}" do
-      ext_name exts
-      db_name db_name
+ruby_block 'process extensions.json' do
+  block do
+    # run_context = Chef::RunContext.new(node, {})
+    exts = JSON.parse(::File.read(node[:pg_extensions_file]))
+    exts.each do |db_name, exts|
+      run_context.resource_collection << r = Chef::Resource::PostgresqlPgExtension.new("install #{exts.join(',')} in database #{db_name}", run_context)
+      r.db_name = db_name
+      r.ext_name = exts
     end
   end
+  only_if { ::File.exist?(node[:pg_extensions_file]) }
 end
