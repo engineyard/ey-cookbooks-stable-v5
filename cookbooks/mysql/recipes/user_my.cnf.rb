@@ -15,7 +15,7 @@ template "/root/.my.cnf" do
     :home_dir => '/root/',
     :mysql_version => Gem::Version.new(node['mysql']['short_version']),
     :mysql_5_7 => Gem::Version.new('5.7'),
-    :host => node.dna['instance_role'][/^(db|solo)/] ? '127.0.0.1' : node.dna['db_host'],
+    :host => node.dna['instance_role'][/^(db|solo)/] ? 'localhost' : node.dna['db_host'],
   })
   source "user_my.cnf.erb"
 end
