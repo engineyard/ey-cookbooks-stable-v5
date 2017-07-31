@@ -14,8 +14,8 @@ if node['tinyproxy']['is_tinyproxy_instance']
 
   # Create the tinyproxy directory
   directory "/data/#{app_name}/shared/tinyproxy" do
-    owner 'deploy'
-    group 'deploy'
+    owner 'nobody'
+    group 'nobody'
     mode 0777
     recursive true
     action :create
@@ -23,14 +23,20 @@ if node['tinyproxy']['is_tinyproxy_instance']
 
   # Create the tinyproxy config file
   template config_file do
-    owner 'deploy'
-    group 'deploy'
+    owner 'nobody'
+    group 'nobody'
     mode 0644
     source 'tinyproxy.conf.erb'
     variables({
       :app_name => app_name,
       :port => proxy_port
     })
+  end
+
+  # Ensure everything in the tinyproxy directory is owned by nobody
+  execute "chown tinyproxy directory" do
+    command "chown -R nobody:nobody /data/#{app_name}/shared/tinyproxy"
+    action :run
   end
 
   # Run tinyproxy from monit
@@ -44,8 +50,12 @@ if node['tinyproxy']['is_tinyproxy_instance']
       :config_file => config_file
     })
   end
+else
+  # For non-tinyproxy instances, delete any tinyproxy.monitrc
+  # that may have been carried over from a snapshot
+  cleanup_tinyproxy_monitrc
+end
 
-  execute 'monit reload' do
-    action :run
-  end
+execute 'monit reload' do
+  action :run
 end
