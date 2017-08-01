@@ -4,7 +4,34 @@
 #
 
 # Find all cron jobs specified in attributes/cron.rb where current node name matches instance_name
-crons = node[:custom_crons].find_all {|c| c[:instance_name] == node.dna[:name] }
+named_crons = node[:custom_crons].find_all {|c| c[:instance_name] == node.dna[:name] }
+
+# Find all cron jobs for utility instances
+util_crons = node[:custom_crons].find_all {|c| c[:instance_name] == 'util' }
+
+# Find all cron jobs for application instances
+app_crons = node[:custom_crons].find_all {|c| c[:instance_name] == 'app' }
+
+# Find all cron jobs for ALL instances
+all_crons = node[:custom_crons].find_all {|c| c[:instance_name] == 'all' }
+
+# Find all cron jobs for Database instances
+db_crons = node[:custom_crons].find_all {|c| c[:instance_name] == 'db' }
+
+crons = all_crons + named_crons
+
+
+if node['dna']['instance_role'] == 'util'
+    crons = crons + util_crons
+end
+
+if node['dna']['instance_role'] == 'app' || node['dna']['instance_role'] == 'app_master'
+    crons = crons + app_crons
+end
+
+if node['dna']['instance_role'] == 'db_master' || node['dna']['instance_role'] == 'db_slave'
+    crons = crons + db_crons
+end
 
 crons.each do |cron|
   cron cron[:name] do
@@ -18,3 +45,5 @@ crons.each do |cron|
     command  cron[:command]
   end
 end
+
+
