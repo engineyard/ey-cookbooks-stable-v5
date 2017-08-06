@@ -9,6 +9,7 @@ default['tinyproxy'].tap do |tinyproxy|
 
   # Run Tinyproxy on a named util instance
   # This is the default
+  tinyproxy['install_type'] = 'NAMED_UTIL'
   tinyproxy['utility_name'] = 'tinyproxy'
   tinyproxy['is_tinyproxy_instance'] = (
     node['dna']['instance_role'] == 'util' &&
@@ -16,5 +17,6 @@ default['tinyproxy'].tap do |tinyproxy|
   )
 
   # Run tinyproxy on the app_master instance
+  #tinyproxy['install_type'] = 'APP_MASTER'
   #tinyproxy['is_tinyproxy_instance'] = (node['dna']['instance_role'] == 'app_master')
 end
