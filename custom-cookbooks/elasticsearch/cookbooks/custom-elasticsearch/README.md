@@ -1,7 +1,6 @@
 # Elasticsearch
 
-This recipe installs Elasticsearch 2.4.0 and requires Java 7 or later.
-
+This recipe installs Elasticsearch 2.x/5.x. Elasticsearch 2.x requires Java 7 or later, Elasticsearch 5.x requires Java 8.
 
 ## Installation
 
