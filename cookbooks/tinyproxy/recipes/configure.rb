@@ -2,10 +2,23 @@
 app_name = 'todo'
 proxy_port = node['tinyproxy']['port']
 
-tinyproxy_instance = node['dna']['engineyard']['environment']['instances'].find { |instance| instance['role'] == 'app_master' }
-tinyproxy_host = tinyproxy_instance['private_hostname']
 # Write down the IP address and port used by the tinyproxy host
 # so that web workers or background job workers know how to use tinyproxy
+
+def tinyproxy_host
+  case node['tinyproxy']['install_type']
+  when 'NAMED_UTIL'
+    node.dna.utility_instances.
+      select{ |i| i.name == node['tinyproxy']['utility_name'] }.
+      map{ |i| i.hostname }
+  when 'APP_MASTER'
+    node.engineyard.environment.instances.
+      select{ |i| 'app_master' == i.role }.
+      map{ |i| i.private_hostname}
+  end
+end
+
+hostname = tinyproxy_host
 if ['solo', 'app_master', 'app', 'util'].include?(node['dna']['instance_role'])
   template "/data/#{app_name}/shared/config/tinyproxy.yml" do
     owner 'deploy'
@@ -13,7 +26,7 @@ if ['solo', 'app_master', 'app', 'util'].include?(node['dna']['instance_role'])
     mode 0644
     source 'tinyproxy.yml.erb'
     variables({
-      :hostname => tinyproxy_host,
+      :hostname => hostname,
       :port => proxy_port
     })
   end
