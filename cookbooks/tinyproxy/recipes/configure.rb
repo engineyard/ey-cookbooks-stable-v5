@@ -10,11 +10,13 @@ def tinyproxy_host
   when 'NAMED_UTIL'
     node.dna.utility_instances.
       select{ |i| i.name == node['tinyproxy']['utility_name'] }.
-      map{ |i| i.hostname }
+      map{ |i| i.hostname }.
+      first
   when 'APP_MASTER'
     node.engineyard.environment.instances.
       select{ |i| 'app_master' == i.role }.
-      map{ |i| i.private_hostname}
+      map{ |i| i.private_hostname}.
+      first
   end
 end
 
