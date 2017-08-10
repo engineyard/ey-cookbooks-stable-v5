@@ -60,7 +60,6 @@ if has_backups_enabled && (db_slaves_available && is_db_slave && is_first_slave 
   end
 else
   cron 'mysql' do
-    user   cronjob_user
     action :delete
   end
 end
