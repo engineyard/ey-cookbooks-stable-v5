@@ -28,8 +28,8 @@ node.engineyard.apps.each_with_index do |app, app_index|
   end
 
   app_name = app.name
-  app_user = node.engineyard.environment.ssh_username
-  app_password = node.engineyard.environment.ssh_password
+  app_user = app.database_username
+  app_password = app.database_password
 
   ey_cloud_report "node-app-#{app_name}" do
     message "configuring #{app_name} via #{mode_hash[:label]} proxy"

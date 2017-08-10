@@ -5,19 +5,19 @@ module PostgreSQL
     end
 
     def pg_running
-      %x{psql -U postgres -t -c"select 1;" 2> /dev/null}.strip == '1'
+      %x{psql -U node.engineyard.environment['db_admin_username'] -t -h localhost -c"select 1;" 2> /dev/null}.strip == '1'
     end
-    
+
     def running_pg_version
       if pg_running
-        %x{psql -U postgres -c'select version();' | grep -E -o 'PostgreSQL ([0-9]+\.?)+' | awk '{print $NF}'}.strip
+        %x{psql -U node.engineyard.environment['db_admin_username'] -c'select version();' | grep -E -o 'PostgreSQL ([0-9]+\.?)+' | awk '{print $NF}'}.strip
       else
         binary_pg_version
       end
     end
-    
+
     def binary_pg_version
-      %x{psql -U postgres --version | grep PostgreSQL | awk '{print $NF}'}.strip
+      %x{psql -U node.engineyard.environment['db_admin_username'] --version | grep PostgreSQL | awk '{print $NF}'}.strip
     end
 
     def add_shared_preload_library(lib)

@@ -6,8 +6,9 @@ managed_template "/etc/.mysql.backups.yml" do
   mode 0600
   source "backups.yml.erb"
   variables({
-    :dbuser => 'root',
-    :dbpass => node['owner_pass'],
+    :dbuser => node.engineyard.environment['db_admin_username'],
+    :dbpass => node.engineyard.environment['db_admin_password'],
+    :log_coordinates => db_host_is_rds? ? false : true,
     :keep   => node.dna['backup_window'] || 14,
     :id     => node.dna['aws_secret_id'],
     :key    => node.dna['aws_secret_key'],

@@ -7,7 +7,7 @@ template "/tmp/mysql-cleanup.sql" do
   mode 0644
   source "cleanup.sql.erb"
   variables({
-    :dbpass => node['owner_pass'],
+    :dbpass => node.engineyard.environment['db_admin_password'],
     :user_hosts => [
       ['',    'localhost'],
       ['',     mysql_hostname],
@@ -30,7 +30,7 @@ end
 
 execute "create-database-for-mysql-cleanup" do
   command %Q{
-    export MYSQL_PWD=#{node['owner_pass']}; mysql -u root < /tmp/mysql-cleanup.sql
+    export MYSQL_PWD=#{node.engineyard.environment['db_admin_password']}; mysql -u root < /tmp/mysql-cleanup.sql
   }
   notifies :run, 'execute[remove-database-file-for-mysql-cleanup]'
 end

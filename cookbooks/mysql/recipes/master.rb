@@ -28,8 +28,8 @@ link "/usr/bin/mysql_install_db" do
   to "/usr/share/mysql/scripts/mysql_install_db"
   owner 'root'
   group 'root'
-  only_if { ! File.exists?("/usr/bin/mysql_install_db") and File.exists?("/usr/share/mysql/scripts/mysql_install_db") } 
-  
+  only_if { ! File.exists?("/usr/bin/mysql_install_db") and File.exists?("/usr/share/mysql/scripts/mysql_install_db") }
+
 end
 
 execute "do-init-mysql" do
@@ -51,42 +51,12 @@ include_recipe "mysql::startup"
 
 execute "set-root-mysql-pass" do
   command %Q{
-    /usr/bin/mysqladmin -u root password '#{node['owner_pass']}' || /usr/bin/mysqladmin -u root --password='' password '#{node['owner_pass']}'; true
+    /usr/bin/mysqladmin -u root password '#{node.engineyard.environment['db_admin_password']}' || /usr/bin/mysqladmin -u root --password='' password '#{node.engineyard.environment['db_admin_password']}'; true
   }
 end
 
 include_recipe "mysql::cleanup" if node['mysql']['short_version'] == '5.6' # MySQL 5.7 doesn't include extra users/databases by default
 
-node.engineyard.environment['apps'].each do |app|
-
-  dbhost = (node.dna['db_host'] == 'localhost' ? 'localhost' : '%')
-
-  template "/tmp/create.#{app['name']}.sql" do
-    owner 'root'
-    group 'root'
-    mode 0644
-    source "create.sql.erb"
-    variables({
-      :dbuser => node["owner_name"],
-      :dbpass => node['owner_pass'],
-      :dbname => app['database_name'],
-      :dbhost => dbhost,
-    })
-  end
-
-  execute "remove-database-file-for-#{app['name']}" do
-    command %Q{
-      rm /tmp/create.#{app['name']}.sql
-    }
-    action :nothing
-  end
-
-  execute "create-database-for-#{app['name']}" do
-    command %Q{
-      export MYSQL_PWD=#{node['owner_pass']}; mysql -u root < /tmp/create.#{app['name']}.sql
-    }
-    notifies :run, "execute[remove-database-file-for-#{app['name']}]"
-  end
-end
+include_recipe "mysql::setup_app_users_dbs"
 
 include_recipe "ey-backup::mysql"

@@ -7,6 +7,11 @@
   host:      '<%= @dbhost %>'
   reconnect: true
 <%= @pool ? "  pool:      #@pool" : '' %>
+<% if @include_ssl %>
+  sslca: '/home/<%= @ssl_owner %>/.mysql/root.crt'
+  sslkey: '/home/<%= @ssl_owner %>/.mysql/mysql.key'
+  sslcert: '/home/<%= @ssl_owner %>/.mysql/mysql.crt'
+<% end %>
 
 <% @slaves.each_with_index do |slave,i| %>
 <%= i == 0 ? "slave" : "slave_#{i}" %>:
@@ -18,4 +23,9 @@
   host:      '<%= slave['private_hostname'] %>'
   reconnect: true
 <%= @pool ? "  pool:      #@pool" : '' %>
+<% if @include_ssl %>
+  sslca: '/home/<%= @ssl_owner %>/.mysql/root.crt'
+  sslkey: '/home/<%= @ssl_owner %>/.mysql/mysql.key'
+  sslcert: '/home/<%= @ssl_owner %>/.mysql/mysql.crt'
+<% end %>
 <% end %>

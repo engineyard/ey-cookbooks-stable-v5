@@ -5,8 +5,8 @@ managed_template "/etc/.postgresql.backups.yml" do
   backup 0
   source "backups.yml.erb"
   variables({
-    :dbuser => node.dna['users'].first['username'],
-    :dbpass => node.dna['users'].first['password'],
+    :dbuser => node.engineyard.environment['db_admin_username'],
+    :dbpass => node.engineyard.environment['db_admin_password'],
     :keep   => node.dna['backup_window'] || 14,
     :id     => node.dna['aws_secret_id'],
     :key    => node.dna['aws_secret_key'],

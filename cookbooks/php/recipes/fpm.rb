@@ -46,7 +46,7 @@ bash 'eselect php and restart via monit' do
   code <<-EOH
     eselect php set fpm php#{node["php"]["minor_version"]}
     EOH
-  not_if "php-fpm -v | grep PHP | grep #{node['php']['version']}" 
+  not_if "php-fpm -v | grep PHP | grep #{node['php']['version']}"
   notifies :run, 'execute[monit_restart_fpm]'
 end
 
@@ -102,8 +102,8 @@ app_names.each do |app_name|
       :app_name => app_name,
       :php_env => node.dna['environment']['framework_env'],
       :user => node["owner_name"],
-      :dbuser => node["owner_name"],
-      :dbpass => node.engineyard.environment.ssh_password,
+      :dbuser => ode.apps.detect {|app| app[:name] == app_name}.database_username,
+      :dbpass => ode.apps.detect {|app| app[:name] == app_name}.database_password,
       :dbhost => node.dna['db_host'],
       :dbreplicas => node.dna['db_slaves'].join(':'),
       :max_children => app_fpm_count,

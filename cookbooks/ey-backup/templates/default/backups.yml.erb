@@ -6,6 +6,9 @@
 :backup_bucket: <%= @backup_bucket %>
 :dbuser: <%= @dbuser %>
 :dbpass: <%= @dbpass %>
+<% if @log_coordinates %>
+:log_coordinates: <%= @log_coordinates %>
+<% end %>
 :env: <%= @env %>
 :databases:
 <% @databases.each do |database| %>
