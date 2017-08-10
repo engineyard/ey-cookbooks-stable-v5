@@ -46,7 +46,7 @@ is_db_master_or_solo = ['db_master','solo'].include?(node.dna['instance_role'])
 is_db_slave          = 'db_slave' == node.dna['instance_role']
 is_first_slave       = node.dna['db_slaves'].first == (node['ec2'] && node['ec2']['local_hostname'] ? node['ec2']['local_hostname'] : hostname.stdout)
 
-if has_backups_enabled && (db_slaves_available && is_db_slave && is_first_slave || is_db_master_or_solo)
+if has_backups_enabled && (db_slaves_available && is_db_slave && is_first_slave || !db_slaves_available && is_db_master_or_solo)
   encryption_command = @encryption_command
   backup_command = "eybackup -e mysql #{encryption_command} >> /var/log/eybackup.log 2>&1"
 
