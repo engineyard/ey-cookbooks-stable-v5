@@ -43,12 +43,11 @@ end
 has_backups_enabled  = node.dna['backup_window'] != 0
 db_slaves_available  = node.dna['db_slaves'].any?
 is_db_master_or_solo = ['db_master','solo'].include?(node.dna['instance_role'])
-is_db_slave          = 'db_slave' == node.dna['instance_role']
 
 # The backup target is the first db-slave, we do this to avoid multiple db-slaves doing backups
 is_backup_target = node.dna['db_slaves'].first == (node['ec2'] && node['ec2']['local_hostname'] ? node['ec2']['local_hostname'] : hostname.stdout)
 
-if has_backups_enabled && (db_slaves_available && is_db_slave && is_backup_target || !db_slaves_available && is_db_master_or_solo)
+if has_backups_enabled && (db_slaves_available && is_backup_target || !db_slaves_available && is_db_master_or_solo)
   encryption_command = @encryption_command
   backup_command = "eybackup -e mysql #{encryption_command} >> /var/log/eybackup.log 2>&1"
 
