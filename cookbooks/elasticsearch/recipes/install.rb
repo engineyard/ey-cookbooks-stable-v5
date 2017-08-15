@@ -177,8 +177,8 @@ owner_name = node['dna']['users'].first['username']
 # This portion of the recipe should run on all instances in your environment.  We are going to drop elasticsearch.yml for you so you can parse it and provide the instances to your application.
 if ['solo','app_master','app','util'].include?(node['dna']['instance_role'])
   elasticsearch_hosts = []
-  node['dna']['utility_instances'].each do |elasticsearch|
-    if elasticsearch['name'].include?("elasticsearch_")
+  node['dna']['utility_instances'].each do |instance|
+    if instance['name'].include?("elasticsearch_")
       elasticsearch_hosts << "#{elasticsearch['hostname']}:9200"
     end
   end
