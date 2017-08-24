@@ -50,9 +50,15 @@ lock(){
   RESULT=0
   if [ -e $LOCK_FILE ]; then
     LAST_LOCK_PID=`cat $LOCK_FILE`
+    # Test if the lock file does not match a running process
     if [ -n $LAST_LOCK_PID -a -z "`ps axo pid|grep $LAST_LOCK_PID`" -a -f $LOCK_FILE ];then
       sleep 1
       logger -t "monit-dj:$WORKER[$$]" "Removing stale lock file for $WORKER ($LAST_LOCK_PID)"
+      rm $LOCK_FILE 2>&1
+    # Test if the lock file matches a running process, but it's a zombie
+    elif [ -n $LAST_LOCK_PID ] && [ ! -z `ps aux | grep $LAST_LOCK_PID | awk '{print $8}' | grep Z` ];then
+      sleep 1
+      logger -t "monit-dj:$WORKER[$$]" "Removing stale lock file for zombie $WORKER ($LAST_LOCK_PID)"
       rm $LOCK_FILE 2>&1
     else
       logger -t "monit-dj:$WORKER[$$]" "Monit already messing with $WORKER ($LAST_LOCK_PID)"
