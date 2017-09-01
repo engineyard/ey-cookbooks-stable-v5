@@ -1,7 +1,6 @@
 # Engine Yard Cloud v5 Chef Recipes
--
 
-This codebase and its cookbooks represent the latest version of Engine Yard's **`stable-v5-3.0`** stack.
+- This codebase and its cookbooks represent the latest version of Engine Yard's **`stable-v5-3.0`** stack.
 
 ## Dependencies
 
@@ -21,6 +20,7 @@ gem install ey-core
 	 include_recipe 'custom-<recipe>'
 	 ```
 	- Create or edit `cookbooks/ey-custom/metadata.rb` and add the line `depends 'custom-<recipe>'`
+		- prepend `name 'ey-custom'` to `cookbooks/ey-custom/metadata.rb` in case of a creation
 	- Download this repository and copy `custom-cookbooks/<recipe>/cookbooks/custom-<recipe>` to `cookbooks`. For example, to use memcached, copy `custom-cookbooks/memcached/cookbooks/custom-memcached ` to `cookbooks/custom-memcached`.
 3. Alternative to step #2 above: use [ey-v5-starterkit](https://github.com/engineyard/ey-v5-starterkit) to automate copying the recipe from the custom-cookbooks directory
 4. To upload and apply the recipes, run
