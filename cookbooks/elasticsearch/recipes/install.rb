@@ -179,7 +179,7 @@ if ['solo','app_master','app','util'].include?(node['dna']['instance_role'])
   elasticsearch_hosts = []
   node['dna']['utility_instances'].each do |instance|
     if instance['name'].include?("elasticsearch_")
-      elasticsearch_hosts << "#{elasticsearch['hostname']}:9200"
+      elasticsearch_hosts << "#{instance['hostname']}:9200"
     end
   end
 
