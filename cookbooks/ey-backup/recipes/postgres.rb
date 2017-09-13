@@ -40,41 +40,27 @@ node.engineyard.environment['apps'].each do |app|
 	end
 end
 
-if node.dna['db_slaves'].empty? && node.dna['backup_window'] != 0
-  # No slaves detected, put the backup on the solo/db_master if backups are enabled
-  if ['db_master','solo'].include?(node.dna['instance_role'])
-    encryption_command = @encryption_command
+has_backups_enabled  = node.dna['backup_window'] != 0
+db_slaves_available  = node.dna['db_slaves'].any?
+is_db_master_or_solo = ['db_master','solo'].include?(node.dna['instance_role'])
 
-    backup_cron "postgresql" do
-      command "eybackup -e postgresql #{encryption_command} >> /var/log/eybackup.log 2>&1"
-      month   '*'
-      weekday '*'
-      day     '*'
-      hour    node['backup_hour']       # this attribute is set by ey-base/attributes/snapshot_and_backup_intervals.rb
-      minute  node['backup_minute']
-    end
+# The backup target is the first db-slave, we do this to avoid multiple db-slaves doing backups
+is_backup_target = node.dna['db_slaves'].first == (node['ec2'] && node['ec2']['local_hostname'] ? node['ec2']['local_hostname'] : hostname.stdout)
+
+if has_backups_enabled && (db_slaves_available && is_backup_target || !db_slaves_available && is_db_master_or_solo)
+  encryption_command = @encryption_command
+
+  cron 'postgresql' do
+    command "eybackup -e postgresql #{encryption_command} >> /var/log/eybackup.log 2>&1"
+    month   '*'
+    weekday '*'
+    day     '*'
+    hour    node['backup_hour']     # this attribute is set by ey-base/attributes/snapshot_and_backup_intervals.rb
+    minute  node['backup_minute']
   end
-  # Slaves detected, put them on the db_slave if backups are enabled
 else
-  if ['db_slave'].include?(node.dna['instance_role']) && node.dna['backup_window'] != 0
-    db_slave1_fqdn=node.dna['db_slaves'].first
-    encryption_command = @encryption_command
-
-    hostname = Mixlib::ShellOut.new("hostname")
-    hostname.run_command
-
-    cron "postgresql" do
-      command "eybackup -e postgresql #{encryption_command} >> /var/log/eybackup.log 2>&1"
-      month   '*'
-      weekday '*'
-      day     '*'
-      hour    node['backup_hour']       # this attribute is set by ey-base/attributes/snapshot_and_backup_intervals.rb
-      minute  node['backup_minute']
-      only_if {(node['ec2'] && node['ec2']['local_hostname'] ? node['ec2']['local_hostname'] : hostname.stdout)  == db_slave1_fqdn}
-    end
-  else
-    cron "postgresql" do
-      action :delete
-    end
+  cron 'postgresql' do
+    user   cronjob_user
+    action :delete
   end
 end
