@@ -69,7 +69,7 @@ All customizations go to `cookbooks/custom-elasticsearch/attributes/default.rb`.
 
 ### Choose the instances that run the recipe
 
-By default, the elasticsearch recipe runs on utility instances with a name that starts with `elasticsearch_`. You can change this by modifying `attributes/default.rb`.
+By default, the elasticsearch recipe runs on utility instances with a name includes the word `elasticsearch`. You can change this by modifying `attributes/default.rb`.
 
 #### A. Run Elasticsearch on utility instances
 
