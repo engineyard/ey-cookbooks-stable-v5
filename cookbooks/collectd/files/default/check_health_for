@@ -229,7 +229,7 @@ check_primary-ebs() {
     message=()
     
     # get filesystems
-    egrep '/db|/data' /proc/mounts | 
+    egrep ' /db | /data ' /proc/mounts | 
     {
       while read i
       do

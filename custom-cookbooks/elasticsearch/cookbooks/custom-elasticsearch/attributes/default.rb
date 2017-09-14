@@ -16,11 +16,15 @@ default['elasticsearch'].tap do |elasticsearch|
 
   # Elasticsearch version to install
   # Go to https://www.elastic.co/downloads/past-releases to see the available version
+  #elasticsearch['version'] = '5.5.0'
   elasticsearch['version'] = '2.4.4'
   # This is the SHA256 checksum. Note that this is different from the SHA1 checksum in the Elastic website
-  elasticsearch['checksum'] = 'bee3ca3d5b2103e09b18e1791d1cc504388b992cc4ebf74869568db13c3d4372'
+  # To generate the SHA256 checksum, download the file and then run:
+  # - Linux: sha256sum <zipfile>
+  # - OSX: shasum -a 256 <zipfile>
+  #elasticsearch['checksum'] = '02d9b16334ca97eaaab308bb65743ba18249295d4414f6967c2daf13663cf01d'   # checksum for 5.5.0
+  elasticsearch['checksum'] = 'bee3ca3d5b2103e09b18e1791d1cc504388b992cc4ebf74869568db13c3d4372'  # checksum for 2.4.4
 
-  # NOTE: Elasticsearch 5.x.x does not yet work on EY Cloud. Feel free to open a Pull Request to address this!
   # Use this URL for the 5.x.x versions
   #elasticsearch['download_url'] = "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-#{elasticsearch['version']}.zip"
   # Use this URL for the 2.4.x versions
@@ -47,4 +51,13 @@ default['elasticsearch'].tap do |elasticsearch|
   elasticsearch['fdulimit'] = nil
   elasticsearch['defaultreplicas'] = 1
   elasticsearch['defaultshards'] = 6
+
+  # JVM Options, will be used to populate /etc/elasticsearch/jvm.options
+  # For guidelines on how to calculate the optimal JVM memory settings,
+  # see https://www.elastic.co/guide/en/elasticsearch/reference/master/heap-size.html
+  elasticsearch['jvm_options'] = {
+    :Xms => '2g',
+    :Xmx => '2g',
+    :Xss => '1m'
+  }
 end

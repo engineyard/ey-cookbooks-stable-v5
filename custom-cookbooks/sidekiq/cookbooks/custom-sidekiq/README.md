@@ -152,14 +152,14 @@ If you're running Sidekiq on a solo instance or on your app master, add a deploy
 hook similar to:
 
     on_app_master do
-      sudo "monit -g sidekiq_#{config.app}_0 restart all"
+      sudo "monit -g #{config.app}_sidekiq restart all"
     end
 
 On the other hand, if you'r running Sidekiq on a dedicated utility instance, the
 deploy hook should be like:
 
     on_utilities :sidekiq do
-      sudo "monit -g sidekiq_#{config.app}_<worker_id> restart all"
+      sudo "monit -g #{config.app}_sidekiq restart all"
     end
 
 where `sidekiq` is the name of the utility instance.

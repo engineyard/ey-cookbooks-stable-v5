@@ -20,7 +20,7 @@ if ChefPatches[Chef::VERSION].include? :install_package
         pkg = "~#{name}-#{$1}"
       end
 
-      shell_out!( "emerge -g -n --color n --nospinner --quiet#{expand_options(@new_resource.options)} #{pkg}" )
+      shell_out_with_timeout!( "emerge -g -n --color n --nospinner --quiet#{expand_options(@new_resource.options)} #{pkg}" )
     end
   end
 end

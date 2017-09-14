@@ -28,3 +28,5 @@ gem install ey-core
 	```
 	ey-core recipes upload --environment <nameofenvironment> --apply
 	```
+
+For more information about our V5 (Gentoo 16.06) Stack, please see https://support.cloud.engineyard.com/hc/en-us/sections/205071967-Engine-Yard-Gentoo-16-06
