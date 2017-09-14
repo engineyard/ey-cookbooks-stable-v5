@@ -159,7 +159,7 @@ owner_name = node['dna']['users'].first['username']
 if ['solo','app_master','app','util'].include?(node['dna']['instance_role'])
   elasticsearch_hosts = []
   node['dna']['utility_instances'].each do |elasticsearch|
-    if elasticsearch['name'].include?("elasticsearch_")
+    if elasticsearch['name'].include?("elasticsearch")
       elasticsearch_hosts << "#{elasticsearch['hostname']}:9200"
     end
 
