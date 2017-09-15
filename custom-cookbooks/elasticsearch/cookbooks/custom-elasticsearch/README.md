@@ -161,6 +161,8 @@ After updating the JVM options, you need to restart Elasticsearch by running `su
 
 If you have a small index and can easily rebuild it, the simplest way to upgrade from a previous version is to completely delete `/data/elasticsearch` and then re-run the recipe with the newer version. To do an in-place upgrade while keeping the index, please consult the [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html).
 
+If you’re upgrading from 2.x to 5.x, the 5.x versions require higher limits in `/etc/security/limits.conf`. The latest version of the recipe sets up the higher limits on `/etc/security/limits.conf`, but an instance reboot is needed for the change to take effect. Terminating the old ES 2.x instance and booting a new one may be the simpler path. 
+
 ## Dependencies
 
   * Your application should use gems(s) such as [tire][4],[rubberband][3],[elastic_searchable][5].
