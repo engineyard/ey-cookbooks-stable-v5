@@ -10,6 +10,7 @@ solr_version = node['solr']['solr_version']
 solr_file = "solr-#{solr_version}.tgz"
 solr_url = "https://archive.apache.org/dist/lucene/solr/#{solr_version}/#{solr_file}"
 core_name = node['solr']['core_name']
+nss_version = "3.23"
 
 username = node['dna']['engineyard']['environment']['ssh_username']
 
@@ -32,6 +33,17 @@ if node['solr']['is_solr_instance']
       command "eselect java-vm set system #{java_eselect_version}"
       action :run
     end
+  end
+
+  Chef::Log.info "Upgrading dev-libs/nss"
+  enable_package "dev-libs/nss" do
+    version nss_version
+    unmask true
+  end
+
+  package "dev-libs/nss" do
+    version nss_version
+    action :install
   end
 
   directory "/var/run/solr" do
