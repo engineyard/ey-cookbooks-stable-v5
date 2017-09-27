@@ -5,7 +5,7 @@
 # Ensure that we are running as the root user.
 # If not, error exit while notifying the user.
 
-if (( ! $UID )) 
+if (( ! $UID ))
 then
   echo "ERROR: This script must be run as a user, not as root." 2>&1
 	exit 1
@@ -21,6 +21,7 @@ hot_time_padding=30 # Add this to hot_time_max (default, one monit interval)
 # load environment variables
 source "/data/${application}/shared/config/env"
 source "/data/${application}/shared/config/env.custom"
+source "/data/${application}/shared/config/env.cloud"
 
 # Declare bash arrays
 # Positions array is to keep track of the starting
@@ -39,7 +40,7 @@ cd "${current_path}"
 
 unicorn_is_in_gemfile()
 {
-	if [[ -s "${current_path}/Gemfile" ]] 
+	if [[ -s "${current_path}/Gemfile" ]]
 	then
 		if ! test -f "${current_path}/ey_bundler_binstubs/unicorn" ## This is bundle exec
 		then
@@ -59,18 +60,18 @@ unicorn_is_running()
 	if [[ -f ${pidfile} ]]
 	then
 		fetch_current_pid
-		if [[ -d "/proc/${master_pid}" ]] 
+		if [[ -d "/proc/${master_pid}" ]]
 		then
 			process_name="$( awk '/Name/{print $2}' /proc/$master_pid/status )"
 			application_name="$(readlink /proc/$master_pid/cwd |  cut -d '/' -f 3)"
 
-			if [[ "$application_name" = "" ]] 
+			if [[ "$application_name" = "" ]]
 			then  # Secondary check if readlink failed
 				printf "\nWarning: Could not get application name from /proc. Trying with ps\n"
 				application_name="$(ps awx |grep $master_pid |grep -v grep|awk '{print $10}'|cut -d '/' -f 3)"
 			fi
 
-			if [[ "$application_name" = "$application" ]] 
+			if [[ "$application_name" = "$application" ]]
 			then
 				return 0 # The only valid case, the process is indeed running.
 			fi
@@ -155,7 +156,7 @@ found_stalled_controller()
 			fetch_controller_pid
 			echo "Old Controller taking over $controller_age seconds to run, more then $max_controller_age seconds - killing PID: ${controller_pid}"
 			kill -9 $controller_pid && sleep 1
-			
+
 			return 0
 		fi
 	fi
@@ -179,7 +180,7 @@ cleanup_old_master_failures()
 
 				echo "Thinning the herd."
 
-				if [[ -s "$current_path/config.ru" ]] 
+				if [[ -s "$current_path/config.ru" ]]
 				then
 					pkill -9 -f 'unicorn' && sleep 1
 				else
@@ -225,7 +226,7 @@ display_logs()
 
 fetch_controller_pid()
 {
-	if [[ -s "$controller_pidfile" ]] 
+	if [[ -s "$controller_pidfile" ]]
 	then
 		controller_pid=$(cat "$controller_pidfile")
 	else
@@ -236,7 +237,7 @@ fetch_controller_pid()
 
 fetch_current_pid()
 {
-	if [[ -s "$pidfile" ]] 
+	if [[ -s "$pidfile" ]]
 	then
 		master_pid=$(cat "$pidfile")
 	else
@@ -247,7 +248,7 @@ fetch_current_pid()
 
 fetch_new_pid()
 {
-	if [[ -s "$pidfile" ]] 
+	if [[ -s "$pidfile" ]]
 	then
 		new_pid=$(cat "$pidfile")
 	else
@@ -258,7 +259,7 @@ fetch_new_pid()
 
 fetch_oldpid()
 {
-	if [[ -s "$old_pidfile" ]] 
+	if [[ -s "$old_pidfile" ]]
 	then
 		master_oldpid=$(cat "$old_pidfile")
 	else
@@ -269,7 +270,7 @@ fetch_oldpid()
 
 old_pidfile_exists()
 {
-	if [[ -f "$old_pidfile" ]] 
+	if [[ -f "$old_pidfile" ]]
 	then
 		return 0
 	else
@@ -279,7 +280,7 @@ old_pidfile_exists()
 
 old_master_is_alive()
 {
-	if old_pidfile_exists 
+	if old_pidfile_exists
 	then
 		return 0
 	else
@@ -289,7 +290,7 @@ old_master_is_alive()
 
 wait_for_old_master_to_die()
 {
-	while old_master_is_alive 
+	while old_master_is_alive
 	do
 		sleep .25
 		let "hot_restart_time+=1"
@@ -314,7 +315,7 @@ one_last_check() {
 	fetch_new_pid
 
 	# if new master is old master
-	if [[ $new_pid -eq $old_master_pid ]] 
+	if [[ $new_pid -eq $old_master_pid ]]
 	then
 		display_logs
 		echo ""
@@ -331,11 +332,11 @@ extra_checks() {
 	# Let's wait for the old master pid to exit.
 	sleep 2
 	# It should take more than 2 seconds to start a new process to start and have the pid files swap.
-	if old_pidfile_exists 
+	if old_pidfile_exists
 	then
 		old_master_pid=$(cat "$old_pidfile")
 
-		if wait_for_old_master_to_die 
+		if wait_for_old_master_to_die
 		then
 			sleep $extra_quick_sleep
 			one_last_check
@@ -395,11 +396,11 @@ deploy_action() {
 }
 
 unicorn_start() {
-	if ! unicorn_is_running 
+	if ! unicorn_is_running
 	then
 		echo "Unicorn Starting, Type: ${APP_TYPE} interface, App Name: ${application}"
 
-		if [[ $APP_TYPE == "rails" ]] 
+		if [[ $APP_TYPE == "rails" ]]
 		then
 			$UNICORN_EXEC -E $RAILS_ENV -c $UNICORN_CONF -D
 			unicorn_status=$?
@@ -426,7 +427,7 @@ unicorn_start() {
 
 unicorn_status()
 {
-	if unicorn_is_running 
+	if unicorn_is_running
 	then
 		printf "\nUnicorn master is running with:"
 		printf "\n  pid: $master_pid"
@@ -439,7 +440,7 @@ unicorn_status()
 
 unicorn_terminate()
 {
-	if unicorn_is_running 
+	if unicorn_is_running
 	then
 		echo "Stopping Unicorn for $application with pid $master_pid."
 
@@ -453,7 +454,7 @@ unicorn_terminate()
 
 unicorn_genocide()
 {
-	if unicorn_is_running 
+	if unicorn_is_running
 	then
 		echo "WARNING: This is about to kill the master pid with a -9 signal, "
 		echo "and then attempt to clean up /all/ unicorn_rails workers."
@@ -468,7 +469,7 @@ unicorn_genocide()
 
 		echo "Thinning the herd."
 
-		if [[ -s "$current_path/config.ru" ]] 
+		if [[ -s "$current_path/config.ru" ]]
 		then
 			pkill -9 -f 'unicorn' && sleep 1
 		else
@@ -519,7 +520,7 @@ case "$1" in
 		then
 			drop_controller_pid
 			cleanup_old_master_failures
-			if unicorn_is_running 
+			if unicorn_is_running
 			then
 				fix_permissions
 				unicorn_terminate
@@ -539,7 +540,7 @@ case "$1" in
 		then
 			drop_controller_pid
 			cleanup_old_master_failures
-			if unicorn_is_running 
+			if unicorn_is_running
 			then
 				fix_permissions
 				deploy_action
@@ -556,7 +557,7 @@ case "$1" in
 		then
 			drop_controller_pid
 			cleanup_old_master_failures
-			if unicorn_is_running 
+			if unicorn_is_running
 			then
 				fix_permissions
 				unicorn_terminate

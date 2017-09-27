@@ -26,3 +26,5 @@ env[DB_REPLICAS] = <%= @dbreplicas %>
 env[MEMCACHED_SERVERS] = <%= @memcache_hostnames %>
 ; Add any custom environment variables into env.custom
 include=/data/<%= @app_name %>/shared/config/env.custom
+; This variables are managed through the cloud.engineyard.com web UI
+include=/data/<%= @app_name %>/shared/config/env.cloud
