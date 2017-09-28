@@ -12,7 +12,15 @@ if %w[solo app app_master].include?(node['dna']['instance_role'])
     cdn_distribution = app.metadata('cdn_distribution', nil)
 
     if cdn_distribution
-      template "/data/#{app.name}/shared/config/initializers/cdn.rb" do
+      base_dir = "/data/#{app.name}/shared/config/initializers"
+
+      directory base_dir do
+        owner ssh_username
+        group ssh_username
+        recursive true
+      end
+      
+      template "#{base_dir}/cdn.rb" do
         source "cdn.initializer.erb"
         owner ssh_username
         group ssh_username
