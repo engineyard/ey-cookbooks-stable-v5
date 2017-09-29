@@ -1,7 +1,4 @@
 # Sets up rails asset host to point to CDN
 
-Rails.application.config.action_controller.asset_host = Proc.new { |source, request|
-  host = '<%= @asset_host %>'
-  schema = (request && request.ssl?) ? 'https' : 'http'
-  "#{schema}://#{host}"
-}
+ActionController::Base.asset_host = '<%= @asset_host %>'
+ActionMailer::Base.asset_host = '<%= @asset_host %>'
