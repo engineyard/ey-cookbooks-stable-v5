@@ -1,14 +1,14 @@
 # custom-cron
 
 This is a wrapper cookbook around Engine Yard's cron cookbook.  It automates the
-addition of cron jobs  for the application user (`deploy`)on the utility
-instance name specified for each cron job. All cron jobs are specified in the
+addition of cron jobs  for the application user (`deploy`)on the 
+instance name or type specified for each cron job. All cron jobs are specified in the
 attributes file of the cron cookbook.
 
 ## Limitations
 This cookbook will not install cron jobs for the root user, it must be modified
 if this is required.  Cron jobs are installed for the default application user,
-typically called deploy.
+typically called `deploy`.
 
 ## Installation
 
@@ -55,16 +55,16 @@ Yard.
 All customizations go to `cookbooks/custom-cron/attributes/default.rb`.
 
 Add your cron jobs as an array of hashes in `default[:custom_crons]` You must
-specify a name, time, command and instance name.  The time value must be the
+specify a name, time, command and instance name or instance type. They following arguments are valid: `app`, `db`, `util`, `all`, or "instance_name".  The time value must be the
 full string containing minute, hour, day, month and weekday separated by spaces
 (eg: '* * * * *').
 
 ```
 default[:custom_crons] = [
-   {:name => "test1", :time => "10 * * * *",
-    :command => "echo 'test1'", :instance_name => "cron"
+   {:name => "Install on myRedisInstance only", :time => "10 * * * *",
+    :command => "echo 'test1'", :instance_name => "myRedisInstance"
   },
-  {:name => "test2", :time => "10 1 * * *",
-   :command => "echo 'test2'", :instance_name => "cron"}
+  {:name => "Install on all instances", :time => "10 1 * * *",
+   :command => "echo 'test2'", :instance_name => "all"}
 ]
 ```
