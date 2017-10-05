@@ -17,11 +17,10 @@ if ['solo', 'app', 'app_master', 'util'].include?(node['dna']['instance_role'])
       mode 0744
     end
 
-    if perform_restart
-      execute "/engineyard/bin/app_todo restart" do
-        action :run
-        user ssh_username
-      end
+    execute "/engineyard/bin/app_#{app_name} restart" do
+      action :run
+      user ssh_username
+      only_if { perform_restart && ::File.exist?("/data/#{app_name}/current") && ::File.exist?("/engineyard/bin/app_#{app_name}")}
     end
   end
 

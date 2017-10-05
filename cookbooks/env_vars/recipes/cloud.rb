@@ -8,7 +8,9 @@ if %w[solo app app_master util].include?(node['dna']['instance_role'])
   perform_restart = node['env_vars']['perform_restart']
 
   node['dna']['engineyard']['environment']['apps'].each do |app_data|
-    template "/data/#{app_data['name']}/shared/config/env.cloud" do
+    app_name = app_data['name']
+
+    template "/data/#{app_name}/shared/config/env.cloud" do
       source "env.cloud.erb"
       owner ssh_username
       group ssh_username
@@ -16,13 +18,14 @@ if %w[solo app app_master util].include?(node['dna']['instance_role'])
       variables(:environment_variables => fetch_environment_variables(app_data))
       helpers(EnvVars::Helper)
 
-      notifies :run, "execute[restart_#{app_data['name']}]", :delayed
+      notifies :run, "execute[restart_#{app_name}]", :delayed
     end
 
-    execute "restart_#{app_data['name']}" do
-      command "if [ -d /data/#{app_data['name']}/current ]; then /engineyard/bin/app_#{app_data['name']} restart; fi"
+    execute "restart_#{app_name}" do
+      command "/engineyard/bin/app_#{app_name} restart"
       user ssh_username
       action :nothing
+      only_if { perform_restart && ::File.exist?("/data/#{app_name}/current") && ::File.exist?("/engineyard/bin/app_#{app_name}")}
     end
   end
 end
