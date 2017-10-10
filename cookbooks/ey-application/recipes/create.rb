@@ -22,7 +22,7 @@ node.engineyard.apps.each do |app|
     end
   else
     Chef::Log.info "--- Dropping db.yml file for db #{dbtype}"
-    
+
     # check if we need to add the determine_adapter erb to template
     if !!(dbtype[/^mysql/] && app['type'][/^ra(ck|ils[34])$/])
       determine_adapter_code = <<-RUBY
@@ -40,7 +40,7 @@ end
       RUBY
       dbtype = '<%= determine_adapter %>'
     end
-    
+
     managed_template "/data/#{app.name}/shared/config/database.yml" do
       owner node.engineyard.environment.ssh_username
       group node.engineyard.environment.ssh_username

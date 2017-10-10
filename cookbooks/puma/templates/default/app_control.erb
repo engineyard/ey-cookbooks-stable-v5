@@ -6,6 +6,7 @@
 source /etc/profile
 source /data/<%= @app_name %>/shared/config/env
 source /data/<%= @app_name %>/shared/config/env.custom
+source /data/<%= @app_name %>/shared/config/env.cloud
 
 # Ensure that we are running as the root user.
 # If not, error exit while notifying the user.
@@ -31,7 +32,7 @@ fetch_current_pid() {
       # Remove the pidfile if the process isn't actually running
       current_pid=0
       cleanup
-    fi 
+    fi
   else
     # Try to check if the process is running - if found, provide missing pid file
     current_pid="$(ps auwwx | grep ".*[Pp]uma\.${PORT}\.pid.*--port ${PORT}" | awk '{print $2}')"
