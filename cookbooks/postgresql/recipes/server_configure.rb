@@ -93,6 +93,10 @@ if ['solo', 'db_master'].include?(node.dna['instance_role'])
     user "postgres"
     not_if { FileTest.directory?("#{postgres_root}/#{postgres_version}/data") }
   end
+  
+  zone = "#{node.engineyard.environment['timezone']}"
+  zonepath = "/usr/share/zoneinfo/#{zone}"
+  timezone = (File.exists?(zonepath) and !zone.empty? ) ? zone : 'GMT'
 
   template "#{postgres_root}/#{postgres_version}/data/postgresql.conf" do
     source "postgresql.conf.erb"
@@ -120,7 +124,8 @@ if ['solo', 'db_master'].include?(node.dna['instance_role'])
       :postgres_root => postgres_root,
       :postgres_version => postgres_version,
       :hot_standby => "on",
-      :archive_timeout => '0'
+      :archive_timeout => '0',
+      :timezone => timezone
     )
   end
 end
