@@ -15,3 +15,10 @@ proxy_set_header  X-Queue-Start     't=$start_time';
 
 proxy_redirect off;
 proxy_max_temp_file_size 0;
+
+
+
+<% if @http2 %>
+proxy_set_header  X-Forwarded-Proto "https";
+proxy_headers_hash_bucket_size 128;
+<% end %>
