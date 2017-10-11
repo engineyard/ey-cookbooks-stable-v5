@@ -49,8 +49,8 @@ end
       variables({
         :determine_adapter_code => determine_adapter_code,
         :environment => node.engineyard.environment['framework_env'],
-        :dbuser => node.engineyard.environment.ssh_username,
-        :dbpass => node.engineyard.environment.ssh_password,
+        :dbuser => app.database_username,
+        :dbpass => app.database_password,
         :dbname => app.database_name,
         :dbhost => node.dna['db_host'],
         :dbtype => dbtype,

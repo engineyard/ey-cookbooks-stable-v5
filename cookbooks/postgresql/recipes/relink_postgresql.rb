@@ -12,9 +12,3 @@ execute "re-link-postgresql" do
   notifies :touch, "file[#{link_file}]", :immediate
   not_if { File.exists?(link_file) }
 end
-
-# temporary until dev-perl/DBD-Pg ebuild is out with better dependencies - executing on relink recipe
-#execute "clean up previous version of postgresql-base-#{node['postgresql']['short_version']} " do
-#  command %Q{emerge -Cv "<dev-db/postgresql-base-#{node['postgresql']['short_version']}" 2>&1 }
-#  action :run
-#end

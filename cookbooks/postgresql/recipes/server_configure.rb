@@ -88,7 +88,7 @@ if ['solo', 'db_master'].include?(node.dna['instance_role'])
   end
 
   execute "init-postgres" do
-    command "initdb -D #{postgres_root}/#{postgres_version}/data --encoding=UTF8 --locale=en_US.UTF-8"
+    command "echo #{node.engineyard.environment['db_admin_password']} > /tmp/.pass && initdb -D #{postgres_root}/#{postgres_version}/data --encoding=UTF8 --locale=en_US.UTF-8 --pwfile=/tmp/.pass; rm /tmp/.pass > /dev/null 2>&1"
     action :run
     user "postgres"
     not_if { FileTest.directory?("#{postgres_root}/#{postgres_version}/data") }
@@ -150,7 +150,7 @@ if ['db_slave'].include?(node.dna['instance_role'])
   else
   postgresql_slave node.dna['db_host'] do
       require 'yaml'
-      password node['owner_pass']
+      password node.engineyard.environment['db_admin_password']
     end
   end
 
@@ -195,7 +195,7 @@ if ['db_slave'].include?(node.dna['instance_role'])
       :primary_host => node.dna['db_host'],
       :primary_port => 5432,
       :primary_user => "postgres",
-      :primary_password => node['owner_pass'],
+      :primary_password => node.engineyard.environment['db_admin_password'],
       :trigger_file => "/tmp/postgresql.trigger",
       :postgres_version => postgres_version,
       :conn_app_name => node.name ? node.name : node.instance.id
@@ -246,9 +246,9 @@ template "#{postgres_root}/#{postgres_version}/data/pg_hba.conf" do
   group 'root'
   mode 0600
   source "pg_hba.conf.erb"
-  notifies :reload, "service[postgresql-#{postgres_version}]"
+  notifies :reload, "service[postgresql-#{postgres_version}]", :immediately
   variables({
-    :dbuser => node.dna['users'].first['username'],
+    :app_users => node.engineyard.apps.collect {|app| app.database_username}.uniq,
     :cidr => cidr,
     :custom_file => "#{postgres_root}/#{postgres_version}/custom_pg_hba.conf",
     :custom_contents => custom_contents
@@ -283,32 +283,6 @@ end
 
 user "postgres" do
   action :unlock
-end
-
-username = node.engineyard.environment.ssh_username
-password = node.engineyard.environment.ssh_password
-
-if ['solo', 'db_master'].include?(node.dna['instance_role'])
-  execute "create-db-user#{username}" do
-    command  %{psql -U postgres postgres -c \"CREATE USER #{username} with ENCRYPTED PASSWORD '#{password}' createdb\"}
-    not_if %{psql -U postgres -c "select * from pg_roles" | grep #{username}}
-  end
-
-  execute "alter-db-user-postgres" do
-    command %{psql -Upostgres postgres -c \"ALTER USER postgres with ENCRYPTED PASSWORD '#{password}'\"}
-    not_if %{psql -c "select pg_last_xlog_receive_location()" | grep "/"}
-  end
-
-  execute "alter-public-schema-owner-to-#{node["owner_name"]}" do
-    command %{psql -U postgres postgres -c \"ALTER SCHEMA public OWNER TO #{node["owner_name"]}\"}
-    not_if %{psql -c "select pg_last_xlog_receive_location()" | grep "/"}
-  end
-end
-
-node.engineyard.apps.each do |app|
-  createdb app.database_name do
-    owner username
-  end
 end
 
 ruby_block 'process extensions.json' do

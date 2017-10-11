@@ -1,5 +1,5 @@
 postgres_root    = '/db/postgresql'
-postgres_check_bin = `( which check_postgres.pl || echo '/usr/local/bin/check_postgres.pl' ) | tr -d '\n'` 
+postgres_check_bin = `( which check_postgres.pl || echo '/usr/local/bin/check_postgres.pl' ) | tr -d '\n'`
 check_postgres_version = '2.21.0'
 
 ey_cloud_report "postgresql monitoring" do
@@ -42,7 +42,7 @@ template "/engineyard/bin/check_postgres_wrapper.sh" do
   group 'postgres'
   mode 0751
   variables({
-    :dbpass => node.engineyard.environment.ssh_password,
+    :dbpass => node.engineyard.environment['db_admin_password'],
     :postgres_check_bin => postgres_check_bin
   })
 end

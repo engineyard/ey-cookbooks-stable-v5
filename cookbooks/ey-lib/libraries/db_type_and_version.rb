@@ -18,5 +18,15 @@ class Chef
         nil
       end
     end
+
+    def db_host_is_rds?
+      node.engineyard.environment[:db_provider_name] == 'amazon_rds'
+    end
+  end
+
+  class Resource
+    def db_host_is_rds?
+      node.engineyard.environment[:db_provider_name] == 'amazon_rds'
+    end
   end
 end

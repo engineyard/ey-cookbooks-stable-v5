@@ -9,8 +9,10 @@
 local   all             all                                     trust
 # IPv4 local connections:
 host    all             all             127.0.0.1/32            trust
-# IPv4 deploy user 10.x:
-host    all             <%= @dbuser %>  <%= @cidr %>              md5
+<% @app_users.each do |user| %>
+# IPv4 <%= user %> user 10.x:
+host    all             <%= user %>  <%= @cidr %>              md5
+<% end %>
 # IPv4 postgres replication for 10.x:
 host    replication     postgres        <%= @cidr %>              md5
 # IPv4 postgres user for 10.x with md5:

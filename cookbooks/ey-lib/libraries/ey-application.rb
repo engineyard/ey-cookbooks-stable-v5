@@ -9,13 +9,15 @@ class Chef
         apps
       end
 
-      attr_reader :name, :database_name, :root, :path
+      attr_reader :name, :database_name, :database_username, :database_password, :root, :path
 
       def initialize(name, app, node, root = '/data')
         @app  = app
         @name = name
         @node = node
         @database_name = ey_app['database_name'] || name
+        @database_username = ey_app['database_username'] || node.engineyard.environment.ssh_username
+        @database_password = ey_app['database_password'] || node.engineyard.environment.ssh_password
         @root = root
         @path = File.join(root, name)
       end

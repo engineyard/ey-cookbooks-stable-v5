@@ -5,7 +5,7 @@ template "/root/.pgpass" do
   group 'root'
   source 'pgpass.erb'
   variables({
-    :dbpass => node.engineyard.environment.ssh_password
+    :dbpass => node.engineyard.environment['db_admin_password']
   })
 end
 
@@ -15,8 +15,8 @@ end
 
 update_file "add_PGUSER_to_root_bash_login" do
   path "/root/.bash_login"
-  body "export PGUSER='postgres'"
-  not_if "grep 'PGUSER' /root/.bash_login"
+  body "export PGUSER='#{node.engineyard.environment['db_admin_username']}'\nexport PGHOST='#{node.dna['db_host']}'\nexport PGDATABASE=postgres"
+  not_if "grep 'PGDATABASE' /root/.bash_login"
 end
 
 cookbook_file "/root/.psqlrc" do
@@ -26,3 +26,5 @@ cookbook_file "/root/.psqlrc" do
   mode '0600'
   action :create_if_missing
 end
+
+include_recipe 'ey-backup::postgres'

@@ -9,6 +9,6 @@ template "/engineyard/bin/check_mysql.sh" do
   group 'mysql'
   mode 0751
   variables({
-    :dbpass => node.engineyard.environment.ssh_password
+    :dbpass => node.engineyard.environment['db_admin_password']
   })
 end

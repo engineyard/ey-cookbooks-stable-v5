@@ -49,13 +49,15 @@ end
       variables({
         :determine_adapter_code => determine_adapter_code,
         :environment => node.engineyard.environment['framework_env'],
-        :dbuser => node.engineyard.environment.ssh_username,
-        :dbpass => node.engineyard.environment.ssh_password,
+        :dbuser => app.database_username,
+        :dbpass => app.database_password,
         :dbname => app.database_name,
         :dbhost => node.dna['db_host'],
         :dbtype => dbtype,
         :slaves => node.engineyard.environment.instances.select{|i| i["role"] =="db_slave"},
-        :pool => node.engineyard.environment.jruby? ? node.dna['jruby_pool_size'] : nil
+        :pool => node.engineyard.environment.jruby? ? node.dna['jruby_pool_size'] : nil,
+        :ssl_owner => node.engineyard.environment.ssh_username,
+        :include_ssl => !!node.engineyard.environment['db_stack_name'][/^mysql/] && !db_host_is_rds?
       })
     end
   end
