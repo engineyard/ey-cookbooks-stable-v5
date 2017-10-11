@@ -24,7 +24,16 @@ default[:pg_ext_details] = {
 }
 
 # postgis version details
-default[:postgis_version] = '2.2.2'
-default[:proj_version] = "4.8.0"
-default[:geos_version] = "3.5.0-r2"
-default[:gdal_version] = "1.11.1"
+case attribute.dna.engineyard.environment.db_stack_name
+when "postgres9_6"
+  default[:postgis_version] = '2.3.3'
+  # separating these in case we decide to bump them later
+  default[:proj_version] = "4.8.0"
+  default[:geos_version] = "3.5.0-r2"
+  default[:gdal_version] = "1.11.1"
+else
+  default[:postgis_version] = '2.2.2'
+  default[:proj_version] = "4.8.0"
+  default[:geos_version] = "3.5.0-r2"
+  default[:gdal_version] = "1.11.1"
+end

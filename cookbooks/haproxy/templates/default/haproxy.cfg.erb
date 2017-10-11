@@ -68,8 +68,10 @@ defaults
   # and will add one if missing.
   option httpclose
 
+<% if !@http2 %>
   # Insert the X-Forwarded-For header for requests sent to the backend.
   option forwardfor
+<% end %>
 
   # If sending a request to one worker fails, try to send it to another, 3 times
   # before aborting the request
@@ -121,33 +123,79 @@ defaults
 
 listen cluster
   bind *:<%= @http_bind_port %> mss 1422
-  reqadd X-Forwarded-Proto:\ http
-
-  <% if @backends.any? %>
-    <% @backends.each_with_index do |instance, i| %>
-  server app-<%= i %> <%= instance['private_hostname'] %>:8081 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
-    <% end %>
-  <% else %>
-    # It must be a solo.
-    server solo 127.0.0.1:8081 check inter 5000 fastinter 1000 fall 1 weight 50
-  <% end %>
-
-<% if Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.count > 0 %>
-    listen clusterssl
-    bind *:443 mss 1422 ssl <%= Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.collect {|pem| "crt #{pem}"}.join(" ") %>
-    reqadd X-Forwarded-Proto:\ https
+<% if @http2 %>
+    #redirect http=>https
+    redirect scheme https code 301 if !{ ssl_fc }
+<% else %>
+    reqadd X-Forwarded-Proto:\ http
 
     <% if @backends.any? %>
-    <% @backends.each_with_index do |instance, i| %>
-      server app-<%= i %> <%= instance['private_hostname'] %>:8081 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
-    <% end %>
-    <% else %>
-        # It must be a solo.
-        server solo 127.0.0.1:8081 check inter 5000 fastinter 1000 fall 1 weight 50
+      <% @backends.each_with_index do |instance, i| %>
+    server app-<%= i %> <%= instance['private_hostname'] %>:8081 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
       <% end %>
+    <% else %>
+      # It must be a solo.
+      server solo 127.0.0.1:8081 check inter 5000 fastinter 1000 fall 1 weight 50
+    <% end %>
+<% end %>
+
+
+
+<% if @http2 %>
+
+    listen clusterssl
+    mode tcp
+    bind *:443 mss 1422 ssl <%= Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.collect {|pem| "crt #{pem}"}.join(" ") %>  alpn h2
+
+
+    use_backend nodes-http2 if { ssl_fc_alpn -i h2 }
+    default_backend nodes-http
+
+
+  backend nodes-http
+     
+      <% if @backends.any? %>
+      <% @backends.each_with_index do |instance, i| %>
+        server app-<%= i %> <%= instance['private_hostname'] %>:8089 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
+      <% end %>
+      <% else %>
+          # It must be a solo.
+          server solo 127.0.0.1:8089 check inter 5000 fastinter 1000 fall 1 weight 50
+        <% end %>
+
+ backend nodes-http2
+      mode tcp
+
+      <% if @backends.any? %>
+      <% @backends.each_with_index do |instance, i| %>
+        server app-<%= i %> <%= instance['private_hostname'] %>:8081 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> send-proxy # <%= instance['id'] %>
+      <% end %>
+      <% else %>
+          # It must be a solo.
+          server solo 127.0.0.1:8081 check inter 5000 fastinter 1000 fall 1 weight 50 send-proxy
+        <% end %>
+    
+
 <% else %>
+    <% if Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.count > 0 %>
+        listen clusterssl
+        bind *:443 mss 1422 ssl <%= Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.collect {|pem| "crt #{pem}"}.join(" ") %>
+        reqadd X-Forwarded-Proto:\ https
+
+        <% if @backends.any? %>
+        <% @backends.each_with_index do |instance, i| %>
+          server app-<%= i %> <%= instance['private_hostname'] %>:8081 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
+        <% end %>
+        <% else %>
+            # It must be a solo.
+            server solo 127.0.0.1:8081 check inter 5000 fastinter 1000 fall 1 weight 50
+          <% end %>
+    <% else %>
+
+    <% end %>
 
 <% end %>
+
 # TODO: ELB configuration
 
 listen lbtoworkers

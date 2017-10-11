@@ -234,7 +234,8 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
             :fcgi_pass_port => fcgi_service[:fcgi_pass_port],
             :fcgi_mem_limit => fcgi_service[:fcgi_mem_limit],
             :fcgi_instance_count => fcgi_service[:fcgi_instance_count],
-            :use_msec => use_msec
+            :use_msec => use_msec,
+			:http2 => node['nginx']['http2']
           }
         }
       )
@@ -255,7 +256,8 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
         :http_bind_port => nginx_http_port,
         :server_names => app.vhosts.first.domain_name.empty? ? [] : [app.vhosts.first.domain_name],
         :webroot => php_webroot,
-        :env_name => node.engineyard.environment[:name]
+        :env_name => node.engineyard.environment[:name],
+		:http2 => node['nginx']['http2']
       })
       notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
     end
