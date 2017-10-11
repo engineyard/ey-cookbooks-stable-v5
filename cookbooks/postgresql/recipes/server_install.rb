@@ -1,9 +1,9 @@
 postgres_version = node['postgresql']['short_version']
 
 known_ebuild_versions = %w[
-  9.4.8   9.4.11
-  9.5.3
-  9.5.6
+  9.4.8   9.4.11  9.4.12
+  9.5.3   9.5.6   9.5.7
+  9.6.3
 ]
 
 execute "dropping lock version file" do
