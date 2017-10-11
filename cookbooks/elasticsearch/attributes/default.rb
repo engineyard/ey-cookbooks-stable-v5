@@ -7,10 +7,6 @@ default['elasticsearch'].tap do |elasticsearch|
   # Not recommended for production environments
   #elasticsearch['is_elasticsearch_instance'] = ( ['solo', 'app_master'].include?(node['dna']['instance_role']) )
 
-  # Set this to true if you're running more than one elasticsearch instance
-  # Set to false if you're running on a solo or app_master
-  elasticsearch['configure_cluster'] = true
-
   # Where to download and extract the installer
   elasticsearch['tmp_dir'] = '/tmp'
 
