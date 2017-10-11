@@ -69,7 +69,7 @@ All customizations go to `cookbooks/custom-elasticsearch/attributes/default.rb`.
 
 ### Choose the instances that run the recipe
 
-By default, the elasticsearch recipe runs on utility instances with a name that starts with `elasticsearch_`. You can change this by modifying `attributes/default.rb`.
+By default, the elasticsearch recipe runs on utility instances with a name includes the word `elasticsearch`. You can change this by modifying `attributes/default.rb`.
 
 #### A. Run Elasticsearch on utility instances
 
@@ -78,7 +78,7 @@ By default, the elasticsearch recipe runs on utility instances with a name that 
 * Uncomment this line:
 
 ```
-elasticsearch['is_elasticsearch_instance'] = ( node['dna']['instance_role'] == 'util' && node['dna']['name'].include?('elasticsearch_') )
+elasticsearch['is_elasticsearch_instance'] = ( node['dna']['instance_role'] == 'util' && node['dna']['name'].include?('elasticsearch') )
 ```
 
 * Make sure this line is commented out:
@@ -106,7 +106,7 @@ elasticsearch['is_elasticsearch_instance'] = ( ['solo', 'app_master'].include?(n
 * Make sure this line is commented out:
 
 ```
-#elasticsearch['is_elasticsearch_instance'] = ( node['dna']['instance_role'] == 'util' && node['dna']['name'].include?('elasticsearch_') )
+#elasticsearch['is_elasticsearch_instance'] = ( node['dna']['instance_role'] == 'util' && node['dna']['name'].include?('elasticsearch') )
 ```
 
 ### Specify the Elasticsearch version

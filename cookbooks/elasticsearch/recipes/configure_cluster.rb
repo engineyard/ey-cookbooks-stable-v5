@@ -6,7 +6,7 @@ else
   elasticsearch_instances = []
   elasticsearch_expected = 0
   node['dna']['utility_instances'].each do |elasticsearch|
-    if elasticsearch['name'].include?("elasticsearch_")
+    if elasticsearch['name'].include?("elasticsearch")
       elasticsearch_expected = elasticsearch_expected + 1 unless node['dna']['fqdn'] == elasticsearch['hostname']
       elasticsearch_instances << "#{elasticsearch['hostname']}:9300" unless node['dna']['fqdn'] == elasticsearch['hostname']
     end
