@@ -2,7 +2,7 @@ source 'https://rubygems.org/' do
   gem 'chef', '~> 12.7'
   gem 'right_aws', '~> 3.1.0'
   gem 'engineyard-serverside', '~> 2.6.6'
-  gem 'ey_cloud_server', '1.4.60'
+  gem 'ey_cloud_server', '1.4.61'
   gem 'ey_services_setup', '0.0.7'
 end
 
