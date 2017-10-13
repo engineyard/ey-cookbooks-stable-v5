@@ -20,7 +20,14 @@ upstream upstream_<%= @app_name %> {
 # Directive assigns configuration for the virtual server.
 server {
 # The listen directive specifies the address and port accepted by the enclosing server {...} block. It is possible to specify only an address, only a port, or a server name as the address.
+
+<% if @http2 %>
+  listen <%= @http_bind_port %> http2 proxy_protocol;
+  listen 8089;
+  real_ip_header proxy_protocol;
+<% else %>
   listen <%= @http_bind_port %>;
+<% end %>
 
   #
   # Server Names
