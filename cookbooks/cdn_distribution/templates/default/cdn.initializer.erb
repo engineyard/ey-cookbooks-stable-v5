@@ -1,0 +1,4 @@
+# Sets up rails asset host to point to CDN
+
+ActionController::Base.asset_host = '<%= @asset_host %>'
+ActionMailer::Base.asset_host = '<%= @asset_host %>'
