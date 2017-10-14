@@ -46,10 +46,4 @@ All customizations go to `cookbooks/custom-env_vars/attributes/default.rb`.
 
 Every time you update `env.custom`, you need to restart the application. A Unicorn or Puma hot restart will not do; you need to start a new master process that has sourced the updated `env.custom` file.
 
-If you want to restart the application during the chef run, set `perform_restart` to true:
-
-```
-e['perform_restart'] = true
-```
-
-NOTE: We do not recommend using this for production environments. For production, you can cycle through the instances and run `/engineyard/bin/app_<application_name> restart` on each one.
+To restart the application, you can cycle through the application instances and run `/engineyard/bin/app_<application_name> restart` on each one.
