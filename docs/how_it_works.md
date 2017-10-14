@@ -66,7 +66,7 @@ If you find yourself wanting to customize something that isn't controlled by an 
 
 Please submit all pull requests against the `next-release` branch. We do this because `master` will always reflect the latest production version of stable-v5. If you pull request is merged that means it is currently being tested for inclusion in the next release. If testing passes and a release is cut the PR will be updated with a comment noting in what version it was released. You'll then need to "Upgrade" your environment to use the latest release.
 
-If your pull request is purely a documentation change, it may be OK to just submit it against `master`.
+Before submitting a pull request, please rebase it against the next-release branch again by running `git rebase -i origin/next-release`. This way, you get to pull the latest changes and avoid possible merge conflicts, in case a release was made after you started working on your PR.
 
 ## Engine Yard's Release Process ##
 
