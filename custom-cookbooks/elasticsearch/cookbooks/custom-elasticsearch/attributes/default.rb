@@ -1,7 +1,11 @@
 default['elasticsearch'].tap do |elasticsearch|
   # Run Elasticsearch on util instances containing elasticsearch in name
   # This is the default
-  elasticsearch['is_elasticsearch_instance'] = ( node['dna']['instance_role'] == 'util' && node['dna']['name'].include?('elasticsearch') )
+  elasticsearch['instance_name'] = 'elasticsearch'
+  elasticsearch['is_elasticsearch_instance'] = (
+    node['dna']['instance_role'] == 'util' &&
+    node['dna']['name'].include?(elasticsearch['instance_name'])
+  )
 
   # Run Elasticsearch on a solo or app_master instance
   # Not recommended for production environments
