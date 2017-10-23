@@ -41,7 +41,13 @@ node.engineyard.environment['apps'].each do |app|
 	end
 end
 
-if node.dna['backup_window'] != 0 && ['db_master','solo'].include?(node.dna['instance_role'])
+is_backup_instance = if node['db_backup']['mysql']['backup_slave']
+  ['db_slave'].include?(node.dna['instance_role']) && node['db_backup']['mysql']['db_slave_name'] == node['dna']['name']
+else
+  ['db_master','solo'].include?(node.dna['instance_role'])
+end
+
+if node.dna['backup_window'] != 0 && is_backup_instance
   encryption_command = @encryption_command
   backup_command = "eybackup -e mysql #{encryption_command} >> /var/log/eybackup.log 2>&1"
 
