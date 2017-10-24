@@ -65,7 +65,7 @@ managed_template "/etc/haproxy.cfg" do
     :https_bind_port => haproxy_https_port,
     :httpchk_host => haproxy_httpchk_host,
     :httpchk_path => haproxy_httpchk_path,
-    :http2 => node.http2
+    :http2 => node['haproxy']['http2']
   })
 
   # We need to reload to activate any changes to the config
