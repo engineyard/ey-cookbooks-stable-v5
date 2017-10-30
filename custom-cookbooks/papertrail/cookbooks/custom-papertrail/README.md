@@ -51,6 +51,20 @@ If you do not have `cookbooks/ey-custom` on your app repository, you can copy
 
 All customizations go to `cookbooks/custom-papertrail/attributes/default.rb`.
 
+### Choose the instances that run the recipe
+
+By default, the papertrail recipe configures all instances in the environment. You can change this using `node['dna']['instance_role']` and `node['dna']['instance_role'] `.
+
+```ruby
+# this is the default
+default['papertrail']['is_papertrail_instance'] = true
+
+# run the recipe on a utility instance named papertrail (see comments in custom-papertrail/attributes/default.rb)
+default['papertrail']['is_papertrail_instance'] = (node['dna']['instance_role'] == 'util' && node['dna']['name'] == 'papertrail')
+
+# run the recipe on a solo instance
+default['papertrail']['is_papertrail_instance'] = (node['dna']['instance_role'] == 'solo')
+```
 
 ### Specify the logs to monitor
 
