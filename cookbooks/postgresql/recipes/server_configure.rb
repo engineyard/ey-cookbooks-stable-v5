@@ -74,6 +74,10 @@ directory postgres_temp do
     recursive true
 end
 
+zone = "#{node.engineyard.environment['timezone']}"
+zonepath = "/usr/share/zoneinfo/#{zone}"
+timezone = (File.exists?(zonepath) and !zone.empty? ) ? zone : 'GMT'
+
 if ['solo', 'db_master'].include?(node.dna['instance_role'])
   ey_cloud_report "configuring postgresql 9" do
     message "processing postgresql #{postgres_version} configuration"
@@ -93,10 +97,6 @@ if ['solo', 'db_master'].include?(node.dna['instance_role'])
     user "postgres"
     not_if { FileTest.directory?("#{postgres_root}/#{postgres_version}/data") }
   end
-  
-  zone = "#{node.engineyard.environment['timezone']}"
-  zonepath = "/usr/share/zoneinfo/#{zone}"
-  timezone = (File.exists?(zonepath) and !zone.empty? ) ? zone : 'GMT'
 
   template "#{postgres_root}/#{postgres_version}/data/postgresql.conf" do
     source "postgresql.conf.erb"
@@ -180,7 +180,8 @@ if ['db_slave'].include?(node.dna['instance_role'])
       :postgres_root => postgres_root,
       :postgres_version => postgres_version,
       :hot_standby => "on",
-      :archive_timeout => '0'
+      :archive_timeout => '0',
+      :timezone => timezone
     )
   end
 
