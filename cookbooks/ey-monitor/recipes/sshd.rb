@@ -10,7 +10,7 @@ end
 
 # OpenSSH and Logjam
 bash 'Enforce strong Moduli' do
-  code "awk '$5 >= 2048' /etc/ssh/moduli > /etc/ssh/moduli.strong && cp /etc/ssh/moduli.strong /etc/ssh/moduli"
+  code "awk '$5 >= 2047' /etc/ssh/moduli > /etc/ssh/moduli.strong && cp /etc/ssh/moduli.strong /etc/ssh/moduli"
   not_if { File.exists?("/etc/ssh/moduli.strong") }
 end
 
