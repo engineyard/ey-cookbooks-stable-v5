@@ -1,9 +1,15 @@
 ## Custom Scheduled Scaling
 
-## Prerequisites ##
-Support must add metadata entries at the Account level for the `CORE_API` token, with value `core_api_token`, on the environment where the scaler instance runs.
-
 This is a wrapper cookbook for scheduled-scaling. This is designed to help you customize how to scale up/down environment/instances without having to modify the 'scheduled_scaling' recipe. If you find you're unable to modify the way 'scheduled_scaling' runs just by modifying this recipe, please open a Github issue.
+
+## Prerequisites ##
+
+An environment where to run this recipe, which can't be the same one that is being stopped/started.
+The name of the environment to be stopped/started.
+An Elastic IP to be used on the environment.
+A blueprint with the configuration the environment should have when started.
+Open a ticke with EY Support to add a metadata entries at the Account level for the `CORE_API` token, with value `core_api_token`, on the environment where the scaler instance runs.  If you don't have an API token, it can be obtained from cloud.engineyard.com/cli
+
 
 <a name="#installation"></a>
 ## Installation
@@ -49,7 +55,7 @@ Check file `custom-scheduled_scaling/attributes/default.rb` for details.
 <a name="customizations"></a>
 ## Customizations
 
-All customizations go to `cookbooks/custom-scheduled_scaling/attributes/default.rb`.
+All customizations go to `custom-scheduled_scaling/attributes/default.rb`.
 
 ## Credits
 

@@ -1,8 +1,9 @@
 
 default['scheduled_scaling'].tap do |scheduled_scaling|
 
-   # The account name
-  scheduled_scaling['account'] = "dvalfre-ey"
+  # The account name
+  # Substite 'my_account' for the correct account name
+  scheduled_scaling['account'] = "my_account"
 
   # Run the scaling on a named util instance
   # This is the default
@@ -20,9 +21,12 @@ default['scheduled_scaling'].tap do |scheduled_scaling|
   # Scheduling tasks, specified as cronjobs
   # Add them here
   #scheduled_scaling[:tasks] = []
+  # replace 'my_environment' for the name of the env to be stopped/started
+  # replace 'my_environment_blueprint' for the name of the blueprint to be used when starting the environment
+  # replace 'x.x.x.x' for the Elastic IP to be attached when starting the environment
   # Example:
-  # scheduled_scaling[:tasks] = [{:name => "stop_env", :time => "0 6/4 * * *", :type => "stop_environment", :environment_name => "scheduled_scaling_test", :timeout => "1200"},
-  #                              {:name => "start_env", :time => "0 */4 * * *", :type => "start_environment", :environment_name => "scheduled_scaling_test", :timeout => "5200", :blueprint_name => "scheduled_scaling_env", :ip_address => "x.x.x.x"}]
+  # scheduled_scaling[:tasks] = [{:name => "stop_env", :time => "0 6/4 * * *", :type => "stop_environment", :environment_name => "my_environment", :timeout => "1200"},
+  #                              {:name => "start_env", :time => "0 */4 * * *", :type => "start_environment", :environment_name => "my_environment", :timeout => "5200", :blueprint_name => "my_environment_blueprint", :ip_address => "x.x.x.x"}]
 
  end
 
