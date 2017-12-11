@@ -17,5 +17,7 @@ default['papertrail'].tap do |papertrail|
   papertrail['exclude_patterns']      = [  
     '400 0 "-" "-" "-', # seen in ssl access logs
   ]
+  # Install Papertrail to all instances by default
+  papertrail['is_papertrail_instance'] = true
 end
 

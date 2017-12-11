@@ -13,125 +13,128 @@
 
 PAPERTRAIL_CONFIG = node['papertrail']
 
-remote_syslog_src_filename = PAPERTRAIL_CONFIG[:remote_syslog_filename]
-remote_syslog_src_filepath = "#{Chef::Config['file_cache_path']}#{remote_syslog_src_filename}"
-remote_syslog_extract_path = "#{Chef::Config['file_cache_path']}remote_syslog2/#{PAPERTRAIL_CONFIG[:remote_syslog_checksum]}"
+if PAPERTRAIL_CONFIG['is_papertrail_instance']
 
-# install syslog-ng
+  remote_syslog_src_filename = PAPERTRAIL_CONFIG[:remote_syslog_filename]
+  remote_syslog_src_filepath = "#{Chef::Config['file_cache_path']}#{remote_syslog_src_filename}"
+  remote_syslog_extract_path = "#{Chef::Config['file_cache_path']}remote_syslog2/#{PAPERTRAIL_CONFIG[:remote_syslog_checksum]}"
 
-# EngineYard Gentoo Portage only recently added a new version of syslog-ng, so you have to update it even on new instances
-execute 'get-latest-portage' do
-  command 'emerge --sync'
-end
+  # install syslog-ng
 
-# Make sure you have the EngineYard "enable_package" recipe
-enable_package 'app-admin/syslog-ng' do
-  version PAPERTRAIL_CONFIG[:syslog_ng_version]
-  override_hardmask true
-end
+  # EngineYard Gentoo Portage only recently added a new version of syslog-ng, so you have to update it even on new instances
+  execute 'get-latest-portage' do
+    command 'emerge --sync'
+  end
 
-package 'app-admin/syslog-ng' do
-  version PAPERTRAIL_CONFIG[:syslog_ng_version]
-  action :install
-end
+  # Make sure you have the EngineYard "enable_package" recipe
+  enable_package 'app-admin/syslog-ng' do
+    version PAPERTRAIL_CONFIG[:syslog_ng_version]
+    override_hardmask true
+  end
 
-directory '/etc/syslog-ng/cert.d' do
-  recursive true
-end
+  package 'app-admin/syslog-ng' do
+    version PAPERTRAIL_CONFIG[:syslog_ng_version]
+    action :install
+  end
 
-remote_file '/etc/syslog-ng/cert.d/papertrail-bundle.tar.gz' do
-  source 'https://papertrailapp.com/tools/papertrail-bundle.tar.gz'
-  checksum '5590de7f7f957508eff58767212cae8fa2fb8cf503e5b5b801f32087501060f3'
-  mode '0644'
-end
+  directory '/etc/syslog-ng/cert.d' do
+    recursive true
+  end
 
-bash 'extract SSL certificates' do
-  cwd '/etc/syslog-ng/cert.d'
-  code <<-EOH
-    tar xzf papertrail-bundle.tar.gz
-    EOH
-end
+  remote_file '/etc/syslog-ng/cert.d/papertrail-bundle.tar.gz' do
+    source 'https://papertrailapp.com/tools/papertrail-bundle.tar.gz'
+    checksum '5590de7f7f957508eff58767212cae8fa2fb8cf503e5b5b801f32087501060f3'
+    mode '0644'
+  end
 
-service "syslog-ng" do
-    supports :start => true, :stop => true, :restart => true, :status => true
-    action [ :enable, :start ]
-end
+  bash 'extract SSL certificates' do
+    cwd '/etc/syslog-ng/cert.d'
+    code <<-EOH
+      tar xzf papertrail-bundle.tar.gz
+      EOH
+  end
 
-template '/etc/syslog-ng/syslog-ng.conf' do
-  source 'syslog-ng.conf.erb'
-  mode '0644'
-  variables(PAPERTRAIL_CONFIG)
-  notifies :restart, resources(:service => "syslog-ng")
-end
+  service "syslog-ng" do
+      supports :start => true, :stop => true, :restart => true, :status => true
+      action [ :enable, :start ]
+  end
 
-# EngineYard Gentoo instances use sysklogd by default
-execute 'stop-sysklogd' do
-  command %{/etc/init.d/sysklogd stop}
-  ignore_failure true
-end
+  template '/etc/syslog-ng/syslog-ng.conf' do
+    source 'syslog-ng.conf.erb'
+    mode '0644'
+    variables(PAPERTRAIL_CONFIG)
+    notifies :restart, resources(:service => "syslog-ng")
+  end
 
-execute 'restart-syslog-ng' do
-  command %{/etc/init.d/syslog-ng restart}
-end
+  # EngineYard Gentoo instances use sysklogd by default
+  execute 'stop-sysklogd' do
+    command %{/etc/init.d/sysklogd stop}
+    ignore_failure true
+  end
 
-# remove remote_syslog gem & install remote_syslog2 daemon
+  execute 'restart-syslog-ng' do
+    command %{/etc/init.d/syslog-ng restart}
+  end
 
-execute 'stop existing instances of remote_syslog' do
-  command %{/etc/init.d/remote_syslog stop}
-  only_if { ::File.exists?("/etc/init.d/remote_syslog") }
-end
+  # remove remote_syslog gem & install remote_syslog2 daemon
 
-execute 'remove remote_syslog gem' do
-  command %{gem uninstall remote_syslog -x}
-end
+  execute 'stop existing instances of remote_syslog' do
+    command %{/etc/init.d/remote_syslog stop}
+    only_if { ::File.exists?("/etc/init.d/remote_syslog") }
+  end
 
-execute "Get remote_syslog" do
-  command "wget -O #{remote_syslog_src_filepath} https://github.com/papertrail/remote_syslog2/releases/download/#{PAPERTRAIL_CONFIG[:remote_syslog_version]}/#{PAPERTRAIL_CONFIG[:remote_syslog_filename]}"
-end
+  execute 'remove remote_syslog gem' do
+    command %{gem uninstall remote_syslog -x}
+  end
 
-bash 'extract and copy executable' do
-  cwd ::File.dirname(remote_syslog_src_filepath)
-  code <<-EOH
-    mkdir -p #{remote_syslog_extract_path}
-    tar xzf #{remote_syslog_src_filename} -C #{remote_syslog_extract_path}
-    mv #{remote_syslog_extract_path}/remote_syslog/remote_syslog /usr/local/bin
-    EOH
-  not_if { ::File.exists?(remote_syslog_extract_path) }
-end
+  execute "Get remote_syslog" do
+    command "wget -O #{remote_syslog_src_filepath} https://github.com/papertrail/remote_syslog2/releases/download/#{PAPERTRAIL_CONFIG[:remote_syslog_version]}/#{PAPERTRAIL_CONFIG[:remote_syslog_filename]}"
+  end
 
-file "/usr/local/bin/remote_syslog" do
-  owner "root"
-  group "root"
-  mode "0755"
-  action :touch
-end
+  bash 'extract and copy executable' do
+    cwd ::File.dirname(remote_syslog_src_filepath)
+    code <<-EOH
+      mkdir -p #{remote_syslog_extract_path}
+      tar xzf #{remote_syslog_src_filename} -C #{remote_syslog_extract_path}
+      mv #{remote_syslog_extract_path}/remote_syslog/remote_syslog /usr/local/bin
+      EOH
+    not_if { ::File.exists?(remote_syslog_extract_path) }
+  end
 
-# remote_syslog config file
-template '/etc/log_files.yml' do
-  source 'log_files.yml.erb'
-  mode '0644'
-  variables(PAPERTRAIL_CONFIG)
-end
+  file "/usr/local/bin/remote_syslog" do
+    owner "root"
+    group "root"
+    mode "0755"
+    action :touch
+  end
 
-# init.d config file
-template '/etc/conf.d/remote_syslog' do
-  source 'remote_syslog.confd.erb'
-  mode '0644'
-end
+  # remote_syslog config file
+  template '/etc/log_files.yml' do
+    source 'log_files.yml.erb'
+    mode '0644'
+    variables(PAPERTRAIL_CONFIG)
+  end
 
-# init.d script
-template '/etc/init.d/remote_syslog' do
-  source 'remote_syslog.initd.erb'
-  mode '0755'
-end
+  # init.d config file
+  template '/etc/conf.d/remote_syslog' do
+    source 'remote_syslog.confd.erb'
+    mode '0644'
+  end
 
-# start at boot
-execute 'start remote_syslog at boot' do
-  command %{rc-update add remote_syslog default}
-  creates '/etc/runlevels/default/remote_syslog'
-end
+  # init.d script
+  template '/etc/init.d/remote_syslog' do
+    source 'remote_syslog.initd.erb'
+    mode '0755'
+  end
 
-# start right now
-execute 'start or restart remote_syslog' do
-  command %{/etc/init.d/remote_syslog restart}
+  # start at boot
+  execute 'start remote_syslog at boot' do
+    command %{rc-update add remote_syslog default}
+    creates '/etc/runlevels/default/remote_syslog'
+  end
+
+  # start right now
+  execute 'start or restart remote_syslog' do
+    command %{/etc/init.d/remote_syslog restart}
+  end
 end
