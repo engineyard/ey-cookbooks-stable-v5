@@ -13,6 +13,7 @@ depend() {
 }
 
 start() {
+	fix_running_pid
         configtest || return 1
         ebegin "Starting nginx"
         start-stop-daemon --start --pidfile /var/run/nginx.pid \
@@ -21,6 +22,7 @@ start() {
 }
 
 stop() {
+	fix_running_pid
         configtest || return 1
         ebegin "Stopping nginx"
         start-stop-daemon --stop --pidfile /var/run/nginx.pid
@@ -29,6 +31,7 @@ stop() {
 }
 
 reload() {
+	fix_running_pid
         configtest || return 1
         ebegin "Refreshing nginx' configuration"
         kill -HUP `cat /var/run/nginx.pid` &>/dev/null
@@ -71,3 +74,18 @@ configtest() {
         /usr/sbin/nginx -c /etc/nginx/nginx.conf -t
         eend $? "failed, please correct errors above"
 }
+
+fix_running_pid() {
+    # This match has to be exact
+    running_pid=`pgrep -f "nginx: master process /usr/sbin/nginx -c /etc/nginx/nginx.conf"`
+    # if process is not running then wipe its pidfile
+    if [ -z "${running_pid}" ]; then
+       rm -f /var/run/nginx.pid
+       return 0
+    fi
+    # So daemon is running
+    # write its pid on pidfile
+    echo $running_pid > /var/run/nginx.pid
+    return 0
+}
+
