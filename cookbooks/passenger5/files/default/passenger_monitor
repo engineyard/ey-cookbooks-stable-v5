@@ -100,7 +100,7 @@ for each in /tmp/passenger.*;do
 done
 
 ## Get a list of passenger workers.
-raw_stats=$(/usr/sbin/passenger-status 2>> /tmp/passenger_errors)
+raw_stats=$(passenger-status 2>> /tmp/passenger_errors)
 exit_code=$?
 
 ## Kill any passenger workers that are not in $pstats
