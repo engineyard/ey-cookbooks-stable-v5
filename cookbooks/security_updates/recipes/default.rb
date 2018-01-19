@@ -28,3 +28,7 @@ package 'app-admin/sudo' do
   version '1.8.16-r1'
 end
 
+# YT-CC-1225
+package 'dev-libs/libyaml' do
+  version '0.1.7'
+end
