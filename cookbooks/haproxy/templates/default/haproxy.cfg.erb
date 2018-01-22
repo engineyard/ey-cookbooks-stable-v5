@@ -64,9 +64,10 @@ defaults
   # request. HAProxy documentation has a long explanation for this option.
   option abortonclose
 
-  # Check if a "Connection: close" header is already set in each direction,
-  # and will add one if missing.
-  option httpclose
+  # [CC-629] httpclose replaced with http-server-close. Enabling Server Close (SCL) mode.
+  # More information about connection closing modes:
+  # https://www.haproxy.com/documentation/aloha/7-0/traffic-management/lb-layer7/http-modes
+  option http-server-close
 
 <% if !@http2 %>
   # Insert the X-Forwarded-For header for requests sent to the backend.
