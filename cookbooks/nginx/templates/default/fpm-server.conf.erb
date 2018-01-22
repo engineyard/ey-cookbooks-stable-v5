@@ -47,6 +47,8 @@ server {
     fastcgi_intercept_errors    off;
     fastcgi_param               SCRIPT_FILENAME $document_root$fastcgi_script_name;
     fastcgi_param               SERVER_NAME $hostname;
+    #YT-CC-1023 httpoxy CGI vulnerability (CVE-2016-5385) mitigation
+    fastcgi_param               HTTP_PROXY "";
     <% if  File.exists?("/etc/newrelic/newrelic.cfg") %>
     fastcgi_param               PHP_VALUE "newrelic.appname=<%= @env_name %> / <%= @app_name %>";
     <% end %>
