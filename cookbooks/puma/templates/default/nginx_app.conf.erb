@@ -90,7 +90,11 @@ server {
   error_log /var/log/engineyard/nginx/<%= @vhost.app.name %>.error.log notice;
   <% end %>
 
-  #
+  # Adding CORS Header to the font files.
+  location ~* \.(eot|otf|ttf|woff|woff2|svg)$ {
+    add_header Access-Control-Allow-Origin *;
+  }
+
   # Expire header on assets. For more information on the reasoning behind
   # this please browse http://developer.yahoo.com/performance/rules.html#expires
   #

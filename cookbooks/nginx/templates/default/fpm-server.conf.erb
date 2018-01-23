@@ -33,6 +33,11 @@ server {
 # Include additional location blocks.  File copied in via deploy hooks
 	include /etc/nginx/servers/<%= @app_name %>/additional_location_blocks.customer;
 
+  # Adding CORS Header to the font files.
+  location ~* \.(eot|otf|ttf|woff|woff2|svg)$ {
+    add_header Access-Control-Allow-Origin *;
+  }
+
   location / {
     try_files $uri $uri/ /index.php$is_args$args;
   }
