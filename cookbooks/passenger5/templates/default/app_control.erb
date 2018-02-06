@@ -23,6 +23,23 @@ case "$1" in
     ;;
 
   start)
+    NGINX_PID=`sudo netstat -antp | grep <%= @port %> | grep LISTEN | awk '{split($7,a,"/"); print a[1]}'`
+    PASSENGER_PID=`sudo ps -ef | grep passenger-standalone | grep <%= @port %> | awk '{print $2};'`
+    PIDFILE='/data/<%= @app_name %>/shared/pids/passenger.<%= @port %>.pid'
+    if [ -n $NGINX_PID ]; then
+      if [ ! -z $PASSENGER_PID ]; then
+        if [ ! -f $PIDFILE ]; then
+          echo $PASSENGER_PID > $PIDFILE
+          echo "Passenger: PIDFILE $PIDFILE was recreated with PID $PASSENGER_PID"
+        fi
+      else
+        echo "Passenger: Nginx is running with PID $NGINX_PID, but the standalone Passenger process is missing."
+        echo "Passenger: Killing Nginx with PID $NGINX_PID"
+        sudo kill -9 $NGINX_PID
+      fi
+    fi
+
+    # Start Passenger
     /usr/local/bin/passenger start current --daemonize --port <%= @port %> --environment <%= @rails_env %> --max-pool-size <%= @worker_count %> --min-instances <%= @worker_count %> --pid-file /data/<%= @app_name %>/shared/pids/passenger.<%= @port %>.pid --log-file /data/<%= @app_name %>/shared/log/passenger.<%= @port %>.log
     ;;
 
