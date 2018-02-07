@@ -127,11 +127,13 @@ server {
   include /etc/nginx/common/proxy.conf;
   proxy_set_header        X-Forwarded-Proto https;
   proxy_pass http://<%= @vhost.app.name %>ssl_upstream;
+  proxy_hide_header X-Powered-By;
   }
   <% else %>
   location @app_<%=@vhost.app.name%> {
   include /etc/nginx/common/proxy.conf;
   proxy_pass http://<%= @vhost.app.name %>_upstream;
+  proxy_hide_header X-Powered-By;
   }
   <% end %>
 
