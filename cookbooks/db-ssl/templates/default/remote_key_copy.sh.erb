@@ -7,7 +7,7 @@ keyname=<%= @keyname %>
 instances='<%= @instances %>'
 replicas='<%= @replicas %>'
 keypath="${dbroot}/keygen/${user}/"
-ssh_options='ssh -i /root/.ssh/internal -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+ssh_options='ssh -i /root/.ssh/internal -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10'
 
 function usage {
   echo "Usage: $0 user"
@@ -17,13 +17,20 @@ function usage {
 }
 
 function push_keys {
+  local target=${1}
+
   if [[ "$user" != 'mysql' ]]
   then
-    eval ${ssh_options} ${instance} "mkdir -p ${user_home}/.${keyname}"
-    rsync -a -e "${ssh_options}" ${keyname}.crt ${instance}:${user_home}/.${keyname}/
-    rsync -a -e "${ssh_options}" ${keyname}.key ${instance}:${user_home}/.${keyname}/
-    rsync -a -e "${ssh_options}" root.crt ${instance}:${user_home}/.${keyname}/
+    eval ${ssh_options} ${target} "mkdir -p ${user_home}/.${keyname}"
+    rsync -a -e "${ssh_options}" ${keyname}.crt ${target}:${user_home}/.${keyname}/
+    rsync -a -e "${ssh_options}" ${keyname}.key ${target}:${user_home}/.${keyname}/
+    rsync -a -e "${ssh_options}" root.crt ${target}:${user_home}/.${keyname}/
   fi
+}
+
+function is_up() {
+  eval ${ssh_options} -o ConnectTimeout=10 $1 'date'
+  [[ $? -eq 0 ]]
 }
 
 if [[ -z $user ]]
@@ -37,14 +44,18 @@ cd ${keypath}
 # copy keys to other instances
 for instance in ${instances}
 do
-  push_keys
+  if is_up ${instance}
+  then
+    push_keys ${instance}
+  else
+    echo "Instance ${instance} is not available. Skipping."
+  fi
 done
 
 # Copy keys to replicas
 for replica in ${replicas}
 do
-  eval ${ssh_options} ${replica} 'date'
-  if [[ $? -eq 0 ]]
+  if is_up ${replica}
   then
     # Copy Server Keys to replica data dir
     cd ${datadir}
@@ -60,7 +71,7 @@ do
     
     # Copy User Keys to replica Users
     cd ${keypath}
-    push_keys
+    push_keys ${replica}
   else
     echo 'Replica DB not accessible, skipping.'
   fi
