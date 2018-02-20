@@ -2,6 +2,8 @@
 ; FPM Configuration ;
 ;;;;;;;;;;;;;;;;;;;;;
 
+; For application <%= @app_name %>
+
 ; All relative paths in this configuration file are relative to PHP's install
 ; prefix (/usr/lib64/php5.3). This prefix can be dynamicaly changed by using the
 ; '-p' argument from the command line.
@@ -22,14 +24,14 @@
 ; Pid file
 ; Note: the default prefix is /usr/lib64/php5.3/var
 ; Default Value: none
-pid = /var/run/engineyard/php-fpm.pid
+pid = /var/run/engineyard/php-fpm_<%= @app_name %>.pid
 
 ; Error log file
 ; If it's set to "syslog", log is sent to syslogd instead of being written
 ; in a local file.
 ; Note: the default prefix is /usr/lib64/php5.3/var
 ; Default Value: log/php-fpm.log
-error_log = /var/log/engineyard/php-fpm/error.log
+error_log = /var/log/engineyard/php-fpm/<%= @app_name %>_error.log
 
 ; syslog_facility is used to specify what type of program is logging the
 ; message. This lets syslogd specify that messages from different facilities
@@ -103,6 +105,4 @@ error_log = /var/log/engineyard/php-fpm/error.log
 ; Pool Definitions ; 
 ;;;;;;;;;;;;;;;;;;;;
 
-<% @apps.each do |app| %>
-include = /data/<%= app %>/shared/config/fpm-pool.conf
-<% end %>
+include = /data/<%= @app_name %>/shared/config/fpm-pool.conf
