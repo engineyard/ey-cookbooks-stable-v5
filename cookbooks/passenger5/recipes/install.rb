@@ -81,18 +81,8 @@
       })
       notifies :restart, resources(:service => "nginx"), :delayed
     end
-
-    # Render proxy.conf
-    cookbook_file "/etc/nginx/common/proxy.conf" do
-      owner ssh_username
-      group ssh_username
-      mode 0644
-      source "proxy.conf"
-      action :create
-      notifies :restart, resources(:service => "nginx"), :delayed
-    end
-
-    # If certificates have been added, render the https Nginx vhost and custom config
+    
+	# If certificates have been added, render the https Nginx vhost and custom config
     if app.vhosts.first.https?
       file "/data/nginx/servers/#{app.name}/custom.ssl.conf" do
         action :create_if_missing

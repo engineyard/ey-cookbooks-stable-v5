@@ -15,7 +15,10 @@ proxy_set_header  X-Queue-Start     't=$start_time';
 
 proxy_redirect off;
 proxy_max_temp_file_size 0;
-
+<% if @passenger5=="nginx_passenger5" %>
+proxy_buffering                off;
+proxy_headers_hash_bucket_size 128;
+<% end %>
 
 
 <% if @http2 %>

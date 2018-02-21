@@ -96,7 +96,8 @@ managed_template "/data/nginx/common/proxy.conf" do
   mode 0644
   source "common.proxy.conf.erb"
   variables({
-    :use_msec => use_msec
+    :use_msec => use_msec,
+	:passenger5 => node[:dna][:environment][:stack]
   })
   notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
 end
