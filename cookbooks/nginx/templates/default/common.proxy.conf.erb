@@ -15,13 +15,17 @@ proxy_set_header  X-Queue-Start     't=$start_time';
 
 proxy_redirect off;
 proxy_max_temp_file_size 0;
+
+<% if @http2  %>
+proxy_set_header  X-Forwarded-Proto "https";
+<% end %>
+
 <% if @passenger5=="nginx_passenger5" %>
 proxy_buffering                off;
+<% end %>
+
+<% if @passenger5=="nginx_passenger5" or @http2 %>
 proxy_headers_hash_bucket_size 128;
 <% end %>
 
 
-<% if @http2 %>
-proxy_set_header  X-Forwarded-Proto "https";
-proxy_headers_hash_bucket_size 128;
-<% end %>
