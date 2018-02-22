@@ -11,7 +11,7 @@ ey_cloud_report "packages" do
   message "processing unix packages"
 end
 
-node.dna['packages_to_install'].each do |pkg|
+node['dna']['packages_to_install'].each do |pkg|
   ey_cloud_report "each package" do
     message "processing package: #{pkg[:name]}"
   end

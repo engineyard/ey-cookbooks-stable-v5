@@ -15,7 +15,7 @@ default['total_memory'] = `cat /proc/meminfo`.scan(/^MemTotal:\s+(\d+)\skB$/).fl
 default['total_memory_mb'] = node['total_memory'] / 1024 / 1024
 default['shared_memory_percentage'] = "0.25"
 default['effective_cache_size_percentage'] = "0.80"
-shared_buffers1 = node['total_memory_mb'] * shared_memory_percentage.to_f
+shared_buffers1 = node['total_memory_mb'] * default['shared_memory_percentage'].to_f
 if shared_buffers1.to_i > 17500
   default['shared_buffers'] = 17500
 else

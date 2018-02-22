@@ -5,4 +5,4 @@ default['nginx']['action'] = action
 default['nginx']['http2'] = false
 
 
-Chef::Log.info("Version: #{nginx[:version]}, Passenger Gem:#{nginx[:passenger_gem]}\n")
+Chef::Log.info("Version: #{node['nginx'][:version]}, Passenger Gem:#{node['nginx'][:passenger_gem]}\n")

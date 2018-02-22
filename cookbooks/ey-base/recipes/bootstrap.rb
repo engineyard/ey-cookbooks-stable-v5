@@ -1,5 +1,5 @@
-include_recipe 'ey-monitor' # stonith
-include_recipe "ec2" if ['solo', 'app', 'util', 'app_master','node'].include?(node.dna['instance_role'])
+include_recipe 'ey-monitor'
+include_recipe "ec2" if ['solo', 'app', 'util', 'app_master','node'].include?(node['dna']['instance_role'])
 
 include_recipe 'ey-dynamic::packages'
 
@@ -8,10 +8,10 @@ include_recipe 'ephemeraldisk'
 # descriptive hostname
 
 descriptive_hostname = [
-  node.dna['engineyard']['this'],
-  node.dna['environment']['name'],
-  node.dna['instance_role'],
-  node.dna['name'],
+  node['dna']['engineyard']['this'],
+  node['dna']['environment']['name'],
+  node['dna']['instance_role'],
+  node['dna']['name'],
   node.name,
   `hostname`
 ].compact.join(',')
@@ -35,7 +35,7 @@ directory "/data/homedirs" do
   mode '0755'
 end
 
-node.dna['applications'].each_key do |app|
+node['dna']['applications'].each_key do |app|
   directory "/data/#{app}" do
     owner node["owner_name"]
     group node["owner_name"]
@@ -76,7 +76,7 @@ end
 #   group 'root'
 #   mode 0644
 #   source 'kernel-2.6'
-#   not_if { node.dna[:kernel][:release].include?("2.6.32") || File.exists?("/etc/modules.autoload.d/keep.kernel-2.6") }
+#   not_if { node['dna'][:kernel][:release].include?("2.6.32") || File.exists?("/etc/modules.autoload.d/keep.kernel-2.6") }
 # end
 
 cookbook_file '/etc/env.d/99manpager' do
@@ -127,7 +127,7 @@ template '/etc/env.d/05framework_env' do
   source '05framework_env.erb'
   backup 0
   variables(
-    #:framework_env => node.dna['environment']['framework_env']
+    #:framework_env => node['dna']['environment']['framework_env']
     :framework_env => node.engineyard.environment['framework_env']
   )
 end

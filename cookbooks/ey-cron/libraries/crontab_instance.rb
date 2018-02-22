@@ -3,7 +3,7 @@ class Chef
     # Is the current instance an app_master or a solo?
     # @return [Boolean] true if the instance fits the criteria, false otherwise
     def app_master_or_solo?(node)
-      #['solo', 'app_master'].include?(node.dna.instance_role)
+      #['solo', 'app_master'].include?(node['dna'].instance_role)
       instance = node.engineyard.instance
 
       instance.app_master? || instance.solo?

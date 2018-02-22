@@ -1,6 +1,6 @@
 require 'mixlib/shellout'
 
-managed_template "/etc/.mysql.backups.yml" do
+template "/etc/.mysql.backups.yml" do
   owner 'root'
   group 'root'
   mode 0600
@@ -9,9 +9,9 @@ managed_template "/etc/.mysql.backups.yml" do
     :dbuser => node.engineyard.environment['db_admin_username'],
     :dbpass => node.engineyard.environment['db_admin_password'],
     :log_coordinates => db_host_is_rds? ? false : true,
-    :keep   => node.dna['backup_window'] || 14,
-    :id     => node.dna['aws_secret_id'],
-    :key    => node.dna['aws_secret_key'],
+    :keep   => node['dna']['backup_window'] || 14,
+    :id     => node['dna']['aws_secret_id'],
+    :key    => node['dna']['aws_secret_key'],
     :env    => node.engineyard.environment['name'],
     :region => node.engineyard.environment.region,
     :backup_bucket => node.engineyard.environment.backup_bucket,
@@ -41,7 +41,7 @@ node.engineyard.environment['apps'].each do |app|
 	end
 end
 
-if node.dna['backup_window'] != 0 && ['db_master','solo'].include?(node.dna['instance_role'])
+if node['dna']['backup_window'] != 0 && ['db_master','solo'].include?(node['dna']['instance_role'])
   encryption_command = @encryption_command
   backup_command = "eybackup -e mysql #{encryption_command} >> /var/log/eybackup.log 2>&1"
 

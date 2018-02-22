@@ -32,7 +32,7 @@ end
 service "nginx" do
   action :nothing
   supports :restart => true, :status => true, :reload => true
-  only_if { ['solo','app', 'app_master'].include?(node.dna[:instance_role]) }
+  only_if { ['solo','app', 'app_master'].include?(node['dna'][:instance_role]) }
 end
 
 
@@ -43,7 +43,7 @@ runlevel 'nginx' do
 end
 
 
-managed_template "/etc/conf.d/nginx" do
+template "/etc/conf.d/nginx" do
   source "conf.d/nginx.erb"
   variables({
     :nofile => 16384
@@ -60,7 +60,7 @@ file "/data/nginx/stack.conf" do
   mode 0644
 end
 
-managed_template "/data/nginx/nginx.conf" do
+template "/data/nginx/nginx.conf" do
   owner node['owner_name']
   group node['owner_name']
   mode 0644
@@ -90,7 +90,7 @@ directory "/data/nginx/ssl" do
   mode 0775
 end
 
-managed_template "/data/nginx/common/proxy.conf" do
+template "/data/nginx/common/proxy.conf" do
   owner node['owner_name']
   group node['owner_name']
   mode 0644
@@ -101,7 +101,7 @@ managed_template "/data/nginx/common/proxy.conf" do
   notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
 end
 
-managed_template "/data/nginx/common/servers.conf" do
+template "/data/nginx/common/servers.conf" do
   owner node['owner_name']
   group node['owner_name']
   mode 0644
@@ -109,7 +109,7 @@ managed_template "/data/nginx/common/servers.conf" do
   notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
 end
 
-managed_template "/data/nginx/common/fcgi.conf" do
+template "/data/nginx/common/fcgi.conf" do
   owner node['owner_name']
   group node['owner_name']
   mode 0644
@@ -124,7 +124,7 @@ file "/data/nginx/servers/default.conf" do
   notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
 end
 
-(node.dna[:removed_applications]||[]).each do |app|
+(node['dna'][:removed_applications]||[]).each do |app|
   execute "remove-old-vhosts-for-#{app}" do
     command "rm -rf /data/nginx/servers/#{app}*"
     notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
@@ -136,7 +136,7 @@ node.engineyard.apps.each_with_index do |app, index|
   dhparam_available = app.metadata('dh_key',nil)
 
   if dhparam_available
-    managed_template "/data/nginx/ssl/dhparam.#{app.name}.pem" do
+    template "/data/nginx/ssl/dhparam.#{app.name}.pem" do
        owner node['owner_name']
        group node['owner_name']
        mode 0600
@@ -173,7 +173,7 @@ node.engineyard.apps.each_with_index do |app, index|
     mode 0644
   end
 
-  managed_template "/data/nginx/servers/#{app.name}.users" do
+  template "/data/nginx/servers/#{app.name}.users" do
     owner node['owner_name']
     group node['owner_name']
     mode 0644
@@ -199,7 +199,7 @@ node.engineyard.apps.each_with_index do |app, index|
 
 php_webroot = node.engineyard.environment.apps.first['components'].find {|component| component['key'] == 'app_metadata'}['php_webroot']
 
-  managed_template "/etc/nginx/listen_http.port" do
+  template "/etc/nginx/listen_http.port" do
     owner node['owner_name']
     group node['owner_name']
     mode 0644
@@ -215,7 +215,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
   # time values, we can use just a regular if statement
 
   if stack.match(mongrel_unicorn)
-    managed_template "/data/nginx/servers/#{app.name}.conf" do
+    template "/data/nginx/servers/#{app.name}.conf" do
       owner node['owner_name']
       group node['owner_name']
       mode 0644
@@ -228,7 +228,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
             :app_name   => app.name,
             :app_type => app.app_type,
             :mongrel_base_port => mongrel_base_port,
-            :mongrel_instance_count => [1, recipe.get_pool_size / node.dna[:applications].size].max,
+            :mongrel_instance_count => [1, recipe.get_pool_size / node['dna'][:applications].size].max,
             :http_bind_port => nginx_http_port,
             :server_names => app.vhosts.first.domain_name.empty? ? [] : [app.vhosts.first.domain_name],
             :fcgi_pass_port => fcgi_service[:fcgi_pass_port],
@@ -245,7 +245,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
 
   if stack.match(php_fpm)
 
-    managed_template "/data/nginx/servers/#{app.name}.conf" do
+    template "/data/nginx/servers/#{app.name}.conf" do
       owner node['owner_name']
       group node['owner_name']
       mode 0644
@@ -262,7 +262,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
       notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
     end
 
-    managed_template "/etc/nginx/servers/#{app.name}/additional_server_blocks.customer" do
+    template "/etc/nginx/servers/#{app.name}/additional_server_blocks.customer" do
       owner node['owner_name']
       group node['owner_name']
       mode 0644
@@ -273,7 +273,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
       source "additional_server_blocks.customer.erb"
       not_if { File.exists?("/etc/nginx/servers/#{app.name}/additional_server_blocks.customer") }
     end
-    managed_template "/etc/nginx/servers/#{app.name}/additional_location_blocks.customer" do
+    template "/etc/nginx/servers/#{app.name}/additional_location_blocks.customer" do
       owner node['owner_name']
       group node['owner_name']
       mode 0644
@@ -405,7 +405,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
 
     # PHP SSL template
     if stack.match(php_fpm)
-      managed_template "/data/nginx/servers/#{app.name}.ssl.conf" do
+      template "/data/nginx/servers/#{app.name}.ssl.conf" do
         owner node['owner_name']
         group node['owner_name']
         mode 0644
@@ -421,7 +421,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
         notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
       end
 
-      managed_template "/etc/nginx/servers/#{app.name}/additional_server_blocks.ssl.customer" do
+      template "/etc/nginx/servers/#{app.name}/additional_server_blocks.ssl.customer" do
         owner node['owner_name']
         group node['owner_name']
         mode 0644
@@ -432,7 +432,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
         source "additional_server_blocks.ssl.customer.erb"
         not_if { File.exists?("/etc/nginx/servers/#{app.name}/additional_server_blocks.ssl.customer") }
       end
-      managed_template "/etc/nginx/servers/#{app.name}/additional_location_blocks.ssl.customer" do
+      template "/etc/nginx/servers/#{app.name}/additional_location_blocks.ssl.customer" do
         owner node['owner_name']
         group node['owner_name']
         mode 0644
@@ -457,7 +457,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
 
     # CC-260: Same issue as previous; using compile-time if rather than run-time only_if directive
     if stack.match(mongrel_unicorn)
-      managed_template "/data/nginx/servers/#{app.name}.ssl.conf" do
+      template "/data/nginx/servers/#{app.name}.ssl.conf" do
         owner node['owner_name']
         group node['owner_name']
         mode 0644
@@ -470,7 +470,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
               :app_name   => app.name,
               :app_type => app.app_type,
               :mongrel_base_port => mongrel_base_port,
-              :mongrel_instance_count => [1, recipe.get_pool_size / node.dna[:applications].size].max,
+              :mongrel_instance_count => [1, recipe.get_pool_size / node['dna'][:applications].size].max,
               :http_bind_port => nginx_http_port,
               :server_names =>  app[:vhosts][1][:name].empty? ? [] : [app[:vhosts][1][:name]],
               :fcgi_pass_port => fcgi_service[:fcgi_pass_port],
@@ -482,7 +482,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
         )
         notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
       end
-      managed_template "/etc/nginx/servers/#{app.name}/additional_server_blocks.ssl.customer" do
+      template "/etc/nginx/servers/#{app.name}/additional_server_blocks.ssl.customer" do
         owner node['owner_name']
         group node['owner_name']
         mode 0644
@@ -493,7 +493,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
         source "additional_server_blocks.ssl.customer.erb"
         not_if { File.exists?("/etc/nginx/servers/#{app.name}/additional_server_blocks.ssl.customer") }
       end
-      managed_template "/etc/nginx/servers/#{app.name}/additional_location_blocks.ssl.customer" do
+      template "/etc/nginx/servers/#{app.name}/additional_location_blocks.ssl.customer" do
         owner node['owner_name']
         group node['owner_name']
         mode 0644

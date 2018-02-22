@@ -1,7 +1,7 @@
 
 include_recipe 'db_admin_tools::pg_top'
 
-if node.dna[:instance_role][/^(db|solo)/]
+if node['dna'][:instance_role][/^(db|solo)/]
   template "/engineyard/bin/database_oom_adj" do
     owner 'root'
     group 'root'

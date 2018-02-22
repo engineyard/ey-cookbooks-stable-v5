@@ -25,7 +25,7 @@ template "/engineyard/bin/ey-alert.rb" do
   mode 0755
   source "ey-alert.erb"
   variables({
-    :url => node.dna[:reporting_url]
+    :url => node['dna'][:reporting_url]
   })
 end
 
@@ -62,7 +62,7 @@ cron 'daily collectd check' do
   command '/engineyard/bin/collectd_nanny daily'
 end
 
-has_db = ['solo','db_master','db_slave'].include?(node.dna['instance_role'])
+has_db = ['solo','db_master','db_slave'].include?(node['dna']['instance_role'])
 
 case node.engineyard.environment['db_stack_name']
 when /mysql/
@@ -107,7 +107,7 @@ package 'dev-perl/HTML-Parser' do
 end
 
 memcached = node['memcached']['perform_install']
-managed_template "/etc/engineyard/collectd.conf" do
+template "/etc/engineyard/collectd.conf" do
   owner 'root'
   group 'root'
   mode 0644
@@ -116,8 +116,8 @@ managed_template "/etc/engineyard/collectd.conf" do
     :db_type => node.engineyard.environment['db_stack_name'],
     :databases => has_db ? node.engineyard.environment['apps'].map {|a| a['database_name']} : [],
     :has_db => has_db,
-    :db_slaves => node.dna['db_slaves'],
-    :role => node.dna['instance_role'],
+    :db_slaves => node['dna']['db_slaves'],
+    :role => node['dna']['instance_role'],
     :memcached => memcached,
     :user => node["owner_name"],
     :alert_script => "/engineyard/bin/ey-alert.rb",

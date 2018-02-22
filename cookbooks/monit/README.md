@@ -13,7 +13,7 @@ On utility instances for background workers, we use monit to ensure that resque 
 
 # Recipe Details
 
-This recipe installs the version specified in node.dna['monit']['version']. This can be overriden by setting `monit_ebuild_version` in the account metadata to install a specific version.
+This recipe installs the version specified in node['dna']['monit']['version']. This can be overriden by setting `monit_ebuild_version` in the account metadata to install a specific version.
 
 The recipe creates the monit configuration file in `/etc/monitrc` and adds an inittab entry so that monit is started every time it dies.
 

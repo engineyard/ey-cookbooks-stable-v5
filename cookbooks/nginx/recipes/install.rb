@@ -147,7 +147,7 @@ logrotate "nginx" do
   SH
 end
 
-managed_template "/data/nginx/nginx_version.conf" do
+template "/data/nginx/nginx_version.conf" do
   owner node.engineyard.environment.ssh_username
   group node.engineyard.environment.ssh_username
   mode 0644

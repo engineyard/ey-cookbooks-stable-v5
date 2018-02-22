@@ -11,7 +11,7 @@ default_name = `hostname`.chomp + "@" + node['ipaddress']
 real_name = set_name or default_name
 cookie = node['elixir']['cookie']
 port  = node['elixir']['port']
-framework_env = node.dna['environment']['framework_env']
+framework_env = node['dna']['environment']['framework_env']
 elixir_map = node['dna']['engineyard']['environment']['instances'].
     compact.
     reject {|instance| instance['id'] == node['dna']['engineyard']['this']}.
@@ -20,7 +20,7 @@ elixir_map = node['dna']['engineyard']['environment']['instances'].
     map {|instance| "#{instance['name']}@#{instance['private_hostname']}"}
 
 
-managed_template "/home/#{node["owner_name"]}/vm.args" do
+template "/home/#{node["owner_name"]}/vm.args" do
   owner ssh_username
   group ssh_username
   mode 0644
@@ -32,7 +32,7 @@ managed_template "/home/#{node["owner_name"]}/vm.args" do
   })
 end
 
-managed_template "/home/#{node["owner_name"]}/elixir_app.config" do
+template "/home/#{node["owner_name"]}/elixir_app.config" do
   owner ssh_username
   group ssh_username
   mode 0644
@@ -52,7 +52,7 @@ node.engineyard.apps.each_with_index do |app, index|
 
   elixir_name = app.metadata('elixir_app_name', nil) || app.name
 
-  managed_template "/data/#{app.name}/shared/config/prod.secret.exs" do
+  template "/data/#{app.name}/shared/config/prod.secret.exs" do
     owner node.engineyard.environment.ssh_username
     group node.engineyard.environment.ssh_username
     mode 0600
@@ -64,7 +64,7 @@ node.engineyard.apps.each_with_index do |app, index|
       :dbname => app.database_name,
       :elixir_name => elixir_name,
       :app_name => app.name,
-      :db_host => node.dna['db_host'] ,
+      :db_host => node['dna']['db_host'] ,
       :port => app_base_port
     })
   end

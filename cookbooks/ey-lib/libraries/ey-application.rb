@@ -3,7 +3,7 @@ class Chef
     class Application
       def self.all(node, applications = nil)
         apps = []
-        (applications || node.dna.applications).each do |name, app|
+        (applications || node['dna']['applications']).each do |name, app|
           apps << new(name, app, node)
         end
         apps

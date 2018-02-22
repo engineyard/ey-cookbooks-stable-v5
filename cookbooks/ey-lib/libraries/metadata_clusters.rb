@@ -14,7 +14,7 @@ class Chef
       mycluster = my_cluster(type, provisioned_id)
       if mycluster
         thisnode = mycluster["nodes"].detect{|n| n["provisioned_id"] == provisioned_id}
-        thisnode.dna[key]
+        thisnode['dna'][key]
       end
     end
 

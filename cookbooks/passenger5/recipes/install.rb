@@ -24,7 +24,7 @@
   # Grab version, ssh user, rails_env and port
   version       = node['passenger5']['version']
   ssh_username  = node['owner_name']
-  framework_env = node.dna['environment']['framework_env']
+  framework_env = node['dna']['environment']['framework_env']
   port          = node['passenger5']['port']
 
   service "nginx" do

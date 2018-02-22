@@ -1,7 +1,7 @@
 class Chef
   class Recipe
     def calc_innodb_buffer_pool
-      solo = ["solo"].include?( node.dna['instance_role'] )
+      solo = ["solo"].include?( node['dna']['instance_role'] )
       total_memory = `cat /proc/meminfo`.scan(/^MemTotal:\s+(\d+)\skB$/).flatten.first.to_i * 1024
       total_memory_mb = (total_memory / 1024/1024)
       instance_role = open("http://169.254.169.254/latest/meta-data/instance-type").read

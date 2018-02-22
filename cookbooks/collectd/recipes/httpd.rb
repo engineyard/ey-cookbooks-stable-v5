@@ -5,7 +5,7 @@ include_recipe "nginx::install"
 #
 # TODO: Split the nginx recipe up so we can include only what we
 #       need in this recipe
-unless %w(app_master app solo).include?(node.dna['instance_role'])
+unless %w(app_master app solo).include?(node['dna']['instance_role'])
   service "nginx" do
     action :stop
     only_if "/etc/init.d/nginx status"

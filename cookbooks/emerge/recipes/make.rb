@@ -6,7 +6,7 @@ if File.exists?("/etc/engineyard/release") then
   case AMI_Release.first
   when /^2009a.1_pre51/i  # Checking entire string as any other AMI we need to assume it's good
     # oldami and newami (pre-2012) need make.conf updated
-    case node.dna['kernel']['machine']
+    case node['dna']['kernel']['machine']
     when 'x86_64'
       template "/etc/make.conf" do
         source "make.conf.erb"

@@ -1,5 +1,6 @@
 require 'chef/resource/package'
-require 'chef/mixin/command'
+require 'chef/mixin/shell_out'
+include Chef::Mixin::ShellOut
 
 class Chef
   class Resource
@@ -7,7 +8,7 @@ class Chef
       def at_least_version(version)
         package_name_str = @package_name || @name
         minimum_version = version
-        status = ::Chef::Mixin::Command.popen4("portageq match / '>=#{package_name_str}-#{version}'") do  |pid, stdin, stdout, stderr|
+        status = Chef::Mixin::ShellOut.shell_out("portageq match / '>=#{package_name_str}-#{version}'") do  |pid, stdin, stdout, stderr|
           err = stderr.read
           raise err unless err =~ /^\s*$/
           candidate = stdout.read

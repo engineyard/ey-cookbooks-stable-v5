@@ -1,5 +1,5 @@
 # Do a quick run
-case node.dna[:instance_role]
+case node['dna'][:instance_role]
 when 'app', 'app_master'
   include_recipe 'ey-monitor'
   include_recipe 'haproxy'

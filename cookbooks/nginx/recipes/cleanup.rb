@@ -1,5 +1,5 @@
 #TODO: uber hacks are uber
-(node.dna[:removed_applications]||[]).each do |app|
+(node['dna'][:removed_applications]||[]).each do |app|
   directory "/data/nginx/servers/#{app}" do
     action :delete
     recursive true

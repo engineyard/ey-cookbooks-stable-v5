@@ -27,7 +27,7 @@ directory '/etc/innotop' do
   mode 0755
 end
 
-managed_template "/etc/innotop/innotop.conf" do
+template "/etc/innotop/innotop.conf" do
   owner 'root'
   group 'root'
   mode 0644

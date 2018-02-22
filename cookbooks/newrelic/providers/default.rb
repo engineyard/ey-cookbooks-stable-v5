@@ -120,7 +120,7 @@ def configure_php_rpm
   end
 
   # Set up newrelic per application
-  #node.dna[:applications].each do |app, data|
+  #node['dna'][:applications].each do |app, data|
   #  file = Chef::Util::FileEdit.new("/data/#{app}/shared/config/fpm-pool.conf")
   #  file.insert_line_if_no_match("/php_value[newrelic.appname] = \"#{app_name}\"/", "php_value[newrelic.appname] = \"#{app_name}\"")
   #  file.write_file

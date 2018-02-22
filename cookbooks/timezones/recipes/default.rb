@@ -11,7 +11,7 @@ end
 zonepath = '/usr/share/zoneinfo/'
 zone = "#{node.engineyard.environment['timezone']}"
 
-has_nginx = ['solo','app','app_master'].include?(node.dna['instance_role'])
+has_nginx = ['solo','app','app_master'].include?(node['dna']['instance_role'])
 
 if not File.exists?(File.join(zonepath, zone)) and zone != '' and not zone.nil?
   raise "Timezone '#{zone}' not recognized."

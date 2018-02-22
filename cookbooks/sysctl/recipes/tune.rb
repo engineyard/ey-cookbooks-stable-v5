@@ -56,6 +56,6 @@ sysctl "net.ipv4.tcp_max_orphans" do
   variables 'net.ipv4.tcp_max_orphans' => node['sysctl']['max_orphans']
 end
 
-if node.dna.instance_role[/db|solo/]
+if node['dna']['instance_role'][/db|solo/]
   include_recipe "sysctl::tune_large_db"
 end

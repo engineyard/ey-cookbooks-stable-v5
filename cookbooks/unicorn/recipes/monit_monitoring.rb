@@ -9,7 +9,7 @@ node.engineyard.apps.each do |app|
       :user => node.engineyard.environment.ssh_username,
       :type => app.app_type,
       :app_type => app.app_type,
-      :framework_env => node.dna['environment']['framework_env']
+      :framework_env => node['dna']['environment']['framework_env']
     })
     source "env.erb"
   end
@@ -69,7 +69,7 @@ node.engineyard.apps.each do |app|
     variables(
       lazy {
         {
-          :unicorn_instance_count => [recipe.get_pool_size / node.dna['applications'].size, 1].max,
+          :unicorn_instance_count => [recipe.get_pool_size / node['dna']['applications'].size, 1].max,
           :app => app.name,
           :type => app.app_type,
           :user => node.engineyard.environment.ssh_username
@@ -79,7 +79,7 @@ node.engineyard.apps.each do |app|
     source "unicorn.rb.erb"
   end
 
-  managed_template "/etc/monit.d/unicorn_#{app.name}.monitrc" do
+  template "/etc/monit.d/unicorn_#{app.name}.monitrc" do
     owner node.engineyard.environment.ssh_username
     group node.engineyard.environment.ssh_username
     mode 0600
@@ -90,8 +90,8 @@ node.engineyard.apps.each do |app|
           :app => app.name,
           :user => node.engineyard.environment.ssh_username,
           :app_type => app.app_type,
-          :unicorn_worker_count => [recipe.get_pool_size / node.dna['applications'].size, 1].max,
-          :environment => node.dna['environment']['framework_env'],
+          :unicorn_worker_count => [recipe.get_pool_size / node['dna']['applications'].size, 1].max,
+          :environment => node['dna']['environment']['framework_env'],
           :master_memory_size => worker_memory_size,
           :master_cycle_count => base_cycles,
           :worker_mem_cycle_checks => worker_mem_cycle_checks

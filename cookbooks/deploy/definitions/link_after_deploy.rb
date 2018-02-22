@@ -5,6 +5,6 @@ define :link_after_deploy, :to => nil do
     action :nothing
   end
 
-  node.dna['_after_deploy_resources'] ||= {}
+  node['dna']['_after_deploy_resources'] ||= {}
   node.normal['_after_deploy_resources'][resource] = :create
 end

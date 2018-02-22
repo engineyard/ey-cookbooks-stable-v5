@@ -15,7 +15,7 @@ user node["owner_name"]
 
 applications_to_deploy.each do |app, data|
 
-  msg = if (data[:run_migrations] && ['solo', 'app_master'].include?(node.dna['instance_role']))
+  msg = if (data[:run_migrations] && ['solo', 'app_master'].include?(node['dna']['instance_role']))
     "deploying & migrating #{app}"
   else
     "deploying #{app}"
@@ -31,12 +31,12 @@ applications_to_deploy.each do |app, data|
 
   cmd = ""
 
-  recipes = node.dna['applications'].collect{|name,data|  data[:recipes]}.flatten
+  recipes = node['dna']['applications'].collect{|name,data|  data[:recipes]}.flatten
   unless (recipes & ['passenger', 'nginx-passenger']).empty?
     cmd = "/engineyard/bin/app_#{app} deploy"
   end
 
-  if node.dna['instance_role'] == 'util'
+  if node['dna']['instance_role'] == 'util'
     cmd = ""
   end
 
@@ -102,13 +102,13 @@ end
 execute "after-deploy-resources" do
   command "date" #noop
 
-  unless node.dna['_after_deploy_resources'].nil?
-    node.dna['_after_deploy_resources'].each do |resource, action|
+  unless node['dna']['_after_deploy_resources'].nil?
+    node['dna']['_after_deploy_resources'].each do |resource, action|
       notifies action, resource
     end
   end
 
   not_if do
-    node.dna['_after_deploy_resources'].nil? || node.dna['_after_deploy_resources'].empty?
+    node['dna']['_after_deploy_resources'].nil? || node['dna']['_after_deploy_resources'].empty?
   end
 end

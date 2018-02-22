@@ -6,7 +6,7 @@ when /mysql/
   include_recipe "mysql"
   include_recipe "mysql::user_my.cnf"
   include_recipe "mysql::master"
-  is_solo = ['solo'].include?(node.dna['instance_role'])
+  is_solo = ['solo'].include?(node['dna']['instance_role'])
   include_recipe "mysql::replication"  unless is_solo
   include_recipe "mysql::monitoring"
   include_recipe "mysql::extras"

@@ -15,7 +15,7 @@ class Chef
 
       def initialize(node)
         @node = node
-        @hash = @node.dna['engineyard']['environment']
+        @hash = @node['dna']['engineyard']['environment']
       end
 
       def instances

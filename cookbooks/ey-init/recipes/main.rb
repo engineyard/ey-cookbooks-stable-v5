@@ -11,7 +11,7 @@
 require 'pp'
 Chef::Log.info(ENV.pretty_inspect)
 
-include_recipe 'ey-base::chef_patches'
+#include_recipe 'ey-base::chef_patches'
 include_recipe 'ey-base::resin_gems'
 include_recipe 'ey-core'
 

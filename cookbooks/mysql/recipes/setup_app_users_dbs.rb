@@ -1,6 +1,6 @@
 node.engineyard.apps.each do |app|
 
-  dbhost = (node.dna['db_hostF'] == 'localhost' ? 'localhost' : '%')
+  dbhost = (node['dna']['db_hostF'] == 'localhost' ? 'localhost' : '%')
 
   template "/tmp/create.#{app.database_name}.sql" do
     owner 'root'

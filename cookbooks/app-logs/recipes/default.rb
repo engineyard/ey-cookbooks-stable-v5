@@ -7,7 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
-(node.dna['applications'] || []).each do |app_name, app_info|
+(node['dna']['applications'] || []).each do |app_name, app_info|
   directory "/var/log/engineyard/apps/#{app_name}" do
     owner node["owner_name"]
     group node["owner_name"]
@@ -27,7 +27,7 @@ logrotate "application-logs" do
   copy_then_truncate true
 end
 
-(node.dna['removed_applications'] || []).each do |dead_app|
+(node['dna']['removed_applications'] || []).each do |dead_app|
   execute "remove-logs-for-#{dead_app}" do
     command %Q{
       rm -rf /var/log/engineyard/apps/#{dead_app}

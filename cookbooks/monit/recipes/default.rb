@@ -89,7 +89,7 @@ inittab "m0" do
 end
 
 execute "restart-monit" do
-  apps = node.dna['applications'].map{|app, data| data['type'] }
+  apps = node['dna']['applications'].map{|app, data| data['type'] }
   cmd = []
   apps.each do |app|
     case app

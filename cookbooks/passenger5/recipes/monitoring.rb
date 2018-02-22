@@ -3,7 +3,7 @@
 # Recipe:: monitoring
 #
 
-if ['app_master', 'app', 'solo'].include?(node.dna['instance_role'])
+if ['app_master', 'app', 'solo'].include?(node['dna']['instance_role'])
 
   ey_cloud_report "passenger" do
     message "configuring passenger_monitor and passenger_killer"

@@ -49,16 +49,16 @@ unless haproxy_httpchk_path
   end
 end
 
-managed_template "/etc/haproxy.cfg" do
+template "/etc/haproxy.cfg" do
   owner 'root'
   group 'root'
   mode 0644
   source "haproxy.cfg.erb"
   variables({
     :backends => node.engineyard.environment.app_servers,
-    :app_master_weight => node.dna[:members] ? ( node.dna[:members].size < 51 ? (50 - (node.dna[:members].size - 1)) : 0 ) : 0,
-    :haproxy_user => node.dna[:haproxy][:username],
-    :haproxy_pass => node.dna[:haproxy][:password],
+    :app_master_weight => node['dna'][:members] ? ( node['dna'][:members].size < 51 ? (50 - (node['dna'][:members].size - 1)) : 0 ) : 0,
+    :haproxy_user => node['dna'][:haproxy][:username],
+    :haproxy_pass => node['dna'][:haproxy][:password],
     :http_bind_port => haproxy_http_port,
     :https_bind_port => haproxy_https_port,
     :httpchk_host => haproxy_httpchk_host,

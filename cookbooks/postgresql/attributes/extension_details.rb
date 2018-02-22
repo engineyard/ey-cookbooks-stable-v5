@@ -24,7 +24,7 @@ default[:pg_ext_details] = {
 }
 
 # postgis version details
-case attribute.dna.engineyard.environment.db_stack_name
+case node['dna']['engineyard']['environment']['db_stack_name']
 when "postgres9_6"
   default[:postgis_version] = '2.3.3'
   # separating these in case we decide to bump them later

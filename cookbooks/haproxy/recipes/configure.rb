@@ -51,17 +51,17 @@ unless haproxy_httpchk_path
 end
 
 use_http2 = node['haproxy'] && node['haproxy']['http2']
-managed_template "/etc/haproxy.cfg" do
+template "/etc/haproxy.cfg" do
   owner 'root'
   group 'root'
   mode 0644
   source "haproxy.cfg.erb"
-  members = node.dna[:members] || []
+  members = node['dna'][:members] || []
   variables({
     :backends => node.engineyard.environment.app_servers,
     :app_master_weight => members.size < 51 ? (50 - (members.size - 1)) : 0,
-    :haproxy_user => node.dna[:haproxy][:username],
-    :haproxy_pass => node.dna[:haproxy][:password],
+    :haproxy_user => node['dna'][:haproxy][:username],
+    :haproxy_pass => node['dna'][:haproxy][:password],
     :http_bind_port => haproxy_http_port,
     :https_bind_port => haproxy_https_port,
     :httpchk_host => haproxy_httpchk_host,

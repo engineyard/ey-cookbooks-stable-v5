@@ -1,7 +1,7 @@
 class Chef
   class Recipe
     def get_fpm_count
-      if ['solo'].include?(node.dna['instance_role'])
+      if ['solo'].include?(node['dna']['instance_role'])
         allocated_memory = 1000
       else
         allocated_memory = 250

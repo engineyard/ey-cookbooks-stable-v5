@@ -1,17 +1,17 @@
 
 include_recipe 'db_admin_tools::mytop'
 
-if node.dna['instance_role'][/^(db|solo)/]
+if node['dna']['instance_role'][/^(db|solo)/]
   include_recipe 'db_admin_tools::innotop'
   include_recipe 'db_admin_tools::percona_toolkit'
 end
 
 # Adding 'db_replica' attribute for future compatibility
-if ['db_master', 'db_slave', 'db_replica'].include?(node.dna['instance_role'])
+if ['db_master', 'db_slave', 'db_replica'].include?(node['dna']['instance_role'])
   include_recipe 'db_admin_tools::binary_logs'
 end
 
-if node.dna['instance_role'][/^(db|solo)/]
+if node['dna']['instance_role'][/^(db|solo)/]
   template "/engineyard/bin/database_oom_adj" do
     owner 'root'
     group 'root'

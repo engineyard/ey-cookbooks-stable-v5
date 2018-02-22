@@ -9,7 +9,7 @@
 
 ey_cloud_report "cron" do
   message "processing crontabs"
-  only_if node.dna['crons'].empty?
+  only_if node['dna']['crons'].empty?
 end
 
 execute "clearing old crons" do
@@ -40,7 +40,7 @@ file "/tmp/cron_update_header" do
   action :delete
 end
 
-unless 'app' == node.dna['instance_role']
+unless 'app' == node['dna']['instance_role']
   cron "ey-snapshots" do
     minute   node['snapshot_minute']
     hour     node['snapshot_hour']

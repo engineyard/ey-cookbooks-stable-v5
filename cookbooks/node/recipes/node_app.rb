@@ -59,8 +59,8 @@ node.engineyard.apps.each_with_index do |app, app_index|
       :home => "/home/#{app_user}",
       :db_user => app_user,
       :db_password => app_password,
-      :db_host => node.dna['db_host'],
-      :db_slaves => node.dna['db_slaves'],
+      :db_host => node['dna']['db_host'],
+      :db_slaves => node['dna']['db_slaves'],
       :app_name => app_name
     )
   end
@@ -101,7 +101,7 @@ node.engineyard.apps.each_with_index do |app, app_index|
     end
   end
 
-  managed_template "/data/nginx/servers/#{app_name}.conf" do
+  template "/data/nginx/servers/#{app_name}.conf" do
     owner node["owner_name"]
     group node["owner_name"]
     mode 0644
@@ -158,7 +158,7 @@ node.engineyard.apps.each_with_index do |app, app_index|
     worker_memory_size = app.metadata(:worker_memory_size, 350)
 
     app_config = "/etc/god/#{app_name}/node.rb"
-    managed_template app_config  do
+    template app_config  do
       owner node["owner_name"]
       group node["owner_name"]
       mode 0644
@@ -171,8 +171,8 @@ node.engineyard.apps.each_with_index do |app, app_index|
         :framework_env => node.engineyard.environment['framework_env'],
         :db_user => app_user,
         :db_password => app_password,
-        :db_host => node.dna['db_host'],
-        :db_slaves => node.dna['db_slaves'],
+        :db_host => node['dna']['db_host'],
+        :db_slaves => node['dna']['db_slaves'],
         :memory_limit => worker_memory_size
       )
     end
@@ -227,7 +227,7 @@ node.engineyard.apps.each_with_index do |app, app_index|
       notifies :restart, resources(:service => "nginx"), :delayed
     end
 
-    managed_template "/data/nginx/servers/#{app_name}.ssl.conf" do
+    template "/data/nginx/servers/#{app_name}.ssl.conf" do
       owner node["owner_name"]
       group node["owner_name"]
       source "ssl.#{mode_hash[:ext]}.erb"

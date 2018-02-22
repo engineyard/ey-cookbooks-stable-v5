@@ -25,7 +25,7 @@ bash "adjust-mysql-server-id" do
   action :nothing
 end
 
-managed_template "/etc/mysql/my.cnf" do
+template "/etc/mysql/my.cnf" do
   owner 'root'
   group 'root'
   mode 0644
@@ -40,8 +40,8 @@ managed_template "/etc/mysql/my.cnf" do
       :mysql_full_version => %x{[[ -f "/db/.lock_db_version" ]] && grep -E -o '^[0-9]+\.[0-9]+\.[0-9]+' /db/.lock_db_version || echo #{node['mysql']['latest_version']} }.chomp,
       :logbase => node['mysql']['logbase'],
       :innodb_buff => innodb_buff,
-      :replication_master => node.dna['instance_role'] == 'db_master',
-      :replication_slave  => node.dna['instance_role'] == 'db_slave',
+      :replication_master => node['dna']['instance_role'] == 'db_master',
+      :replication_slave  => node['dna']['instance_role'] == 'db_slave',
       :server_id    => server_id,
     }
   })

@@ -120,7 +120,7 @@ directory "/opt/nodejs" do
   action :create
 end
 
-managed_template "/opt/nodejs/nodejs_available_versions.json" do
+template "/opt/nodejs/nodejs_available_versions.json" do
   owner 'root'
   group 'root'
   source "nodejs_available_versions.json.erb"
@@ -130,8 +130,10 @@ managed_template "/opt/nodejs/nodejs_available_versions.json" do
   })
 end
 
-# Install yarn
-include_recipe "node::yarn"
+# Install yarn. YT-CC-1132.
+package 'sys-apps/yarn' do
+  version '0.21.3-r1'
+end
 
 if node.engineyard.environment.component?('nodejs')
   include_recipe "node::ey_node_app_info"

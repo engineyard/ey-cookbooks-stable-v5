@@ -9,7 +9,7 @@ known_versions = {
   'dev-db/percona-server' => ['5.6.28.76.1', '5.6.29.76.2-r1', '5.6.32.78.1', '5.6.35.81.0', '5.6.37.82.2', '5.7.13.6', '5.7.14.8', '5.7.17.13', '5.7.19.17']
 }
 
-if node.dna['instance_role'][/^(db|solo)/]
+if node['dna']['instance_role'][/^(db|solo)/]
   execute "dropping lock version file" do
     command "echo $(mysql --version | grep -E -o 'Distrib [0-9]+\.[0-9]+\.[0-9]+' | awk '{print $NF}') > #{lock_version_file}"
     action :run
@@ -74,7 +74,7 @@ end
 
 include_recipe "mysql::relink_mysql" unless node['mysql']['short_version'] == "5.6"
 
-if node.dna['instance_role'][/^db/]    # ~FC023
+if node['dna']['instance_role'][/^db/]    # ~FC023
   # FoodCritic note: Ignore becuase this custom resource doesn't offer only_if
   sysctl "Set vm.swappiness" do
     variables 'vm.swappiness' => '15'

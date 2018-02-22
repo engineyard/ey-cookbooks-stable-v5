@@ -60,7 +60,7 @@ end
 
 
 # get all applications with type PHP
-apps = node.dna['applications'].select{ |app, data| data['recipes'].detect{ |r| r == 'php' } }
+apps = node['dna']['applications'].select{ |app, data| data['recipes'].detect{ |r| r == 'php' } }
 # collect just the app names
 app_names = apps.collect{ |app, data| app }
 
@@ -77,7 +77,7 @@ template "/etc/php-fpm.conf" do
 end
 
 # Can't access get_fpm_coount inside block
-app_fpm_count = (get_fpm_count / node.dna['applications'].size)
+app_fpm_count = (get_fpm_count / node['dna']['applications'].size)
 app_fpm_count = 1 unless app_fpm_count >= 1
 
 # generate an fpm pool for each php app
@@ -100,12 +100,12 @@ app_names.each do |app_name|
     source "fpm-pool.conf.erb"
     variables({
       :app_name => app_name,
-      :php_env => node.dna['environment']['framework_env'],
+      :php_env => node['dna']['environment']['framework_env'],
       :user => node["owner_name"],
       :dbuser => node.engineyard.environment.apps.detect {|app| app[:name] == app_name}.database_username,
       :dbpass => node.engineyard.environment.apps.detect {|app| app[:name] == app_name}.database_password,
-      :dbhost => node.dna['db_host'],
-      :dbreplicas => node.dna['db_slaves'].join(':'),
+      :dbhost => node['dna']['db_host'],
+      :dbreplicas => node['dna']['db_slaves'].join(':'),
       :max_children => app_fpm_count,
       :memcache_hostnames => mc_hostnames.join(',')
     })
@@ -142,7 +142,7 @@ link "/etc/init.d/php-fpm" do
 end
 
 # get all applications with type PHP
-apps = node.dna['applications'].select{ |app, data| data['recipes'].detect{ |r| r == 'php' } }
+apps = node['dna']['applications'].select{ |app, data| data['recipes'].detect{ |r| r == 'php' } }
 # collect just the app names
 app_names = apps.collect{ |app, data| app }
 

@@ -19,7 +19,7 @@ directory "/home/#{node["owner_name"]}/.ssh" do
   action :create
 end
 
-node.dna['applications'].each do |app, data|
+node['dna']['applications'].each do |app, data|
 
   if data[:deploy_key]
 

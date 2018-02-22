@@ -22,14 +22,14 @@ class Chef
   end
 end
 
-Chef::Platform.platforms[:default].merge! :managed_template => Chef::Provider::Template
+#Chef::Platform.platforms[:default].merge! :template => Chef::Provider::Template
 
 # This is just a small wrapper around template that allows us to add a not_if condition as follows:
 # take the full path of the template "/data/someservice.conf" and check for a file on the filesystem
 # called "/data/keep.someservice.conf"
 
-# so for this managed_template resource
-# managed_template "/data/someservice.conf" do
+# so for this template resource
+# template "/data/someservice.conf" do
 #   owner "ez"
 #   mode 0755
 #   source 'someservice.conf.erb'

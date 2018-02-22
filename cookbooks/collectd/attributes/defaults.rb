@@ -1,4 +1,4 @@
-size = attribute.dna[:environment][:instance_size] || ec2_instance_size
+size = node['dna'][:environment][:instance_size] || ec2_instance_size
 default['collectd'] = (default_collectd(size))
 meminfo = Mixlib::ShellOut.new("cat /proc/meminfo").run_command.stdout
 default['swap_total_bytes'] = meminfo.scan(/^SwapTotal:\s+(\d+)\skB$/).flatten.first.to_i * 1024

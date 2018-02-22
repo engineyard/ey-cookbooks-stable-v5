@@ -15,14 +15,14 @@ else
     mode 0644
     source "stonith.yml.erb"
     variables({
-      :aws_secret_id      => node.dna['aws_secret_id'],
-      :aws_secret_key     => node.dna['aws_secret_key'],
-      :endpoint_token     => node.dna['instance']['awsm_token'],
-      :endpoint_uri       => node.dna.environment.stonith_endpoint,
-      'meta_data_hostname' => node.dna['master_app_server']['private_dns_name'],
-      :meta_data_id       => node.dna['instance']['id'],
-      'monitor_host'       => node.dna['master_app_server']['private_dns_name'],
-      :redis_host         => node.dna[:db_host],
+      :aws_secret_id      => node['dna']['aws_secret_id'],
+      :aws_secret_key     => node['dna']['aws_secret_key'],
+      :endpoint_token     => node['dna']['instance']['awsm_token'],
+      :endpoint_uri       => node['dna'].environment.stonith_endpoint,
+      'meta_data_hostname' => node['dna']['master_app_server']['private_dns_name'],
+      :meta_data_id       => node['dna']['instance']['id'],
+      'monitor_host'       => node['dna']['master_app_server']['private_dns_name'],
+      :redis_host         => node['dna'][:db_host],
       :redis_port         => 6380,
     })
   end

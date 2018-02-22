@@ -30,7 +30,7 @@ end
 pool_size = get_pool_size()
 behind_proxy = true
 
-managed_template "/data/nginx/nginx.conf" do
+template "/data/nginx/nginx.conf" do
   owner node.engineyard.environment.ssh_username
   group node.engineyard.environment.ssh_username
   mode 0644
@@ -87,7 +87,7 @@ nginx_version = node.engineyard.metadata("nginx_ebuild_version", node['nginx'][:
 # CC-362: msec is available after version 1.2.7
 use_msec = (nginx_version.split('.').map(&:to_i) <=> [1,2,7]) >= 0
 
-managed_template "/data/nginx/common/proxy.conf" do
+template "/data/nginx/common/proxy.conf" do
   owner node.engineyard.environment.ssh_username
   group node.engineyard.environment.ssh_username
   mode 0644
@@ -98,7 +98,7 @@ managed_template "/data/nginx/common/proxy.conf" do
   notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
 end
 
-managed_template "/data/nginx/common/servers.conf" do
+template "/data/nginx/common/servers.conf" do
   owner node.engineyard.environment.ssh_username
   group node.engineyard.environment.ssh_username
   mode 0644
@@ -106,7 +106,7 @@ managed_template "/data/nginx/common/servers.conf" do
   notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
 end
 
-managed_template "/data/nginx/common/fcgi.conf" do
+template "/data/nginx/common/fcgi.conf" do
   owner node.engineyard.environment.ssh_username
   group node.engineyard.environment.ssh_username
   mode 0644
@@ -187,7 +187,7 @@ end
 
 ## setup /etc/conf.d
 
-managed_template "/etc/conf.d/nginx" do
+template "/etc/conf.d/nginx" do
   source "conf.d/nginx.erb"
   variables({
     :nofile => 16384

@@ -31,9 +31,9 @@ end
 
   ruby_block "copy-ssh-keys-for-#{ssh_owner}" do
     block do
-      keys = [node.dna[:user_ssh_key]].flatten
-      keys << node.dna[:admin_ssh_key].to_s
-      keys << %|from="#{node.cluster.join(",")}" #{node.dna[:internal_ssh_public_key]}|.to_s
+      keys = [node['dna'][:user_ssh_key]].flatten
+      keys << node['dna'][:admin_ssh_key].to_s
+      keys << %|from="#{node.cluster.join(",")}" #{node['dna'][:internal_ssh_public_key]}|.to_s
 
       File.open("#{ssh_dir}/authorized_keys.tmp", 'w') do |temp_key_file|
         keys.each do |key|
@@ -64,7 +64,7 @@ end
     mode "0600"
     source "ssh.erb"
     variables({
-        :key => node.dna[:internal_ssh_private_key]
+        :key => node['dna'][:internal_ssh_private_key]
       })
   end
 end

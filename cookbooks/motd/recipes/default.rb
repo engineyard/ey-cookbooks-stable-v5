@@ -5,8 +5,8 @@
 #
 
 # Application data is in two places in +node+:
-# * node.dna['applications']
-# * node.dna['engineyard'][:environment][:apps]
+# * node['dna']['applications']
+# * node['dna']['engineyard'][:environment][:apps]
 #
 # It is passed into the templates looking like:
 # {
@@ -21,9 +21,9 @@
 #   "app_name2": {...}
 # }
 
-applications = node.dna['applications']
+applications = node['dna']['applications']
 environment_apps = node.engineyard.environment.apps
-# node.dna['engineyard'][:environment][:apps] looks like:
+# node['dna']['engineyard'][:environment][:apps] looks like:
 # [
 #   {
 #     "name": "jerryseinfeld",
@@ -46,7 +46,7 @@ prechef_command_app = metadata_any_app_get("prechef_command")
 
 logs = db_log_paths
 
-if ['solo'].include?(node.dna.instance_role)
+if ['solo'].include?(node['dna']['instance_role'])
   template "/etc/motd" do
     source "motd-solo.erb"
     owner "root"
@@ -63,7 +63,7 @@ if ['solo'].include?(node.dna.instance_role)
     })
   end
 
-elsif ['app_master', 'app', 'util'].include?(node.dna.instance_role)
+elsif ['app_master', 'app', 'util'].include?(node['dna']['instance_role'])
   template "/etc/motd" do
     source "motd-app-util.erb"
     owner "root"
@@ -78,7 +78,7 @@ elsif ['app_master', 'app', 'util'].include?(node.dna.instance_role)
     })
   end
 
-elsif ['db_master', 'db_slave'].include?(node.dna.instance_role)
+elsif ['db_master', 'db_slave'].include?(node['dna']['instance_role'])
   template "/etc/motd" do
     source "motd-db.erb"
     owner "root"

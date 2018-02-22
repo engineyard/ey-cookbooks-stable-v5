@@ -6,10 +6,10 @@ class Chef::Recipe
 end
 
 # Setting a meningful hostname to easy identification in New Relic dashboard
-id = node.dna['engineyard']['this']
-role = node.dna['instance_role'].gsub('_', ' ')
-name = node.dna['name']
-environment = node.dna['environment']['name']
+id = node['dna']['engineyard']['this']
+role = node['dna']['instance_role'].gsub('_', ' ')
+name = node['dna']['name']
+environment = node['dna']['environment']['name']
 
 descriptive_hostname = "#{id} - #{role}"
 descriptive_hostname << " (#{name})" if name

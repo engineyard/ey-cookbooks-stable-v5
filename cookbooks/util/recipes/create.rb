@@ -14,7 +14,7 @@ node.engineyard.apps.each do |app|
   if dbtype == "nodb"
     Chef::Log.info "--- Source file for db #{dbtype} -  dropping nodb file"
 
-     managed_template "/data/#{app.name}/shared/config/nodatabase.yml" do
+     template "/data/#{app.name}/shared/config/nodatabase.yml" do
       owner node.engineyard.environment.ssh_username
       group node.engineyard.environment.ssh_username
       mode 0600
@@ -41,7 +41,7 @@ end
       dbtype = '<%= determine_adapter %>'
     end
     
-    managed_template "/data/#{app.name}/shared/config/database.yml" do
+    template "/data/#{app.name}/shared/config/database.yml" do
       owner node.engineyard.environment.ssh_username
       group node.engineyard.environment.ssh_username
       mode 0600
@@ -52,10 +52,10 @@ end
         :dbuser => node.engineyard.environment.ssh_username,
         :dbpass => node.engineyard.environment.ssh_password,
         :dbname => app.database_name,
-        :dbhost => node.dna['db_host'],
+        :dbhost => node['dna']['db_host'],
         :dbtype => dbtype,
         :slaves => node.engineyard.environment.instances.select{|i| i["role"] =="db_slave"},
-        :pool => node.engineyard.environment.jruby? ? node.dna['jruby_pool_size'] : nil
+        :pool => node.engineyard.environment.jruby? ? node['dna']['jruby_pool_size'] : nil
       })
     end
   end

@@ -1,6 +1,6 @@
 include_recipe 'mysql::client'
 
-mysql_slave node.dna['db_host'] do
+mysql_slave node['dna']['db_host'] do
   password node['owner_pass']
 end
 

@@ -11,8 +11,8 @@ ey_cloud_report "users" do
   message "processing users"
 end
 
-## EY role account should come first in the node.dna[:users] array
-node.dna['users'].each do |user_obj|
+## EY role account should come first in the node['dna'][:users] array
+node['dna']['users'].each do |user_obj|
   execute "create-group" do
     command "groupadd -g #{user_obj[:gid]} #{user_obj[:username]}"
     not_if "getent group #{user_obj[:gid]}"
@@ -25,7 +25,7 @@ node.dna['users'].each do |user_obj|
     shell "/bin/bash"
     password user_obj[:password]
     comment user_obj[:comment]
-    supports :manage_home => false
+    manage_home false
 
     not_if "getent passwd #{user_obj[:uid]}"
   end

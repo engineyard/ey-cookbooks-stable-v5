@@ -42,7 +42,7 @@ class Chef
       private
 
       def assemble_instance
-        id = @node.dna['engineyard']['this']
+        id = @node['dna']['engineyard']['this']
         Chef::EY::Instance.new(@node.engineyard.environment['instances'].detect {|i| i['id'] == id}, @node)
       end
 

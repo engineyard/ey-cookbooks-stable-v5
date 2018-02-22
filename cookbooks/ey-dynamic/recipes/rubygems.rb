@@ -7,7 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
-## EY role acount should come first in the node.dna[:users] array
+## EY role acount should come first in the node['dna'][:users] array
 
 ey_cloud_report "custom gems" do
   message "processing custom gems"
@@ -15,7 +15,7 @@ end
 
 ruby_block "gems to install" do
   block do
-    node.dna['gems_to_install'].each do |pkg|
+    node['dna']['gems_to_install'].each do |pkg|
       command = "gem install #{pkg[:name]} --no-ri --no-rdoc"
       command << " -v #{pkg[:version]}" if pkg[:version]
 

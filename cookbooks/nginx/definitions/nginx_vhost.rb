@@ -42,7 +42,7 @@ define :nginx_vhost, :stack_config => false, :upstream_ports => [] do
     mode 0775
   end
 
-  managed_template "/data/nginx/servers/#{app.name}.rewrites" do
+  template "/data/nginx/servers/#{app.name}.rewrites" do
     owner node.engineyard.environment.ssh_username
     group node.engineyard.environment.ssh_username
     mode 0644
@@ -65,7 +65,7 @@ define :nginx_vhost, :stack_config => false, :upstream_ports => [] do
   meta = node.engineyard.apps.detect {|a| a.metadata?(:nginx_http_port) }
   nginx_http_port = ( meta and meta.metadata?(:nginx_http_port) ) || 8081
 
-  managed_template "/data/nginx/servers/#{app.name}.conf" do
+  template "/data/nginx/servers/#{app.name}.conf" do
     owner node.engineyard.environment.ssh_username
     group node.engineyard.environment.ssh_username
     mode 0644
@@ -93,7 +93,7 @@ define :nginx_vhost, :stack_config => false, :upstream_ports => [] do
     nginx_https_port = ( sslmeta and meta.metadata?(:nginx_https_port) ) || 8082
 
 
-    managed_template "/data/nginx/servers/#{app.name}.ssl.conf" do
+    template "/data/nginx/servers/#{app.name}.ssl.conf" do
       owner node.engineyard.environment.ssh_username
       group node.engineyard.environment.ssh_username
       mode 0644

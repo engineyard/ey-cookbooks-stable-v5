@@ -1,7 +1,7 @@
 include_recipe "nginx"
 
 ssh_username  = node['owner_name']
-framework_env = node.dna['environment']['framework_env']
+framework_env = node['dna']['environment']['framework_env']
 
 service "nginx" do
   action :nothing
