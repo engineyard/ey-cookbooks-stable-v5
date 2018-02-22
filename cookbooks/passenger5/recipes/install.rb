@@ -66,22 +66,6 @@
     memory_option = memory_limit ? "-l #{memory_limit}" : ""
     worker_count = get_pool_size
 
-    # Render the http Nginx vhost
-    template "/data/nginx/servers/#{app.name}.conf" do
-      owner ssh_username
-      group ssh_username
-      mode 0644
-      source "nginx_app.conf.erb"
-      cookbook "passenger5"
-      variables({
-        :vhost => app.vhosts.first,
-        :port => nginx_http_port,
-        :upstream_port => app_base_port,
-        :framework_env => framework_env
-      })
-      notifies :restart, resources(:service => "nginx"), :delayed
-    end
-    
 	# If certificates have been added, render the https Nginx vhost and custom config
     if app.vhosts.first.https?
       file "/data/nginx/servers/#{app.name}/custom.ssl.conf" do
@@ -89,21 +73,6 @@
         owner ssh_username
         group ssh_username
         mode 0644
-      end
-
-      template "/data/nginx/servers/#{app.name}.ssl.conf" do
-        owner ssh_username
-        group ssh_username
-        mode 0644
-        source "nginx_app.conf.erb"
-        variables({
-          :vhost => app.vhosts.first,
-          :ssl => true,
-          :port => nginx_https_port,
-          :upstream_port => app_base_port,
-          :framework_env => framework_env
-        })
-        notifies :restart, resources(:service => "nginx"), :delayed
       end
     end
 

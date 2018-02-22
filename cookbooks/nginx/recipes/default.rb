@@ -11,6 +11,8 @@ stack = node.engineyard.environment['stack_name']
 should_not_run = /(thin|nginx_passenger|nginx_passenger3|nginx_passenger4|nginx_trinidad)/
 mongrel_unicorn = /(nginx_unicorn|nginx_mongrel)/
 php_fpm = /nginx_fpm/
+stack=="nginx_passenger5" ? passenger5=true : passenger5=false
+
 
 Chef::Log.info "NGINX ACTION: #{node['nginx'][:action]}"
 nginx_version = node['nginx']['version']
@@ -97,7 +99,7 @@ managed_template "/data/nginx/common/proxy.conf" do
   source "common.proxy.conf.erb"
   variables({
     :use_msec => use_msec,
-	:passenger5 => node[:dna][:environment][:stack],
+	:passenger5 => passenger5,
 	:http2 => node['nginx']['http2']
   })
   notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
@@ -192,12 +194,18 @@ node.engineyard.apps.each_with_index do |app, index|
   unicorn = app.recipes.include?('unicorn')
   php = app.recipes.include?('php')
 
+# Passenger5 support
+  base_port = node['passenger5']['port'].to_i
+  stepping = 200
+  app_base_port = base_port + ( stepping * index )
+
 #
 # HAX for SD-4650
 # Remove it when awsm stops using dnapi to generate the dna and allows configure ports
 
   meta = node.engineyard.apps.detect {|a| a.metadata?(:nginx_http_port) }
   nginx_http_port = ( meta and meta.metadata?(:nginx_http_port) ) || 8081
+  nginx_https_port = ( meta and meta.metadata?(:nginx_https_port) ) || 8082
 
 php_webroot = node.engineyard.environment.apps.first['components'].find {|component| component['key'] == 'app_metadata'}['php_webroot']
 
@@ -238,6 +246,29 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
             :fcgi_instance_count => fcgi_service[:fcgi_instance_count],
             :use_msec => use_msec,
 			:http2 => node['nginx']['http2']
+          }
+        }
+      )
+      notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
+    end
+  end
+
+
+  if stack.match("nginx_passenger5")
+    managed_template "/data/nginx/servers/#{app.name}.conf" do
+      owner node['owner_name']
+      group node['owner_name']
+      mode 0644
+      source "passenger.conf.erb"
+      variables(
+        lazy {
+          {
+            :application => app,
+			:vhost => app.vhosts.first,
+			:upstream_port => app_base_port,
+            :http_bind_port => nginx_http_port,
+			:http2_bind_port => nginx_http_port,
+            :http2 => node['nginx']['http2']
           }
         }
       )
@@ -484,6 +515,7 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
         )
         notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
       end
+
       managed_template "/etc/nginx/servers/#{app.name}/additional_server_blocks.ssl.customer" do
         owner node['owner_name']
         group node['owner_name']
@@ -503,6 +535,30 @@ php_webroot = node.engineyard.environment.apps.first['components'].find {|compon
         not_if { File.exists?("/etc/nginx/servers/#{app.name}/additional_location_blocks.ssl.customer") }
       end
     end
+
+  if stack.match("nginx_passenger5")
+    managed_template "/data/nginx/servers/#{app.name}.ssl.conf" do
+      owner node['owner_name']
+      group node['owner_name']
+      mode 0644
+      source "passenger.conf.erb"
+      variables(
+        lazy {
+          {
+            :application => app,
+			:ssl => true,
+            :vhost => app.vhosts.first,
+            :upstream_port => app_base_port,
+            :http_bind_port => nginx_https_port,
+			:http2_bind_port => 8082,
+            :http2 => node['nginx']['http2']
+          }
+        }
+      )
+      notifies node['nginx'][:action], resources(:service => "nginx"), :delayed
+    end
+  end
+
   else
     execute "ensure-no-old-ssl-vhosts-for-#{app.name}" do
       command %Q{
