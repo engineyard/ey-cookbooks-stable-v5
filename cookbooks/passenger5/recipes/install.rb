@@ -66,16 +66,6 @@
     memory_option = memory_limit ? "-l #{memory_limit}" : ""
     worker_count = get_pool_size
 
-	# If certificates have been added, render the https Nginx vhost and custom config
-    if app.vhosts.first.https?
-      file "/data/nginx/servers/#{app.name}/custom.ssl.conf" do
-        action :create_if_missing
-        owner ssh_username
-        group ssh_username
-        mode 0644
-      end
-    end
-
     # Render app control script, this script calls the passenger enterprise binaries using the full path
     template "/engineyard/bin/app_#{app.name}" do
       source  'app_control.erb'
