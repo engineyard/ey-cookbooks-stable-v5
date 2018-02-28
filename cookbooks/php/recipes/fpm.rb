@@ -41,44 +41,39 @@ directory "/var/run/engineyard" do
   action :create
 end
 
+# stopping common php-fpm service if it's running
+execute 'stop obsolete php-fpm service' do
+  command "/usr/bin/monit stop php-fpm"
+  only_if "/usr/bin/pgrep php-fpm"
+end
+
+# deleting obsolete service files
+execute 'delete old init scripts' do
+  command "rm -f /etc/monit.d/php-fpm.monitrc && rm -rf /etc/init.d/php-fpm && rm -f /engineyard/bin/php-fpm"
+  only_if "test -f /etc/monit.d/php-fpm.monitrc"
+end
+
+monit_service 'monit_reload_config' do
+  action :nothing
+end
 
 bash 'eselect php and restart via monit' do
   code <<-EOH
     eselect php set fpm php#{node["php"]["minor_version"]}
     EOH
   not_if "php-fpm -v | grep PHP | grep #{node['php']['version']}"
-  notifies :run, 'execute[monit_restart_fpm]'
+  notifies :restartall, 'monit_service[monit_reload_config]'
 end
-
-
-execute 'monit_restart_fpm' do
-  command "sudo monit restart php-fpm"
-  action :nothing
-end
-
-
-
 
 # get all applications with type PHP
 apps = node.dna['applications'].select{ |app, data| data['recipes'].detect{ |r| r == 'php' } }
 # collect just the app names
 app_names = apps.collect{ |app, data| app }
 
-# generate global fpm config
-template "/etc/php-fpm.conf" do
-  owner node["owner_name"]
-  group node["owner_name"]
-  mode "0644"
-  source "fpm-global.conf.erb"
-  variables({
-    :apps => app_names
-  })
-#  notifies :restart, resources(:service => "php-fpm"), :delayed
-end
-
 # Can't access get_fpm_coount inside block
 app_fpm_count = (get_fpm_count / node.dna['applications'].size)
 app_fpm_count = 1 unless app_fpm_count >= 1
+mc_hostnames = node.engineyard.environment.instances.map{|i| i['private_hostname'] if i['role'][/^app|solo/]}.compact.map {|i| "#{i}:11211"}
 
 # generate an fpm pool for each php app
 app_names.each do |app_name|
@@ -91,7 +86,60 @@ app_names.each do |app_name|
     not_if { FileTest.exists?("/data/#{app_name}/shared/config/env.custom") }
   end
 
-  mc_hostnames = node.engineyard.environment.instances.map{|i| i['private_hostname'] if i['role'][/^app|solo/]}.compact.map {|i| "#{i}:11211"}
+  # Create init.d for each php-fpm application
+  # To be able to start and stop each application separately
+  template "/engineyard/bin/php-fpm_#{app_name}" do
+    owner node["owner_name"]
+    group node["owner_name"]
+    mode 0777
+    source "php-fpm-openrc.erb"
+    variables(
+      :app_name => app_name,
+      :user => node["owner_name"],
+      :group => node["owner_name"]
+    )
+  end
+
+  # Delete any existing init.d file if it's not a symlink
+  cookbook_file "/etc/init.d/php-fpm_#{app_name}" do
+    action :delete
+    backup 0
+    not_if "test -h /etc/init.d/php-fpm_#{app_name}"
+  end
+
+  # Create a symlink under init.d
+  link "/etc/init.d/php-fpm_#{app_name}" do
+    to "/engineyard/bin/php-fpm_#{app_name}"
+  end
+
+  # create symlinks for each app too. Required for deploy.
+  link "/engineyard/bin/app_#{app_name}" do
+    to "/engineyard/bin/php-fpm_#{app_name}"
+  end
+    
+  # generate global fpm config
+  template "/etc/php/php-fpm_#{app_name}.conf" do
+    owner node["owner_name"]
+    group node["owner_name"]
+    mode "0644"
+    source "fpm-global.conf.erb"
+    variables({
+      :app_name => app_name
+    })
+    notifies :restart, "monit_service[php-fpm_#{app_name}]", :delayed
+  end
+
+  # generate global fpm config
+  template "/etc/php/php-fpm_#{app_name}.conf" do
+    owner node["owner_name"]
+    group node["owner_name"]
+    mode "0644"
+    source "fpm-global.conf.erb"
+    variables({
+      :app_name => app_name
+    })
+    notifies :restart, "monit_service[php-fpm_#{app_name}]", :delayed
+  end
 
   template "/data/#{app_name}/shared/config/fpm-pool.conf" do
     owner node["owner_name"]
@@ -109,67 +157,28 @@ app_names.each do |app_name|
       :max_children => app_fpm_count,
       :memcache_hostnames => mc_hostnames.join(',')
     })
-
-  end
-end
-
-# Report to Cloud dashboard
-#ey_cloud_report "processing php" do
-#  message "processing php - monitoring"
-#end
-
-# Create global init.d file
-# We are unable to start and stop each app individually
-cookbook_file "/engineyard/bin/php-fpm" do
-  owner node["owner_name"]
-  group node["owner_name"]
-  mode 0777
-  source "init.d-php-fpm.sh"
-  backup 0
-end
-
-# Delete any existing init.d file if it's not a symlink
-cookbook_file "/etc/init.d/php-fpm" do
-  action :delete
-  backup 0
-
-  not_if "test -h /etc/init.d/php-fpm"
-end
-
-# Create a symlink under init.d
-link "/etc/init.d/php-fpm" do
-  to "/engineyard/bin/php-fpm"
-end
-
-# get all applications with type PHP
-apps = node.dna['applications'].select{ |app, data| data['recipes'].detect{ |r| r == 'php' } }
-# collect just the app names
-app_names = apps.collect{ |app, data| app }
-
-app_names.each do |app|
-  # create symlinks for each app, too. Required for deploy.
-  link "/engineyard/bin/app_#{app}" do
-    to "/engineyard/bin/php-fpm"
+    notifies :restart, "monit_service[php-fpm_#{app_name}]", :delayed
   end
 
+  # Create monitrc file for the application and restart monit
+  template "/etc/monit.d/php-fpm_#{app_name}.monitrc" do
+    owner node["owner_name"]
+    group node["owner_name"]
+    mode 0600
+    source "php-fpm.monitrc.erb"
+    variables(
+      :app_name => app_name
+    )
+    backup 0
+    notifies :reload, "monit_service[monit_reload_config]"
+  end
+
+  monit_service "php-fpm_#{app_name}" do
+    service_name "php-fpm_#{app_name}"
+    action :start
+  end
+  
   # Change ownership of app slowlog if set to root
-  check_fpm_log_owner(app)
+  check_fpm_log_owner(app_name)
+
 end
-
-# Create monitrc file (all apps) and restart monit
-template "/etc/monit.d/php-fpm.monitrc" do
-  owner node["owner_name"]
-  group node["owner_name"]
-  mode 0600
-  source "php-fpm.monitrc.erb"
-  variables(
-    :apps => app_names,
-    :user => node["owner_name"]
-  )
-  backup 0
-
-  notifies :run, 'execute[restart-monit]'
-end
-
-# cookbooks/php/libraries/php_helpers.rb
-restart_fpm
