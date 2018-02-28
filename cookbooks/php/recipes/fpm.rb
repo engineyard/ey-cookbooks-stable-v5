@@ -156,7 +156,7 @@ app_names.each do |app_name|
     variables({
       :app_name => app_name
     })
-  #  notifies :restart, resources(:service => "php-fpm"), :delayed
+    notifies :restart, "monit_service[php-fpm_#{app_name}]", :delayed
   end
 
   template "/data/#{app_name}/shared/config/fpm-pool.conf" do

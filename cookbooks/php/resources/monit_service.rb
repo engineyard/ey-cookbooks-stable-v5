@@ -4,6 +4,8 @@
 #
 # Author:: Jevgenij Sevostjanov <jevgenij@lmiw.net>
 
+resource_name :monit_service
+
 property :service_name, String, name_property: true
 
 action :start do
