@@ -116,11 +116,6 @@ app_names.each do |app_name|
   link "/engineyard/bin/app_#{app_name}" do
     to "/engineyard/bin/php-fpm_#{app_name}"
   end
-
-  monit_service "php-fpm_#{app_name}" do
-    service_name "php-fpm_#{app_name}"
-    action :nothing
-  end
   
   # Create monitrc file for the application and restart monit
   template "/etc/monit.d/php-fpm_#{app_name}.monitrc" do
@@ -132,7 +127,7 @@ app_names.each do |app_name|
       :app_name => app_name
     )
     backup 0
-    notifies :restart, "monit_service[php-fpm_#{app_name}]", :delayed
+    notifies :reload, "monit_service[monit_reload_config]"
   end
   
   # generate global fpm config
@@ -176,6 +171,11 @@ app_names.each do |app_name|
       :memcache_hostnames => mc_hostnames.join(',')
     })
     notifies :restart, "monit_service[php-fpm_#{app_name}]", :delayed
+  end
+
+  monit_service "php-fpm_#{app_name}" do
+    service_name "php-fpm_#{app_name}"
+    action :start
   end
   
   # Change ownership of app slowlog if set to root
