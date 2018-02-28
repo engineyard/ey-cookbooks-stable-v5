@@ -116,20 +116,7 @@ app_names.each do |app_name|
   link "/engineyard/bin/app_#{app_name}" do
     to "/engineyard/bin/php-fpm_#{app_name}"
   end
-  
-  # Create monitrc file for the application and restart monit
-  template "/etc/monit.d/php-fpm_#{app_name}.monitrc" do
-    owner node["owner_name"]
-    group node["owner_name"]
-    mode 0600
-    source "php-fpm.monitrc.erb"
-    variables(
-      :app_name => app_name
-    )
-    backup 0
-    notifies :reload, "monit_service[monit_reload_config]"
-  end
-  
+    
   # generate global fpm config
   template "/etc/php/php-fpm_#{app_name}.conf" do
     owner node["owner_name"]
@@ -171,6 +158,19 @@ app_names.each do |app_name|
       :memcache_hostnames => mc_hostnames.join(',')
     })
     notifies :restart, "monit_service[php-fpm_#{app_name}]", :delayed
+  end
+
+  # Create monitrc file for the application and restart monit
+  template "/etc/monit.d/php-fpm_#{app_name}.monitrc" do
+    owner node["owner_name"]
+    group node["owner_name"]
+    mode 0600
+    source "php-fpm.monitrc.erb"
+    variables(
+      :app_name => app_name
+    )
+    backup 0
+    notifies :reload, "monit_service[monit_reload_config]"
   end
 
   monit_service "php-fpm_#{app_name}" do
