@@ -22,8 +22,8 @@ action :restart do
 end
 
 action :restartall do
-  execute "monit restart all services" do
-    command "/usr/bin/monit restart all"
+  execute "monit restart all php-fpm services" do
+    command "/usr/bin/monit restart all -g php-fpm"
   end
 end
 

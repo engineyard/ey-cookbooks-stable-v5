@@ -1,6 +1,6 @@
 check process php-fpm_<%= @app_name %>
   with pidfile /var/run/engineyard/php-fpm_<%= @app_name %>.pid
-  group php-fpm_<%= @app_name %>
+  group php-fpm
   start program = "/bin/bash -c '/etc/init.d/php-fpm_<%= @app_name %> start'"
   stop program = "/bin/bash -c '/etc/init.d/php-fpm_<%= @app_name %> stop'"
   restart program = "/bin/bash -c '/etc/init.d/php-fpm_<%= @app_name %> reload'"
