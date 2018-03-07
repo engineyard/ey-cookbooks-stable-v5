@@ -8,6 +8,10 @@ pm = static
 pm.max_children = <%= @max_children %>
 pm.max_requests = 2500
 
+<% if @status_page -%>
+pm.status_path = /fpm_status_<%= @app_name %>
+<% end -%>
+
 slowlog = /var/log/engineyard/apps/<%= @app_name %>/php-fpm.slow.log
 request_slowlog_timeout = 30
 

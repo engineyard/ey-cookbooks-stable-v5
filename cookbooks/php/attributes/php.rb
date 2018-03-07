@@ -12,3 +12,6 @@ default['php']['version'] = case attribute['dna']['engineyard']['environment']['
 end
  
 default['php']['minor_version'] =  default['php']['version'].split(".").first(2).join(".")
+
+# Atrribute for php-fpm status page enabling
+default['php']['fpm']['status_page'] = true
