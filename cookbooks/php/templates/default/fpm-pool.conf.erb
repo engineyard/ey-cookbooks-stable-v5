@@ -1,6 +1,6 @@
 ; PHP-FPM pool configuration for <%= @app_name %>
 [<%= @app_name %>]
-php_admin_value[error_log] = /data/<%= @app_name %>/current/log/error_log
+php_admin_value[error_log] = /var/log/engineyard/apps/<%= @app_name %>/error.log
 listen = /var/run/engineyard/php-fpm_<%= @app_name %>.sock
 
 listen.backlog = -1
