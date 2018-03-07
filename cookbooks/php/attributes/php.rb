@@ -12,3 +12,5 @@ default['php']['version'] = case attribute['dna']['engineyard']['environment']['
 end
  
 default['php']['minor_version'] =  default['php']['version'].split(".").first(2).join(".")
+# This flag enables access log on PHP-FPM pool
+default['php']['fpm']['extended_logging'] = false

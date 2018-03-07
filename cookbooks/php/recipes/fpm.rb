@@ -77,14 +77,7 @@ mc_hostnames = node.engineyard.environment.instances.map{|i| i['private_hostname
 
 # generate an fpm pool for each php app
 app_names.each do |app_name|
-  cookbook_file "/data/#{app_name}/shared/config/env.custom" do
-    source "env.custom"
-    owner node.engineyard.environment.ssh_username
-    group node.engineyard.environment.ssh_username
-    mode 0755
-    backup 0
-    not_if { FileTest.exists?("/data/#{app_name}/shared/config/env.custom") }
-  end
+
 
   # Create init.d for each php-fpm application
   # To be able to start and stop each application separately
@@ -149,6 +142,18 @@ app_names.each do |app_name|
     mode "0644"
     source "fpm-global.conf.erb"
     variables({
+      :app_name => app_name
+    })
+    notifies :restart, "monit_service[php-fpm_#{app_name}]", :delayed
+  end
+
+  template "/data/#{app_name}/shared/config/env.custom" do
+    source "env.custom.erb"
+    owner node["owner_name"]
+    group node["owner_name"]
+    mode 0755
+    variables({
+      :extended_logging => node['php']['fpm']['extended_logging'],
       :app_name => app_name
     })
     notifies :restart, "monit_service[php-fpm_#{app_name}]", :delayed
