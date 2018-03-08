@@ -7,7 +7,7 @@ set_phpvars() {
 	PHP_FPM_GROUP="<%= @group %>"
 }
 
-extra_started_commands="reload"
+extra_commands="reload"
 
 start() {
         ebegin "Starting PHP FastCGI Process Manager for <%= @app_name %>"
