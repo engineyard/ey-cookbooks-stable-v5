@@ -134,7 +134,7 @@ end
 node.engineyard.apps.each_with_index do |app, index|
 
   dhparam_available = app.metadata('dh_key',nil)
-
+  php_webroot = app.metadata('php_webroot','/public')
   if dhparam_available
     managed_template "/data/nginx/ssl/dhparam.#{app.name}.pem" do
        owner node['owner_name']
@@ -197,7 +197,6 @@ node.engineyard.apps.each_with_index do |app, index|
   meta = node.engineyard.apps.detect {|a| a.metadata?(:nginx_http_port) }
   nginx_http_port = ( meta and meta.metadata?(:nginx_http_port) ) || 8081
 
-php_webroot = node.engineyard.environment.apps.first['components'].find {|component| component['key'] == 'app_metadata'}['php_webroot']
 
   managed_template "/etc/nginx/listen_http.port" do
     owner node['owner_name']
