@@ -17,7 +17,8 @@ fastcgi_param  REMOTE_ADDR        $remote_addr;
 fastcgi_param  REMOTE_PORT        $remote_port;
 fastcgi_param  SERVER_ADDR        $server_addr;
 fastcgi_param  SERVER_PORT        $server_port;
-fastcgi_param  SERVER_NAME        $server_name;
+# [YT-CC-666] $server_port was changed to $http_x_forwarded_port
+fastcgi_param  SERVER_PORT        $http_x_forwarded_port;
 
 # PHP only, required if PHP was built with --enable-force-cgi-redirect
 fastcgi_param  REDIRECT_STATUS    200;
