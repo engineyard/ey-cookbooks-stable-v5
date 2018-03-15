@@ -40,14 +40,7 @@ if is_memcached_instance
       :misc_opts => node['memcached']['misc_opts']
   end
 
-  directory '/etc/monit.d' do
-    owner 'root'
-    group 'root'
-    mode 0755
-    action :create
-  end
-
-  template '/etc/monit.d/memcached.monitrc' do
+  template '/data/monit.d/memcached.monitrc' do
     source 'memcached.monitrc'
     owner 'root'
     group 'root'
