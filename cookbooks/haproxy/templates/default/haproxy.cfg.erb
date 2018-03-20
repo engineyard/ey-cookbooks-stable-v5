@@ -127,7 +127,9 @@ listen cluster
     #redirect http=>https
     redirect scheme https code 301 if !{ ssl_fc }
 <% else %>
-    reqadd X-Forwarded-Proto:\ http
+# YT-CC-666 X-Forwarded-Port added
+  http-request add-header X-Forwarded-Proto http
+  http-request set-header X-Forwarded-Port %[dst_port]
 
     <% if @backends.any? %>
       <% @backends.each_with_index do |instance, i| %>
@@ -178,9 +180,11 @@ listen cluster
 
 <% else %>
     <% if Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.count > 0 %>
-        listen clusterssl
-        bind *:443 mss 1422 ssl <%= Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.collect {|pem| "crt #{pem}"}.join(" ") %>
-        reqadd X-Forwarded-Proto:\ https
+listen clusterssl
+  bind *:443 mss 1422 ssl <%= Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.collect {|pem| "crt #{pem}"}.join(" ") %>
+# YT-CC-666 X-Forwarded-Port added
+  http-request add-header X-Forwarded-Proto https
+  http-request set-header X-Forwarded-Port %[dst_port]
 
         <% if @backends.any? %>
         <% @backends.each_with_index do |instance, i| %>

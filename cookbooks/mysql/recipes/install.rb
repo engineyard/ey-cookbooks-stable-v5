@@ -6,7 +6,7 @@ db_running = %x{mysql -N -e "select 1;" 2> /dev/null}.strip == '1'
 known_versions = {
   # Note: mysql 5.5 is a limited access feature on this stack; use 5.6 or higher if possible.
   'dev-db/mysql' => ['5.5.49'],
-  'dev-db/percona-server' => ['5.6.28.76.1', '5.6.29.76.2-r1', '5.6.32.78.1', '5.6.35.81.0', '5.7.13.6', '5.7.14.8', '5.7.17.13']
+  'dev-db/percona-server' => ['5.6.28.76.1', '5.6.29.76.2-r1', '5.6.32.78.1', '5.6.35.81.0', '5.6.37.82.2', '5.7.13.6', '5.7.14.8', '5.7.17.13', '5.7.19.17']
 }
 
 if node.dna['instance_role'][/^(db|solo)/]

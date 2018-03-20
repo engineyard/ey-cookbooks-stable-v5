@@ -97,7 +97,9 @@ listen cluster
   option httpchk HEAD <%= @httpchk_path %><% if @httpchk_host %> HTTP/1.1\r\nHost:\ <%= @httpchk_host %><% end %>
   http-check expect rstatus ((2|3)[0-9][0-9]|503)
 <% end -%>
-  reqadd X-Forwarded-Proto:\ http
+# YT-CC-666 X-Forwarded-Port added
+  http-request add-header X-Forwarded-Proto http
+  http-request set-header X-Forwarded-Port %[dst_port]
 
   <% @backends.each_with_index do |instance, i| %>
   server app-<%= i %> <%= instance['private_hostname'] %>:81 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
