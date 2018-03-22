@@ -45,12 +45,12 @@ if ChefPatches[Chef::VERSION].include? :candidate_version
       end
 
       pkginfo.stdout.chomp!
-      if pkginfo.stdout =~ /-r[[:digit:]]+$/
+      if pkginfo.stdout =~ /-r\d+$/
         # Latest/Best version of the package is a revision (-rX).
         @candidate_version = pkginfo.stdout.split(/(?<=-)/).last(2).join
       else
         # Latest/Best version of the package is NOT a revision (-rX).
-        @candidate_version = pkginfo.stdout.split('-').last
+        @candidate_version = pkginfo.stdout.split("-").last
       end
 
       @candidate_version
