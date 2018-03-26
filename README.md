@@ -30,3 +30,7 @@ gem install ey-core
 	```
 
 For more information about our V5 (Gentoo 16.06) Stack, please see https://support.cloud.engineyard.com/hc/en-us/sections/205071967-Engine-Yard-Gentoo-16-06
+
+## Contributing/Development
+
+Please read our [Contributions Guidelines](https://github.com/engineyard/ey-cookbooks-stable-v5/blob/next-release/CONTRIBUTING.md).
