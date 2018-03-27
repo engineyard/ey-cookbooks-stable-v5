@@ -171,6 +171,8 @@ include_recipe "motd" # educational message on login
 
 if node.engineyard.instance.component?(:ssmtp)
   include_recipe "ssmtp"
+elsif node.engineyard.instance.component?(:nullmailer)
+  include_recipe "nullmailer" 
 end
 
 if node.engineyard.instance.component?(:exim)
