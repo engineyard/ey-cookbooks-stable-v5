@@ -23,6 +23,8 @@ ports = []
 
 # Total workers are based on CPU counts on target instance, with a minimum of 1 worker per app
 workers = [(1.0*node['cpu']['total']/node.dna['applications'].size).round,1].max
+# Adding puma restart sleep timeout
+sleep_timeout = node['puma']['sleep_timeout']
 
 node.engineyard.apps.each_with_index do |app,index|
   app_base_port = base_port + ( stepping * index )
@@ -95,7 +97,8 @@ node.engineyard.apps.each_with_index do |app,index|
               :shared_path   => "#{app_path}/shared",
               :ports         => ports,
               :framework_env => framework_env,
-              :jruby         => node.engineyard.environment.jruby?)
+              :jruby         => node.engineyard.environment.jruby?,
+              :sleep_timeout => sleep_timeout)
 
   end
 
