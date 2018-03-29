@@ -23,7 +23,7 @@ case "$1" in
     ;;
 
   start)
-    NGINX_PID=`sudo netstat -antp | grep <%= @port %> | grep LISTEN | awk '{split($7,a,"/"); print a[1]}'`
+    NGINX_PID=`sudo netstat -antp | grep -w '<%= @port %>' | grep LISTEN | awk '{split($7,a,"/"); print a[1]}'`
     PASSENGER_PID=`sudo ps -ef | grep passenger-standalone | grep <%= @port %> | awk '{print $2};'`
     PIDFILE='/data/<%= @app_name %>/shared/pids/passenger.<%= @port %>.pid'
     if [ -n $NGINX_PID ]; then
