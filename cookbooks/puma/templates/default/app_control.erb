@@ -124,7 +124,7 @@ start() {
         $puma_options \
         >> ${log_directory}/puma.log 2>&1 &
       echo "verifying ..."
-      sleep 4
+      sleep <%= @sleep_timeout %>
       fetch_current_pid
       if [ "$current_pid" = 0 ]; then
         echo "ERROR: Process did not seem to start"
