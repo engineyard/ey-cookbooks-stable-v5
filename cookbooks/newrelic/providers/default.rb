@@ -18,9 +18,6 @@ action :install do
       install_php_rpm
       configure_php_rpm
     end
-  when "sysmond"
-    install_server_monitoring
-  end
   new_resource.updated_by_last_action true
 end
 
@@ -156,80 +153,4 @@ def configure_php_rpm
     action :nothing
     command "sleep 10s && monit restart newrelic-daemon || true"
   end
-end
-
-def install_server_monitoring
-  enable_package "sys-apps/newrelic-sysmond" do
-    version node['newrelic']['sysmond_version']
-  end
-
-  package "sys-apps/newrelic-sysmond" do
-    action :upgrade
-    version node['newrelic']['sysmond_version']
-    notifies :run, 'execute[restart nrsysmond]', :delayed
-  end
-
-  template "/etc/newrelic/nrsysmond.cfg" do
-    source "nrsysmond.cfg.erb"
-    owner 'root'
-    group 'root'
-    mode 0644
-    backup 0
-    variables(
-      :key => newrelic_license_key,
-      :labels => new_resource.labels
-    )
-    notifies :run, 'execute[restart nrsysmond]', :delayed
-  end
-
-  template "/etc/monit.d/nrsysmond.monitrc" do
-    owner "root"
-    group "root"
-    mode 0644
-    backup 0
-    source "nrsysmond.monitrc.erb"
-    variables(:hostname => new_resource.hostname)
-    notifies :run, 'execute[monit reload]', :immediately
-  end
-
-  template "/etc/init.d/newrelic-sysmond" do
-    owner "root"
-    group "root"
-    mode 0755
-    backup 0
-    source "newrelic-sysmond.init.erb"
-    notifies :run, 'execute[restart nrsysmond]', :delayed
-  end
-
-  
-  directory "/var/log/newrelic" do
-    action :create
-    recursive true
-    owner 'newrelic'
-    group 'newrelic'
-  end
-
-  file "/var/log/newrelic/nrsysmond.log" do
-    action :create
-    owner 'newrelic'
-    group 'newrelic'
-  end
-
-  directory "/var/run/newrelic" do
-    action :create
-    recursive true
-    owner 'newrelic'
-    group 'newrelic'
-  end
-
-  execute "monit reload" do
-    action :nothing
-    notifies :run, 'execute[restart nrsysmond]', :delayed
-  end
-
-  execute "restart nrsysmond" do
-    action :nothing
-    command "sleep 3s && monit restart nrsysmond || true"
-  end
-
 end
