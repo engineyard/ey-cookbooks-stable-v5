@@ -1,0 +1,37 @@
+# Set the prompt variable. This will be read in by ~/.bashrc on launching bash
+#alias ls="ls -Flach --color"
+__mybashrc_setup_PROMPT_COMMAND_and_PS1() {
+  local last_exit="${?}"
+
+  # Change the window title of X terminals
+  echo -ne "\033]0;${USER}@${HOSTNAME%%.*}:${PWD/$HOME/~}\007"
+
+  case ${TERM} in
+    xterm*|linux|vt100|vt320|screen)
+      # Use '\[' and '\]' around non-printing sequences, such as color-changing commands.
+      # Otherwise bash can't figure out the width of the prompt.
+      local bold="\[$(tput bold)\]"
+      local normal="\[$(tput sgr0)\]"
+      local plain="\[\033[0;37m\]"
+      local cyan="\[\033[1;36m\]"
+      local green="\[\033[1;32m\]"
+      local purple="\[\033[1;35m\]"
+      local red="\[\033[0;31m\]"
+      local yellow="\[\033[1;33m\]"
+
+      [[ "${last_exit}" -eq 0 ]] && last_exit="${green}***" || last_exit="${red}*${last_exit}*"
+
+      local tty_inf="$(tty|cut -c6-)"
+
+      if [[ "${TERM}" == "screen" ]] ; then
+        [[ -n ${STY} ]] && tty_inf="${purple}${STY}" || tty_inf="${purple}${tty_inf}"
+      else
+        tty_inf="${cyan}${tty_inf}"
+      fi
+
+      PS1="${green}\t ${plain}<%= @public_ip %> ${red}(${yellow}\w${red}) ${plain}<%= @role %> > <%= @env_name %> > <%= @app_type %> \n${last_exit}<%- if @user == 'root' -%>${red}${bold}<%- else -%>${green}<%- end -%>[\u@\h]:${tty_inf}${plain}${normal}\\$ "
+    ;;
+  esac
+}
+
+PROMPT_COMMAND=__mybashrc_setup_PROMPT_COMMAND_and_PS1
