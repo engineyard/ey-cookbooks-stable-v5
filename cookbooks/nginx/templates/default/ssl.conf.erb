@@ -71,6 +71,11 @@ server {
 
   location = /system/maintenance.html { }
 
+  # Adding CORS Header to the font files.
+  location ~* \.(eot|otf|ttf|woff|woff2|svg)$ {
+    add_header Access-Control-Allow-Origin *;
+  }
+
   # set Expire header on assets: see http://developer.yahoo.com/performance/rules.html#expires
   location ~ ^/(images|assets|javascripts|stylesheets)/ {
   try_files  $uri $uri/index.html /last_assets/$uri /last_assets/$uri.html @app_<%= @app_name %>ssl;
