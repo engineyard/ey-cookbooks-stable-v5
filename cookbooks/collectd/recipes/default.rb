@@ -112,22 +112,25 @@ managed_template "/etc/engineyard/collectd.conf" do
   group 'root'
   mode 0644
   source "collectd.conf.erb"
-  variables({
-    :db_type => node.engineyard.environment['db_stack_name'],
-    :databases => has_db ? node.engineyard.environment['apps'].map {|a| a['database_name']} : [],
-    :has_db => has_db,
-    :db_slaves => node.dna['db_slaves'],
-    :role => node.dna['instance_role'],
-    :memcached => memcached,
-    :user => node["owner_name"],
-    :alert_script => "/engineyard/bin/ey-alert.rb",
-    :load_warning => node['collectd']['load']['warning'],
-    :load_failure => node['collectd']['load']['failure'],
-    :swap_critical_total => node['swap_critical_total'],
-    :swap_warning_total => node['swap_warning_total'],
-    :short_version => short_version,
-    :disk_thresholds => DiskThresholds.new
-  })
+  variables(
+    lazy {
+      {
+        :db_type => node.engineyard.environment['db_stack_name'],
+        :databases => has_db ? node.engineyard.environment['apps'].map {|a| a['database_name']} : [],
+        :has_db => has_db,
+        :db_slaves => node.dna['db_slaves'],
+        :role => node.dna['instance_role'],
+        :memcached => memcached,
+        :user => node["owner_name"],
+        :alert_script => "/engineyard/bin/ey-alert.rb",
+        :load_warning => node['collectd']['load']['warning'],
+        :load_failure => node['collectd']['load']['failure'],
+        :swap_thresholds => SwapThresholds.new,
+        :short_version => short_version,
+        :disk_thresholds => DiskThresholds.new
+      }
+    }
+  )
 end
 
 cookbook_file "/engineyard/bin/check_readonly.sh" do
