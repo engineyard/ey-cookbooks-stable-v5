@@ -1,1 +1,7 @@
 license_key: <%= @license_key %>
+
+<% if !@optional.nil? %>
+<% @optional.each do |partial, message| %>
+<%= partial %>: <%= message %>
+<% end %>
+<% end %>
