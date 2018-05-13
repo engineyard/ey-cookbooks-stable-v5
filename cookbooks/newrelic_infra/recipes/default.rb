@@ -62,7 +62,9 @@ template "/etc/newrelic-infra.yml" do
   mode 0600
   backup false
   variables({
-    :license_key => node['newrelic_infra']['license_key']
+    :license_key => node['newrelic_infra']['license_key'],
+    :optional => node['newrelic_infra']['optional']
+
   })
 end
 
