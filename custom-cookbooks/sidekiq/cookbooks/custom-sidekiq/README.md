@@ -141,6 +141,21 @@ Monit keeps track of your Sidekiq workers and by default, it restarts workers ex
 default['sidekiq']['worker_memory'] = 450
 ```
 
+### Configure multiple queues per worker
+
+By default the recipe configures a single queue named 'Default' per every worker put in place.  The config below shows how to configure more than one queue per worker, and specify their priority as well:
+
+```ruby
+  # Queues
+  sidekiq['queues'] = {
+    # :queue_name => priority
+    :default => 1,
+    :high => 10,
+    :medium => 5,
+    :low => 2
+  }
+```
+
 ## Restarting your workers
 
 This recipe does NOT restart your workers. The reason for this is that shipping
