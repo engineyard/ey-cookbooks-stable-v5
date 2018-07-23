@@ -4,7 +4,7 @@ default['papertrail'].tap do |papertrail|
   papertrail['syslog_ng_version']      = '3.7.3'
   papertrail['remote_syslog_version']  = 'v0.16'
   papertrail['remote_syslog_filename'] = 'remote_syslog_linux_amd64.tar.gz'
-  papertrail['remote_syslog_checksum'] = '04055643eb1c0db9ec61a67bdfd58697912acb467f58884759a054f6b5d6bb56'
+  papertrail['remote_syslog_checksum'] = 'be208e650e910106bc9d6c954807c875b22cd9fbe005aa59e0aad0ed13b0c6b6'
   papertrail['port']                   = 111111111111111 # YOUR PORT HERE
   papertrail['destination_host']       = 'HOST.papertrailapp.com' # YOUR HOST HERE
   papertrail['hostname']               = [app_name, node.dna[:instance_role], `hostname`.chomp].join('_')
