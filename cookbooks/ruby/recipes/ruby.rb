@@ -2,6 +2,7 @@ component = node.engineyard.environment.ruby
 
 ruby_mask = nil
 ruby_dependencies = {}
+do_upgrade_eselect_ruby = false
 
 if component[:version] =~ /^2\.0[\d\.]*\b/
   ruby_mask = '-ruby_targets_ruby20'
@@ -62,17 +63,40 @@ if component[:version] =~ /^2\.4[\d\.]*\b/
   }
 end
 
+if component[:version] =~ /^2\.5[\d\.]*\b/
+  ruby_mask = '-ruby_targets_ruby25'
+  do_upgrade_eselect_ruby = true
+  ruby_dependencies = {
+    "dev-ruby/json"          => "2.0.3-r1",
+    "dev-ruby/racc"          => "1.4.14-r2",
+    "dev-ruby/rake"          => "12.3.0",
+    "dev-ruby/rdoc"          => "6.0.3",
+    "dev-ruby/rubygems"      => "2.7.6",
+    "dev-ruby/did_you_mean"  => "1.2.0",
+    "dev-ruby/kpeg"          => "1.1.0-r1",
+    "dev-ruby/minitest"      => "5.10.3",
+    "dev-ruby/net-telnet"    => "0.1.1-r3",
+    "dev-ruby/power_assert"  => "1.1.1",
+    "dev-ruby/test-unit"     => "3.2.7",
+    "dev-ruby/xmlrpc"        => "0.3.0",
+    "virtual/rubygems"       => "13",
+  }
+end
+
 unmask_package component[:package] do
   version component[:version]
   unmaskfile "ruby"
 end
-
 
 use_mask ruby_mask do
   mask_file "ruby"
   only_if "ruby_mask"
 end
 
+package "app-eselect/eselect-ruby" do
+  action :upgrade
+  only_if { do_upgrade_eselect_ruby }
+end
 
 ruby_dependencies.each do |dep, dep_version|
   enable_package dep do
