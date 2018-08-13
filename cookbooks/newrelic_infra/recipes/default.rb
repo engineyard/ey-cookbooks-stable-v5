@@ -3,6 +3,10 @@
 # Recipe:: default
 #
 
+class Chef::Recipe
+  include NewrelicHelpers
+end
+
 package_version = node['newrelic_infra']['package_version']
 
 deb_file = "newrelic-infra_sysv_#{package_version}_amd64.deb"
@@ -55,6 +59,14 @@ template "/etc/init.d/newrelic-infra" do
   })
 end
 
+if node['newrelic_infra']['use_newrelic_addon']
+  license_key = newrelic_license_key
+else
+  license_key = node['newrelic_infra']['license_key']
+end
+
+display_name = node['newrelic_infra']['display_name']
+
 template "/etc/newrelic-infra.yml" do
   source "newrelic-infra.yml.erb"
   owner "root"
@@ -62,7 +74,8 @@ template "/etc/newrelic-infra.yml" do
   mode 0600
   backup false
   variables({
-    :license_key => node['newrelic_infra']['license_key']
+    :license_key => license_key,
+    :display_name => display_name
   })
 end
 
