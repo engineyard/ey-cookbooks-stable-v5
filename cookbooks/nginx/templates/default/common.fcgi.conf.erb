@@ -20,5 +20,8 @@ fastcgi_param  SERVER_PORT        $server_port;
 # [YT-CC-666] $server_port was changed to $http_x_forwarded_port
 fastcgi_param  SERVER_PORT        $http_x_forwarded_port;
 
+# HTTPS detection in FastCGI applications
+fastcgi_param  HTTPS              $fastcgi_https;
+
 # PHP only, required if PHP was built with --enable-force-cgi-redirect
 fastcgi_param  REDIRECT_STATUS    200;
