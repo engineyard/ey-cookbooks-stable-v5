@@ -14,7 +14,7 @@ install_packages=[
   },
   ]
 
-if ['app', 'app_master', 'util'].include?(node['instance_role'])
+if ['app', 'app_master', 'util'].include?(node.dna['instance_role'])
   install_packages.each do |package|
     major = "#{package[:version].split('.')[0]}.#{package[:version].split('.')[1]}"
 
