@@ -29,7 +29,7 @@ function push_keys {
 }
 
 function is_up() {
-  eval ${ssh_options} -o ConnectTimeout=10 $1 'date'
+  eval ${ssh_options} $1 'date'
   [[ $? -eq 0 ]]
 }
 
