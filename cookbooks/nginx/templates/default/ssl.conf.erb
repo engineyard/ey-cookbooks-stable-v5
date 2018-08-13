@@ -67,6 +67,7 @@ server {
     include /etc/nginx/common/proxy.conf;
     proxy_set_header        X-Forwarded-Proto https;
     proxy_pass http://upstream_<%= @app_name %>ssl;
+    proxy_hide_header X-Powered-By;
   }
 
   location = /system/maintenance.html { }

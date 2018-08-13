@@ -66,6 +66,7 @@ server {
   location @app_<%= @app_name %> {
   include /etc/nginx/common/proxy.conf;
   proxy_pass http://upstream_<%= @app_name %>;
+  proxy_hide_header X-Powered-By;
   }
 
   # Adding CORS Header to the font files.
