@@ -2,7 +2,7 @@ postgres_root    = '/db/postgresql'
 postgres_temp    = '/mnt/postgresql/tmp'
 postgres_version = node['postgresql']['short_version']
 
-if postgres_version < '9.3'
+if postgres_version_lt?('9.3')
   sysctl "Raise kernel.shmmax" do
     variables 'kernel.shmmax' => node['total_memory']
   end
@@ -79,7 +79,7 @@ zonepath = "/usr/share/zoneinfo/#{zone}"
 timezone = (File.exists?(zonepath) and !zone.empty? ) ? zone : 'GMT'
 
 if ['solo', 'db_master'].include?(node.dna['instance_role'])
-  ey_cloud_report "configuring postgresql 9" do
+  ey_cloud_report "configuring postgresql #{postgres_version}" do
     message "processing postgresql #{postgres_version} configuration"
   end
 
@@ -107,7 +107,7 @@ if ['solo', 'db_master'].include?(node.dna['instance_role'])
     notifies :reload, "service[postgresql-#{postgres_version}]"
     variables(
       :pg_port => "5432",
-      :wal_level => postgres_version >= '9.6' ? 'replica' : 'hot_standby',
+      :wal_level => postgres_version_gte?('9.6') ? 'replica' : 'hot_standby',
       :shared_buffers => node['shared_buffers'],
       :maintenance_work_mem => node['maintenance_work_mem'],
       :work_mem => node['work_mem'],
@@ -127,6 +127,7 @@ if ['solo', 'db_master'].include?(node.dna['instance_role'])
       :archive_timeout => '0',
       :timezone => timezone
     )
+    helpers(PostgreSQL::Helper)
   end
 end
 
@@ -201,6 +202,7 @@ if ['db_slave'].include?(node.dna['instance_role'])
       :postgres_version => postgres_version,
       :conn_app_name => node.name ? node.name : node.instance.id
     )
+    helpers(PostgreSQL::Helper)
   end
 end
 

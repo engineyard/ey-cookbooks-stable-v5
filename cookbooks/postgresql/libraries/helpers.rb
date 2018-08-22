@@ -31,6 +31,28 @@ module PostgreSQL
         %x{echo "shared_preload_libraries = '#{lib}'" >> #{custom_conf}}
       end
     end
+
+    def postgres_version_cmp(lhs_version, rhs_version)
+      lhs_version_components = lhs_version
+        .split('.')
+        .map { |c| c.to_i }
+      rhs_version_components = rhs_version
+        .split('.')
+        .map { |c| c.to_i }
+      lhs_version_components <=> rhs_version_components
+    end
+
+    def postgres_version_gte?(compare_version)
+      postgres_version_cmp(node[:postgresql][:short_version], compare_version) >= 0
+    end
+
+    def postgres_version_gt?(compare_version)
+      postgres_version_cmp(node[:postgresql][:short_version], compare_version) > 0
+    end
+
+    def postgres_version_lt?(compare_version)
+      not postgres_version_gte?(compare_version)
+    end
   end
 end
 

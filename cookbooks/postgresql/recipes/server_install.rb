@@ -46,7 +46,7 @@ ruby_block 'check lock version' do
       %x{ grep -q "=dev-db/postgresql-#{package_version}" /etc/portage/package.keywords/local || echo "=dev-db/postgresql-#{package_version}" >> /etc/portage/package.keywords/local}
       run_context.resource_collection.find(:package => "dev-db/postgresql").version package_version
     end
-    if package_version >= '9.3'
+    if postgres_version_cmp(package_version, '9.3') >= 0
       %x{ grep -q "=dev-python/python-exec-0.2" /etc/portage/package.keywords/local || echo "=dev-python/python-exec-0.2" >> /etc/portage/package.keywords/local}
     end
   end
