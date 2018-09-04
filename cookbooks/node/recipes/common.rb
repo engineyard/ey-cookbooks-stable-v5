@@ -132,7 +132,7 @@ end
 
 # Install yarn. YT-CC-1132.
 package 'sys-apps/yarn' do
-  version '0.21.3-r1'
+  version '0.27.5'
 end
 
 if node.engineyard.environment.component?('nodejs')
