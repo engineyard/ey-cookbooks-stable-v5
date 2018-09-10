@@ -55,7 +55,7 @@ let "grace_time=$grace_time*4"
 # Create an array variable
 declare -a info
 
-for record in `passenger-memory-stats | egrep -i "Passenger RubyApp:" | sed -r '/MB/!d;s/(^[0-9]+)\s*(\b[0-9]+)\.[0-9]\sMB\s+(\b[0-9]+)\.[0-9]+\sMB.*\/([^\/]+)\/current\/.*/\1,\2,\3,\4/'`; do
+for record in `passenger-memory-stats | egrep -i "Passenger R(ails|ack|uby)App:" | sed -r '/MB/!d;s/(^[0-9]+)\s*(\b[0-9]+)\.[0-9]\sMB\s+(\b[0-9]+)\.[0-9]+\sMB.*\/([^\/]+)\/current.*/\1,\2,\3,\4/'`; do
 
   # Turn the record into an array, and assign to local variables for clarity
   info=(`echo ${record//,/ }`)
