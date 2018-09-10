@@ -11,6 +11,7 @@ script_version="0.1.0"
 # * Ensure this script is executable (chmod +x)
 #===============================================================================
 
+passenger_utils_bin_path="/usr/local/bin"
 target_app=$1
 
 # Check user is root.
@@ -54,7 +55,7 @@ let "grace_time=$grace_time*4"
 # Create an array variable
 declare -a info
 
-for record in `passenger-memory-stats | egrep -i "Passenger RubyApp:" | sed -r '/MB/!d;s/(^[0-9]+)\s*(\b[0-9]+)\.[0-9]\sMB\s+(\b[0-9]+)\.[0-9]+\sMB.*\/([^\/]+)\/current\/.*/\1,\2,\3,\4/'`; do
+for record in `passenger-memory-stats | egrep -i "Passenger R(ails|ack|uby)App:" | sed -r '/MB/!d;s/(^[0-9]+)\s*(\b[0-9]+)\.[0-9]\sMB\s+(\b[0-9]+)\.[0-9]+\sMB.*\/([^\/]+)\/current.*/\1,\2,\3,\4/'`; do
 
   # Turn the record into an array, and assign to local variables for clarity
   info=(`echo ${record//,/ }`)
@@ -70,7 +71,7 @@ for record in `passenger-memory-stats | egrep -i "Passenger RubyApp:" | sed -r '
   ## Check the against the limit, if it exceeds the memory amount, KILL IT.
   if [[ $app_real -gt $limit ]]; then
     logger -t passenger_monitor -s "Killing PID $app_pid (app $app_name) - memory $app_real MB exceeds $limit MB"
-    kill -USR1 $app_pid
+    ${passenger_utils_bin_path}/passenger-config detach-process $app_pid
     SLEEP_COUNT=0
     while [ -e /proc/$app_pid ]; do
       sleep .25
@@ -100,7 +101,7 @@ for each in /tmp/passenger.*;do
 done
 
 ## Get a list of passenger workers.
-raw_stats=$(/usr/sbin/passenger-status 2>> /tmp/passenger_errors)
+raw_stats=$(${passenger_utils_bin_path}/passenger-status 2>> /tmp/passenger_errors)
 exit_code=$?
 
 ## Kill any passenger workers that are not in $pstats
