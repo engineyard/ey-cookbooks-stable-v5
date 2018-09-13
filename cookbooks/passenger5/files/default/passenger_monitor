@@ -107,7 +107,7 @@ exit_code=$?
 ## Kill any passenger workers that are not in $pstats
 if [ "$exit_code" -eq "0" ] ; then
   pstats=$(echo "$raw_stats" | sed -r -e '/PID:/!d' -e 's/.*PID:\s([0-9]+).*/\1/' | sort -n| uniq)
-  for pid in `diff <(ps aux | egrep -i '[P]assenger R(ails|ack|uby)App:' | awk '{print $2}' | sort -n) <(echo "$pstats") | grep '<' | awk '{print $2}'`; do
+  for pid in `diff <(ps aux | egrep -i '[P]assenger RubyApp:' | awk '{print $2}' | sort -n) <(echo "$pstats") | grep '<' | awk '{print $2}'`; do
     kill -9 $pid
     logger -t passenger_monitor -s "Killing PID $pid - orphaned process"
   done
