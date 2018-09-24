@@ -63,7 +63,7 @@ GEM
     ey_services_setup (0.0.7)
       ey_instance_api_client (= 0.1.11)
       json (~> 1.0)
-    ey_snaplock (2.0.3)
+    ey_snaplock (2.0.4)
       addressable (~> 2.3)
       rack
     ffi (1.9.10)
