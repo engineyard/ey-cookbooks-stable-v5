@@ -184,6 +184,7 @@ if ['db_slave'].include?(node.dna['instance_role'])
       :archive_timeout => '0',
       :timezone => timezone
     )
+    helpers(PostgreSQL::Helper)
   end
 
   template "#{postgres_root}/#{postgres_version}/data/recovery.conf" do
