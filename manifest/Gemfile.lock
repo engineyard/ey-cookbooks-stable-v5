@@ -189,7 +189,7 @@ DEPENDENCIES
   ey_cloud_server (= 1.4.61)!
   ey_enzyme (= 2.0.5)!
   ey_services_setup (= 0.0.7)!
-  ey_snaplock (= 2.0.3)!
+  ey_snaplock (= 2.0.4)!
   right_aws (~> 3.1.0)!
 
 BUNDLED WITH
