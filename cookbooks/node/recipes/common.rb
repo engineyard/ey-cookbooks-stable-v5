@@ -1,5 +1,8 @@
 get_package_name = {
   '4.4.5' => 'net-libs/nodejs',
+  '8.12.0' => 'net-libs/nodejs-bin',
+  '9.11.2' => 'net-libs/nodejs-bin',
+  '10.10.0' => 'net-libs/nodejs-bin'
 }
 get_package_name.default = 'net-libs/nodejs'
 
