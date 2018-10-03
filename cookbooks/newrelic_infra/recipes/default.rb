@@ -87,6 +87,12 @@ cookbook_file "/etc/monit.d/newrelic_infra.monitrc" do
   backup false
 end
 
+execute "Symlink lsmod" do
+   command "ln -s /bin/lsmod /sbin/lsmod"
+   not_if "test -f /sbin/lsmod"
+end
+
+
 execute "monit reload" do
   action :run
 end
