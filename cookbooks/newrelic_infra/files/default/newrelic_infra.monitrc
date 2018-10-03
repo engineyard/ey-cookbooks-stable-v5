@@ -1,5 +1,5 @@
 check process newrelic_infra
   with pidfile /var/run/newrelic-infra.pid
-  start program = "/etc/init.d/newrelic-infra start"
+  start program = "/etc/init.d/newrelic-infra restart"
   stop program = "/etc/init.d/newrelic-infra stop"
   group newrelic_infra
