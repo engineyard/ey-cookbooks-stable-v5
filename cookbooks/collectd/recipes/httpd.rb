@@ -5,6 +5,8 @@ include_recipe "nginx::install"
 #
 # TODO: Split the nginx recipe up so we can include only what we
 #       need in this recipe
+collectd_nginx_version = node['collectd']['nginx']['version']
+
 unless %w(app_master app solo).include?(node.dna['instance_role'])
   service "nginx" do
     action :stop
@@ -45,21 +47,7 @@ end
 #  version '1.6.3-r1'
 #end
 
-cookbook_file "/etc/monit.d/collectd-fcgi.monitrc" do
-  source 'collectd-fcgi.monitrc'
-  owner 'root'
-  group 'root'
-  mode 0644
-  backup 0
-end
 
-cookbook_file "/etc/monit.d/collectd-httpd.monitrc" do
-  source 'collectd-httpd.monitrc'
-  owner 'root'
-  group 'root'
-  mode 0644
-  backup 0
-end
 
 cookbook_file "/etc/init.d/collectd-httpd" do
   source 'collectd-httpd.sh'
@@ -69,6 +57,28 @@ cookbook_file "/etc/init.d/collectd-httpd" do
   backup 0
 end
 
+execute "monit reload" do
+  action :nothing
+end
+
+cookbook_file "/etc/monit.d/collectd-fcgi.monitrc" do
+  source 'collectd-fcgi.monitrc'
+  owner 'root'
+  group 'root'
+  mode 0644
+  backup 0
+  notifies :run, resources(:execute => "monit reload"), :immediately
+end
+
+cookbook_file "/etc/monit.d/collectd-httpd.monitrc" do
+  source 'collectd-httpd.monitrc'
+  owner 'root'
+  group 'root'
+  mode 0644
+  backup 0
+  notifies :run, resources(:execute => "monit reload"), :immediately
+end
+
 # Setup HTTP auth so AWSM can get at the graphs
 execute "install-http-auth" do
   command %Q{
@@ -76,16 +86,23 @@ execute "install-http-auth" do
   }
 end
 
-
-execute "monit reload" do
-  action :run
-end
-
-execute "ensure-newest-nginx" do
-  command %Q{
-    /etc/init.d/collectd-httpd upgrade
-  }
+execute "upgrade collectd nginx" do
+  action :nothing
+  user 'root'
+  command '/etc/init.d/collectd-httpd upgrade'
   only_if %Q{
     [[ -f /var/run/collectd-httpd.pid && "$(readlink -m /proc/$(cat /var/run/collectd-httpd.pid)/exe)" =~ '/usr/sbin/nginx' ]]
   }
 end
+
+managed_template "/data/nginx/collectd_nginx_version.conf" do
+  owner node.engineyard.environment.ssh_username
+  group node.engineyard.environment.ssh_username
+  mode 0644
+  source "collectd_nginx_version.conf.erb"
+  variables(
+    :version => collectd_nginx_version
+  )
+  notifies :run, resources(:execute => "upgrade collectd nginx"), :delayed
+end
+

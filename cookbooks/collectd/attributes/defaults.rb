@@ -6,5 +6,5 @@ default['swap_warn_threshold'] = "0.50"
 default['swap_crit_threshold'] = "0.70"
 default['swap_warning_total'] = node['swap_total_bytes'] * node['swap_warn_threshold'].to_f
 default['swap_critical_total'] = node['swap_total_bytes'] * node['swap_crit_threshold'].to_f
-
+default['collectd']['nginx']['version'] = node.engineyard.metadata('nginx_ebuild_version','1.12.1')
 default['collectd']['version'] = "5.4.1-r3"
