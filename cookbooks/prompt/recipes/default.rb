@@ -14,7 +14,7 @@ public_ip_address = Net::HTTP.get(
   URI('http://169.254.169.254/latest/meta-data/public-ipv4')
 )
 # Specify the users you want to have this prompt in this array.
-users = ["root", "deploy"]
+users = ["deploy"]
 
 # This recipe needs to be in a ruby_block because Chef is running in an
 # indeterminate order. Don't know which piece runs when, and notifies just
@@ -28,7 +28,7 @@ ruby_block :source_prompt do
 
       # Root has a different path for its homedir than other users might,
       # so find this user's home directory
-      homedir = `echo ~#{u}`.chomp
+      homedir = `echo /home/#{u}`.chomp
 
       STDOUT.puts "Found home directory #{homedir} for #{u} ..."
 
@@ -55,7 +55,7 @@ ruby_block :source_prompt do
 end # end chef ruby_block
 
 users.each do |u|
-  homedir = `echo ~#{u}`.chomp
+  homedir = `echo /home/#{u}`.chomp
   # Write out ~/.prompt which then gets sourced by ~/.bashrc
   template "#{homedir}/.prompt" do
     action :create
