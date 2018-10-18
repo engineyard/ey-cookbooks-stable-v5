@@ -26,13 +26,18 @@ default[:pg_ext_details] = {
 # postgis version details
 case attribute.dna.engineyard.environment.db_stack_name
 when "postgres9_6"
-  default[:postgis_version] = '2.3.3'
+  default[:postgis_version] = "2.3.3"
   # separating these in case we decide to bump them later
   default[:proj_version] = "4.8.0"
   default[:geos_version] = "3.5.0-r2"
   default[:gdal_version] = "1.11.1"
+when "postgres10"
+  default[:postgis_version] = "2.4.4"
+  default[:proj_version] = "4.8.0"
+  default[:geos_version] = "3.6.2"
+  default[:gdal_version] = "1.11.1-r3"
 else
-  default[:postgis_version] = '2.2.2'
+  default[:postgis_version] = "2.2.2"
   default[:proj_version] = "4.8.0"
   default[:geos_version] = "3.5.0-r2"
   default[:gdal_version] = "1.11.1"

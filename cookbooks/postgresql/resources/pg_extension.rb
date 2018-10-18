@@ -21,7 +21,7 @@ action :install do
 
       db_names.each do |db_name|
         # bail with a log message if the extension isn't supported for the active Postgres major version
-        if (!ext_details[:min_pg_version].nil? and postgres_version < ext_details[:min_pg_version]) || (!ext_details[:max_pg_version].nil? and postgres_version > ext_details[:max_pg_version])
+        if (!ext_details[:min_pg_version].nil? and postgres_version_lt?(ext_details[:min_pg_version])) || (!ext_details[:max_pg_version].nil? and postgres_version_gt?(ext_details[:max_pg_version]))
           Chef::Log.info "PostgreSQL extension #{ext_name} is only supported on versions #{ext_details[:min_pg_version]} #{!ext_details[:max_pg_version].nil? ? "to " + ext_details[:max_pg_version].to_s : "and higher"}. Currently installed version: #{postgres_version}."
           break
         end
