@@ -43,7 +43,7 @@ if PAPERTRAIL_CONFIG['is_papertrail_instance']
 
   remote_file '/etc/syslog-ng/cert.d/papertrail-bundle.tar.gz' do
     source 'https://papertrailapp.com/tools/papertrail-bundle.tar.gz'
-    checksum '5590de7f7f957508eff58767212cae8fa2fb8cf503e5b5b801f32087501060f3'
+    checksum 'be208e650e910106bc9d6c954807c875b22cd9fbe005aa59e0aad0ed13b0c6b6'
     mode '0644'
   end
 
