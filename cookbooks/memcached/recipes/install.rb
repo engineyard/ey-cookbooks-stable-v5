@@ -40,6 +40,32 @@ if is_memcached_instance
       :misc_opts => node['memcached']['misc_opts']
   end
 
+  if !Dir.exist?("/data/monit.d")
+
+
+bash "migrate-monit.d-dir" do
+  code %Q{
+    mv /etc/monit.d /data/
+    ln -nfs /data/monit.d /etc/monit.d
+  }
+
+  not_if 'file /etc/monit.d | grep "symbolic link"'
+end
+
+directory "/data/monit.d" do
+  owner "root"
+  group "root"
+  mode 0755
+end
+
+enddirectory "/data/monit.d" do
+  owner "root"
+  group "root"
+  mode 0755
+end
+
+end
+  
   template '/data/monit.d/memcached.monitrc' do
     source 'memcached.monitrc'
     owner 'root'
