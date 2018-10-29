@@ -58,12 +58,6 @@ directory "/data/monit.d" do
   mode 0755
 end
 
-enddirectory "/data/monit.d" do
-  owner "root"
-  group "root"
-  mode 0755
-end
-
 end
   
   template '/data/monit.d/memcached.monitrc' do
