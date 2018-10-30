@@ -72,6 +72,17 @@ if PAPERTRAIL_CONFIG['is_papertrail_instance']
     ignore_failure true
   end
 
+# Removes the cronjob for sysklogd daily and weekly by replacing it with nothing
+  bash 'commentout-cronjob' do
+
+    code <<-EOH
+sed -i 's#/etc/init.d/sysklogd --quiet reload##g' /etc/cron.daily/syslog && sed -i 's#/etc/init.d/sysklogd --quiet reload##g' /etc/cron.weekly/syslog
+EOH
+
+ignore_failure true
+end
+
+
   execute 'restart-syslog-ng' do
     command %{/etc/init.d/syslog-ng restart}
   end
