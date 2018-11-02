@@ -8,8 +8,6 @@
 # Port layout and usage:
 #
 # 1) haproxy (default): 80 / 443
-# 2) haproxy (lb-from-master): 8080
-# 3) haproxy (elb): 8090
 # 4) nginx (default): 8081
 # 5) nginx (from haproxy/ssl): 8082
 # 6) nginx (elb-from-haproxy): 8091
@@ -131,6 +129,11 @@ listen cluster
   http-request add-header X-Forwarded-Proto http
   http-request set-header X-Forwarded-Port %[dst_port]
 
+<% if @httpchk_path -%>
+  option httpchk HEAD <%= @httpchk_path %><% if @httpchk_host %> HTTP/1.1\r\nHost:\ <%= @httpchk_host %><% end %>
+  http-check expect rstatus ((2|3)[0-9][0-9]|503)
+<% end -%>
+
     <% if @backends.any? %>
       <% @backends.each_with_index do |instance, i| %>
     server app-<%= i %> <%= instance['private_hostname'] %>:8081 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
@@ -153,6 +156,10 @@ listen cluster
     use_backend nodes-http2 if { ssl_fc_alpn -i h2 }
     default_backend nodes-http
 
+<% if @httpchk_path -%>
+  option httpchk HEAD <%= @httpchk_path %><% if @httpchk_host %> HTTP/1.1\r\nHost:\ <%= @httpchk_host %><% end %>
+  http-check expect rstatus ((2|3)[0-9][0-9]|503)
+<% end -%>
 
   backend nodes-http
      
@@ -186,6 +193,11 @@ listen clusterssl
   http-request add-header X-Forwarded-Proto https
   http-request set-header X-Forwarded-Port %[dst_port]
 
+<% if @httpchk_path -%>
+  option httpchk HEAD <%= @httpchk_path %><% if @httpchk_host %> HTTP/1.1\r\nHost:\ <%= @httpchk_host %><% end %>
+  http-check expect rstatus ((2|3)[0-9][0-9]|503)
+<% end -%>
+
         <% if @backends.any? %>
         <% @backends.each_with_index do |instance, i| %>
           server app-<%= i %> <%= instance['private_hostname'] %>:8081 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
@@ -199,14 +211,3 @@ listen clusterssl
     <% end %>
 
 <% end %>
-
-# TODO: ELB configuration
-
-listen lbtoworkers
-  bind *:8080
-<% if @httpchk_path -%>
-  option httpchk HEAD <%= @httpchk_path %><% if @httpchk_host %> HTTP/1.1\r\nHost:\ <%= @httpchk_host %><% end %>
-  http-check expect rstatus ((2|3)[0-9][0-9]|503)
-<% end -%>
-
-  # TODO: setup proxy back to workers
