@@ -159,30 +159,43 @@ function check_fs-type {
   warning=0
   check_type='device'
   message=''
-  mounts=$(mount)
-  sudo /sbin/blkid -o list -c /dev/null | tail -n +3 | egrep -v 'rootfs|swap'|
+  # Skip filesystems that have been filtered: first line of file should be space separated list of devices to ignore
+  # (e.g. '/dev/xvdb /dev/xvdz2')
+  ignorefile='/etc/engineyard/fs_type_check_ignore'
+  ignore_devices=""
+  if [ -f ${ignorefile} ]; then
+    list=$(head -n1 ${ignorefile})
+    for idev in list; do
+      # If a device is a symlink (e.g. defined by udev rules), we want to resolve it and get the real device path
+      idev_real="$(readlink -e $idev)"
+      if [[ -b "$idev_real" ]]; then
+        ignore_devices="$ignore_devices $idev_real"
+      fi
+    done
+  fi
+  sudo /sbin/blkid -o device -c /dev/null |
   {
-    while read item
+    while read device
     do
-      device=$(echo "${item}" | awk '{print $1}')
-      fs_type_real=$(echo ${item} | awk '{print $2}')
-      fs_type_mount=$(echo "${mounts}" |grep ${device} | awk -Ftype '{print $2}'|awk '{print $1}' | head -n 1)
-      
-      # Skip filesystems that are not mounted.
-      if [[ "${fs_type_mount}" == "" ]]
+      if [[ ${ignore_devices} =~ ${device} ]]
       then
         continue
       fi
-      
-      # Skip filesystems that have been filtered: first line of file should be space separated list of devices to ignore (e.g. '/dev/xvdb /dev/xvdz2')
-      ignorefile='/etc/engineyard/fs_type_check_ignore'
-      if [ -f ${ignorefile} ]
-      then
-        list=$(head -n1 ${ignorefile})
-        if [[ ${list} =~ ${device} ]]
-        then
-          continue
-        fi
+      fs_label=$(blkid -o value -s LABEL ${device})
+      if [[ "z$fs_label" == "zrootfs" ]]; then
+        continue
+      fi
+      fs_type_real=$(blkid -o value -s TYPE ${device})
+      if [[ -z "$fs_type_real" ]]; then
+        continue
+      fi
+      if [[ "$fs_type_real" == "swap" ]]; then
+        continue
+      fi
+      fs_type_mount=$(findmnt -c --output=fstype -nf --source ${device})
+      # Skip filesystems that are not mounted.
+      if [[ -z "${fs_type_mount}" ]]; then
+        continue
       fi
       
       if [[ "${fs_type_mount}" != "${fs_type_real}" ]]
