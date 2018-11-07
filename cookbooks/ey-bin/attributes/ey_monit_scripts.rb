@@ -1,1 +1,1 @@
-default['ey_monit_scripts']['version'] = '0.19.25' 
+default['ey_monit_scripts']['version'] = '0.19.26' 
