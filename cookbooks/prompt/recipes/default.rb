@@ -14,7 +14,10 @@ public_ip_address = Net::HTTP.get(
   URI('http://169.254.169.254/latest/meta-data/public-ipv4')
 )
 # Specify the users you want to have this prompt in this array.
-users = ["deploy"]
+#users = [""]
+
+users = Array.new
+users << node.engineyard.environment.ssh_username
 
 # This recipe needs to be in a ruby_block because Chef is running in an
 # indeterminate order. Don't know which piece runs when, and notifies just
