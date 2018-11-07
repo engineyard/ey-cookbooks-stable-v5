@@ -18,6 +18,7 @@ action :install do
       install_php_rpm
       configure_php_rpm
     end
+  end
   new_resource.updated_by_last_action true
 end
 
