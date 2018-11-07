@@ -8,14 +8,14 @@ package 'media-libs/tiff' do
   version '4.0.8'
 end
 
-# YT-CC-1180
+# YT-CC-1254
 package 'net-misc/curl' do
-  version '7.50.3'
+  version '7.50.3-r1'
 end
 
-# YT-CC-1203
+# YT-CC-1254
 package 'dev-libs/libxml2' do
-  version '2.9.4'
+  version '2.9.4-r1'
 end
 
 # YT-CC-1212
