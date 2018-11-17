@@ -224,8 +224,9 @@ class Engineyard
       end
 
       def calculate_pool_size(instance_size)
+        apps_count  = self.recipe.metadata_get_apps_count
         smallest_of_maximums = [ max_by_memory, max_by_ecu(instance_size), settings[:max_pool_size] ].min
-        [ smallest_of_maximums, settings[:min_pool_size] ].max
+        ([ smallest_of_maximums, settings[:min_pool_size] ].max / apps_count).floor
       end
 
       def available_memory

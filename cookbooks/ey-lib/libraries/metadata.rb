@@ -25,6 +25,10 @@ class Chef
       metadata_env_get(name) || default
     end
 
+    def metadata_get_apps_count
+      apps_count = node.dna.applications.size
+    end
+
     def metadata_app_get(appname, name)
       app = node.engineyard.apps.detect {|a| a.name == appname } and app.metadata?(name)
     end

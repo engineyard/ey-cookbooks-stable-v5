@@ -8,5 +8,5 @@ end
 
 source 'https://nextgem.engineyard.com/' do
   gem 'ey_enzyme',              '2.0.5'
-  gem 'ey_snaplock',            '2.0.3'
+  gem 'ey_snaplock',            '2.0.4'
 end

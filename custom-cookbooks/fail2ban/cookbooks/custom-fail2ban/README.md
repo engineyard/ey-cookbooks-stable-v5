@@ -9,7 +9,7 @@ For simplicity, we recommend that you create the cookbooks directory at the root
 
 Our main recipes have the `fail2ban` recipe but it is not included by default. To use the `fail2ban ` recipe, you should copy this recipe `custom-fail2ban `. You should not copy the actual `fail2ban ` recipe. That is managed by Engine Yard.
 
-1. Edit `cookbooks/ey-custom/fail2ban/after-main.rb` and add
+1. Edit `cookbooks/ey-custom/recipes/after-main.rb` and add
 
       ```
       include_recipe 'custom-fail2ban'

@@ -4,6 +4,7 @@ known_ebuild_versions = %w[
   9.4.8   9.4.11  9.4.12
   9.5.3   9.5.6   9.5.7
   9.6.3
+  10.4
 ]
 
 execute "dropping lock version file" do
@@ -45,7 +46,7 @@ ruby_block 'check lock version' do
       %x{ grep -q "=dev-db/postgresql-#{package_version}" /etc/portage/package.keywords/local || echo "=dev-db/postgresql-#{package_version}" >> /etc/portage/package.keywords/local}
       run_context.resource_collection.find(:package => "dev-db/postgresql").version package_version
     end
-    if package_version >= '9.3'
+    if postgres_version_cmp(package_version, '9.3') >= 0
       %x{ grep -q "=dev-python/python-exec-0.2" /etc/portage/package.keywords/local || echo "=dev-python/python-exec-0.2" >> /etc/portage/package.keywords/local}
     end
   end

@@ -81,17 +81,11 @@ end
 
 
 #This is required by the current (v3) of the graphs tarball.
-enable_package 'dev-perl/Config-General' do
-  version '2.600.0'
-end
 package 'dev-perl/Config-General' do
   version '2.600.0'
 end
 
 #This is required by the current (v3) of the graphs tarball.
-enable_package 'dev-perl/JSON' do
-  version '2.900.0'
-end
 package 'dev-perl/JSON' do
   version '2.900.0'
 end

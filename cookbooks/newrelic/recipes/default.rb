@@ -34,13 +34,7 @@ if newrelic_enabled?
   end
 
   ey_cloud_report "newrelic" do
-    message "configuring NewRelic Server Monitoring for #{descriptive_hostname}"
-  end
-
-  # Use the newrelic resource to install server monitoring
-  newrelic "sysmond" do
-    hostname descriptive_hostname
-    labels labels
+    message "NewRelic Server Monitoring have been replaced with New Relic Infrastructure"
   end
 
 end

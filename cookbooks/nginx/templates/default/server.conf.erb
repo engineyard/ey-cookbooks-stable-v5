@@ -66,8 +66,13 @@ server {
   location @app_<%= @app_name %> {
   include /etc/nginx/common/proxy.conf;
   proxy_pass http://upstream_<%= @app_name %>;
+  proxy_hide_header X-Powered-By;
   }
 
+  # Adding CORS Header to the font files.
+  location ~* \.(eot|otf|ttf|woff|woff2|svg)$ {
+    add_header Access-Control-Allow-Origin *;
+  }
 
   # set Expire header on assets: see http://developer.yahoo.com/performance/rules.html#expires
   location ~ ^/(images|assets|javascripts|stylesheets)/ {

@@ -144,6 +144,7 @@ class Chef
           :ruby_220   => "2.2.9",
           :ruby_230   => "2.3.6",
           :ruby_240   => "2.4.3",
+          :ruby_250   => "2.5.1",
         }
         if versions.has_key?(ruby_archtype.to_sym)
           version = versions[ruby_archtype.to_sym]

@@ -22,4 +22,5 @@ node.engineyard.instance.roles.each { |role| include_recipe "#{role}::prep" }
 node.engineyard.instance.roles.each { |role| include_recipe "#{role}::build" }
 include_recipe 'ey-base::post_bootstrap' # common things that we want to install setting up the instance
 
+include_recipe 'prompt'
 include_recipe 'ey-custom::after-main'

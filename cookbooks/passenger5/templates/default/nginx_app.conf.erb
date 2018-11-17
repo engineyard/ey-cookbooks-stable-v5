@@ -88,7 +88,11 @@ server {
 
   rewrite ^/public/(.*) http://api.<%= domain %>/$1 permanent;
 
-  #
+  # Adding CORS Header to the font files.
+  location ~* \.(eot|otf|ttf|woff|woff2|svg)$ {
+    add_header Access-Control-Allow-Origin *;
+  }
+
   # Expire header on assets. For more information on the reasoning behind
   # this please browse http://developer.yahoo.com/performance/rules.html#expires
   #
@@ -127,11 +131,13 @@ server {
   include /etc/nginx/common/proxy.conf;
   proxy_set_header        X-Forwarded-Proto https;
   proxy_pass http://<%= @vhost.app.name %>ssl_upstream;
+  proxy_hide_header X-Powered-By;
   }
   <% else %>
   location @app_<%=@vhost.app.name%> {
   include /etc/nginx/common/proxy.conf;
   proxy_pass http://<%= @vhost.app.name %>_upstream;
+  proxy_hide_header X-Powered-By;
   }
   <% end %>
 
