@@ -33,7 +33,7 @@ LoadPlugin memory
   LoadPlugin mysql
 <% end %>
 LoadPlugin rrdtool
-<% if @swap_warning_total >= 1 %>
+<% if @swap_thresholds.swap_total >= 1 %>
 LoadPlugin swap
 <% end %>
 LoadPlugin exec
@@ -212,17 +212,17 @@ LoadPlugin threshold
     </Type>
   </Plugin>
 
-  <% if @swap_warning_total >= 1 %>
+  <% if @swap_thresholds.swap_total >= 1 %>
   <Plugin "swap">
     <Type "swap-used">
       WarningMin    0.00
-      WarningMax    <%= @swap_warning_total %>
+      WarningMax    <%= @swap_thresholds.warning_total(node['swap_warn_threshold']) %>
       FailureMin    0.00
-      FailureMax    <%= @swap_critical_total %>
+      FailureMax    <%= @swap_thresholds.critical_total(node['swap_crit_threshold']) %>
       DataSource "value"
     </Type>
   </Plugin>
-  <% end %>
+  <% end %> 
 
   # Disk space alerts
   # Thresholds are pulled from a library
