@@ -8,7 +8,8 @@ require 'chef/provider/package/portage'
 
 ChefPatches = {
   '12.7.2' => [:candidate_version, :install_package, :load_current_resource],
-  '12.10.24' => [:candidate_version, :install_package, :load_current_resource]
+  '12.10.24' => [:candidate_version, :install_package, :load_current_resource],
+  '12.22.5' => [:candidate_version, :install_package, :load_current_resource]
 }
 
 unless ChefPatches.has_key?(Chef::VERSION)
