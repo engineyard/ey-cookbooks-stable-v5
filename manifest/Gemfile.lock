@@ -187,7 +187,7 @@ DEPENDENCIES
   chef (~> 12.7)!
   engineyard-serverside (~> 2.6.6)!
   ey_cloud_server (= 1.4.61)!
-  ey_enzyme (= 2.0.5)!
+  ey_enzyme (= 2.0.6)!
   ey_services_setup (= 0.0.7)!
   ey_snaplock (= 2.0.4)!
   right_aws (~> 3.1.0)!
