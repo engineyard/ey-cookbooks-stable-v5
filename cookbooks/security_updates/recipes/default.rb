@@ -10,7 +10,7 @@ end
 
 # YT-CC-1254
 package 'net-misc/curl' do
-  version '7.50.3-r1'
+  version '7.50.3-r2'
 end
 
 # YT-CC-1254
