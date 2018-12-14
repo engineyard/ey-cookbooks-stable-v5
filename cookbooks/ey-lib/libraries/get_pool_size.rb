@@ -178,7 +178,7 @@ class Engineyard
 	#Not pushing as yet as will result in worker count change on existing instances and so needs KB article and announcment
         "t3.micro"     => InstanceResource.new( 2,   4,   nil               ),
         "t3.small"     => InstanceResource.new( 2,   8,   nil               ),
-        "t3.medium”    => InstanceResource.new( 2,   8,   nil               ),
+        "t3.medium"    => InstanceResource.new( 2,   8,   nil               ),
         "t3.large"     => InstanceResource.new( 2,   8,   nil               ),
         "t3.xlarge"    => InstanceResource.new( 4,   16,  nil               ),
         "t3.2xlarge"   => InstanceResource.new( 4,   31,  nil               ),
