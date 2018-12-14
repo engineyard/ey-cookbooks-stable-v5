@@ -5,6 +5,24 @@
 # definition requires the init.d file to be in
 # place at by this point. And since we configure first
 # it won't be on clean instances
+
+node['dna']['engineyard']['environment']['apps'].each do |app_data|  
+if tls_12_only(app_data) then
+TLS_12 = true
+else
+TLS_12 = false
+  end
+
+if http_2_enabled(app_data) then
+USE_HTTP2 = true
+Chef::Log.info "HTTP2TRUE"
+else
+USE_HTTP2 = false
+Chef::Log.info "HTTP2FALSE"
+  end
+end
+
+
 execute "reload-haproxy" do
   command 'if /etc/init.d/haproxy status ; then /etc/init.d/haproxy reload; else /etc/init.d/haproxy restart; fi'
   action :nothing
@@ -50,7 +68,6 @@ unless haproxy_httpchk_path
   end
 end
 
-use_http2 = node['haproxy'] && node['haproxy']['http2']
 managed_template "/etc/haproxy.cfg" do
   owner 'root'
   group 'root'
@@ -66,7 +83,8 @@ managed_template "/etc/haproxy.cfg" do
     :https_bind_port => haproxy_https_port,
     :httpchk_host => haproxy_httpchk_host,
     :httpchk_path => haproxy_httpchk_path,
-    :http2 => use_http2
+    :http2 => USE_HTTP2,
+    :TLS12 => TLS_12
   })
 
   # We need to reload to activate any changes to the config

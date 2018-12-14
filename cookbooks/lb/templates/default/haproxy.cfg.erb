@@ -1,3 +1,22 @@
+######
+#
+# For the V5 web stack, haproxy is our load balancer, answering on both ports
+# 80 and 443 for client browswer connections. It is responsible for proxying
+# the the next correct step in the chain, and is also responsble for eventually
+# load balancing requests to the application workers.
+#
+# Port layout and usage:
+#
+# 1) haproxy (default): 80 / 443
+# 4) nginx (default): 8081
+# 5) nginx (from haproxy/ssl): 8082
+# 6) nginx (elb-from-haproxy): 8091
+# 7) varnish (from haproxy): 8088
+# 8) apps: 8200+200*app_index + worker_index
+#
+######
+
+
 global
   # maximum number of simultaneous active connections from an upstream web server
   ulimit-n 655350
@@ -11,6 +30,22 @@ global
 
   # Uncomment the statement below to turn on verbose logging
   #debug
+
+  # SSL specific setup. This configuration disallows the most vulnerable
+  # ciphers, but that limits SSL compatibility on old browsers, such as IE6
+<% if !@TLS12 %>
+
+  tune.ssl.default-dh-param 2048
+  ssl-default-bind-options no-sslv3
+  ssl-default-bind-ciphers ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS
+
+<% else %>
+
+    tune.ssl.default-dh-param 2048
+  ssl-default-bind-options no-sslv3 no-tlsv10 no-tlsv11 no-tls-tickets
+  ssl-default-bind-ciphers ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS:!3DES
+
+<% end %>
 
 # Settings in the defaults section apply to all services (unless you change it,
 # this configuration defines one service, called rails).
@@ -41,15 +76,17 @@ defaults
   # https://www.haproxy.com/documentation/aloha/7-0/traffic-management/lb-layer7/http-modes
   option http-server-close
 
+<% if !@http2 %>
   # Insert the X-Forwarded-For header for requests sent to the backend.
   option forwardfor
+<% end %>
 
-  # If sending a request to one Mongrel fails, try to send it to another, 3 times
+  # If sending a request to one worker fails, try to send it to another, 3 times
   # before aborting the request
   retries 3
 
   # Do not enforce session affinity (i.e., an HTTP session can be served by
-  # any Mongrel, not just the one that started the session
+  # any worker, not just the one that started the session
   option redispatch
 
   # Timeout a request if the client did not read any data for 120 seconds
@@ -86,7 +123,7 @@ defaults
 
   errorfile 400 /etc/haproxy/errorfiles/400.http
   errorfile 403 /etc/haproxy/errorfiles/403.http
-  errorfile 408 /dev/null
+  errorfile 408 /dev/null # TODO: Why is this bitbucket instead of the normal haproxy file for a 408?
   errorfile 500 /etc/haproxy/errorfiles/500.http
   errorfile 502 /etc/haproxy/errorfiles/502.http
   errorfile 503 /etc/haproxy/errorfiles/503.http
@@ -94,14 +131,93 @@ defaults
 
 listen cluster
   bind *:<%= @http_bind_port %> mss 1422
-<% if @httpchk_path -%>
-  option httpchk HEAD <%= @httpchk_path %><% if @httpchk_host %> HTTP/1.1\r\nHost:\ <%= @httpchk_host %><% end %>
-  http-check expect rstatus ((2|3)[0-9][0-9]|503)
-<% end -%>
+<% if @http2 %>
+    #redirect http=>https
+    redirect scheme https code 301 if !{ ssl_fc }
+<% else %>
 # YT-CC-666 X-Forwarded-Port added
   http-request add-header X-Forwarded-Proto http
   http-request set-header X-Forwarded-Port %[dst_port]
 
-  <% @backends.each_with_index do |instance, i| %>
-  server app-<%= i %> <%= instance['private_hostname'] %>:81 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
-  <% end %>
+<% if @httpchk_path -%>
+  option httpchk HEAD <%= @httpchk_path %><% if @httpchk_host %> HTTP/1.1\r\nHost:\ <%= @httpchk_host %><% end %>
+  http-check expect rstatus ((2|3)[0-9][0-9]|503)
+<% end -%>
+
+    <% if @backends.any? %>
+      <% @backends.each_with_index do |instance, i| %>
+    server app-<%= i %> <%= instance['private_hostname'] %>:8081 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
+      <% end %>
+    <% else %>
+      # It must be a solo.
+      server solo 127.0.0.1:8081 check inter 5000 fastinter 1000 fall 1 weight 50
+    <% end %>
+<% end %>
+
+
+
+<% if @http2 %>
+
+    listen clusterssl
+    mode tcp
+    bind *:443 mss 1422 ssl <%= Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.collect {|pem| "crt #{pem}"}.join(" ") %>  alpn h2
+
+
+    use_backend nodes-http2 if { ssl_fc_alpn -i h2 }
+    default_backend nodes-http
+
+<% if @httpchk_path -%>
+  option httpchk HEAD <%= @httpchk_path %><% if @httpchk_host %> HTTP/1.1\r\nHost:\ <%= @httpchk_host %><% end %>
+  http-check expect rstatus ((2|3)[0-9][0-9]|503)
+<% end -%>
+
+  backend nodes-http
+     
+      <% if @backends.any? %>
+      <% @backends.each_with_index do |instance, i| %>
+        server app-<%= i %> <%= instance['private_hostname'] %>:8089 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
+      <% end %>
+      <% else %>
+          # It must be a solo.
+          server solo 127.0.0.1:8089 check inter 5000 fastinter 1000 fall 1 weight 50
+        <% end %>
+
+ backend nodes-http2
+      mode tcp
+
+      <% if @backends.any? %>
+      <% @backends.each_with_index do |instance, i| %>
+        server app-<%= i %> <%= instance['private_hostname'] %>:8081 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> send-proxy # <%= instance['id'] %>
+      <% end %>
+      <% else %>
+          # It must be a solo.
+          server solo 127.0.0.1:8081 check inter 5000 fastinter 1000 fall 1 weight 50 send-proxy
+        <% end %>
+    
+
+<% else %>
+    <% if Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.count > 0 %>
+listen clusterssl
+  bind *:443 mss 1422 ssl <%= Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.collect {|pem| "crt #{pem}"}.join(" ") %>
+# YT-CC-666 X-Forwarded-Port added
+  http-request add-header X-Forwarded-Proto https
+  http-request set-header X-Forwarded-Port %[dst_port]
+
+<% if @httpchk_path -%>
+  option httpchk HEAD <%= @httpchk_path %><% if @httpchk_host %> HTTP/1.1\r\nHost:\ <%= @httpchk_host %><% end %>
+  http-check expect rstatus ((2|3)[0-9][0-9]|503)
+<% end -%>
+
+        <% if @backends.any? %>
+        <% @backends.each_with_index do |instance, i| %>
+          server app-<%= i %> <%= instance['private_hostname'] %>:8081 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
+        <% end %>
+        <% else %>
+            # It must be a solo.
+            server solo 127.0.0.1:8081 check inter 5000 fastinter 1000 fall 1 weight 50
+          <% end %>
+    <% else %>
+
+    <% end %>
+
+<% end %>

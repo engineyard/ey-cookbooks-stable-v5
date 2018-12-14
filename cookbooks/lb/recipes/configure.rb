@@ -5,6 +5,24 @@
 # definition requires the init.d file to be in
 # place at by this point. And since we configure first
 # it won't be on clean instances
+
+node['dna']['engineyard']['environment']['apps'].each do |app_data|  
+if tls_12_only(app_data) then
+TLS_12 = true
+else
+TLS_12 = false
+  end
+
+if http_2_enabled(app_data) then
+USE_HTTP2 = true
+Chef::Log.info "HTTP2TRUE"
+else
+USE_HTTP2 = false
+Chef::Log.info "HTTP2FALSE"
+  end
+end
+
+
 execute "reload-haproxy" do
   command 'if /etc/init.d/haproxy status ; then /etc/init.d/haproxy reload; else /etc/init.d/haproxy restart; fi'
   action :nothing
@@ -29,11 +47,12 @@ end
   end
 end
 
-
+#
+# SD-4650
+# Remove it when awsm stops using dnapi to generate the dna and allows configure ports
 
 haproxy_http_port = (app = node.engineyard.apps.detect {|a| a.metadata?(:haproxy_http_port) } and app.metadata?(:haproxy_http_port)) || 80
 haproxy_https_port = (app = node.engineyard.apps.detect {|a| a.metadata?(:haproxy_https_port) } and app.metadata?(:haproxy_https_port)) || 443
-
 
 # CC-52
 # Add http check for accounts with adequate settings in their dna metadata
@@ -54,15 +73,18 @@ managed_template "/etc/haproxy.cfg" do
   group 'root'
   mode 0644
   source "haproxy.cfg.erb"
+  members = node.dna[:members] || []
   variables({
     :backends => node.engineyard.environment.app_servers,
-    :app_master_weight => node.dna[:members] ? ( node.dna[:members].size < 51 ? (50 - (node.dna[:members].size - 1)) : 0 ) : 0,
+    :app_master_weight => members.size < 51 ? (50 - (members.size - 1)) : 0,
     :haproxy_user => node.dna[:haproxy][:username],
     :haproxy_pass => node.dna[:haproxy][:password],
     :http_bind_port => haproxy_http_port,
     :https_bind_port => haproxy_https_port,
     :httpchk_host => haproxy_httpchk_host,
-    :httpchk_path => haproxy_httpchk_path
+    :httpchk_path => haproxy_httpchk_path,
+    :http2 => USE_HTTP2,
+    :TLS12 => TLS_12
   })
 
   # We need to reload to activate any changes to the config
