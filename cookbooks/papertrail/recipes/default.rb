@@ -43,7 +43,7 @@ if PAPERTRAIL_CONFIG['is_papertrail_instance']
 
   remote_file '/etc/syslog-ng/cert.d/papertrail-bundle.tar.gz' do
     source 'https://papertrailapp.com/tools/papertrail-bundle.tar.gz'
-    checksum '5590de7f7f957508eff58767212cae8fa2fb8cf503e5b5b801f32087501060f3'
+    checksum 'be208e650e910106bc9d6c954807c875b22cd9fbe005aa59e0aad0ed13b0c6b6'
     mode '0644'
   end
 
@@ -71,6 +71,17 @@ if PAPERTRAIL_CONFIG['is_papertrail_instance']
     command %{/etc/init.d/sysklogd stop}
     ignore_failure true
   end
+
+# Removes the cronjob for sysklogd daily and weekly by replacing it with nothing
+  bash 'commentout-cronjob' do
+
+    code <<-EOH
+sed -i 's#/etc/init.d/sysklogd --quiet reload##g' /etc/cron.daily/syslog && sed -i 's#/etc/init.d/sysklogd --quiet reload##g' /etc/cron.weekly/syslog
+EOH
+
+ignore_failure true
+end
+
 
   execute 'restart-syslog-ng' do
     command %{/etc/init.d/syslog-ng restart}
