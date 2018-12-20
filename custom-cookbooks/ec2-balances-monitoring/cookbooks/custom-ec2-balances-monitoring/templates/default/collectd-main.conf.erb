@@ -1,8 +1,0 @@
-TypesDB "/usr/share/collectd/types.db"
-TypesDB "/etc/engineyard/ec2credits.types.db"
-
-Include "<%= @original_collectd_conf %>"
-
-<Plugin exec>
-  Exec "<%= @user %>" "/engineyard/bin/check_for_ec2_credit_balances.py"
-</Plugin>
