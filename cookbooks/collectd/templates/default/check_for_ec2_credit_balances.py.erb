@@ -80,16 +80,16 @@ def set_instance_credentials(meta):
 
 def get_cpu_thresholds():
     return {
-        'ok': <%= @cpu_thresh['ok'] %>, # float(os.environ.get('EY_CPU_CREDITS_BALANCE_OK', 20.)),
-        'warning': <%= @cpu_thresh['warning'] %>, # float(os.environ.get('EY_CPU_CREDITS_BALANCE_WARN', 15.)),
-        'alert': <%= @cpu_thresh['alert'] %> # float(os.environ.get('EY_CPU_CREDITS_BALANCE_ALERT', 10.))
+        'ok': float(<%= @ec2_thresholds.cpu_credit_ok %>),
+        'warning': float(<%= @ec2_thresholds.cpu_credit_warn %>),
+        'alert': float(<%= @ec2_thresholds.cpu_credit_alert %>)
     }
 
 def get_volume_burst_balance_thresholds():
     return {
-        'ok': <%= @vol_thresh['ok'] %>, # float(os.environ.get('EY_VOL_BURST_BALANCE_OK', 25.)),
-        'warning': <%= @vol_thresh['warning'] %>, # float(os.environ.get('EY_VOL_BURST_BALANCE_WARN', 15.)),
-        'alert': <%= @vol_thresh['alert'] %> # float(os.environ.get('EY_VOL_BURST_BALANCE_ALERT', 10.))
+        'ok': float(<%= @ec2_thresholds.vol_burst_ok %>),
+        'warning': float(<%= @ec2_thresholds.vol_burst_warn %>),
+        'alert': float(<%= @ec2_thresholds.vol_burst_alert %>)
     }
 
 def get_interval_seconds():
@@ -261,7 +261,7 @@ def check_cpu_credit_balance_task(context, state):
         _putnotif(
             context,
             SEVERITY_FAILURE, 
-            'The EC2 CPU credits balance is below {0:.2f}'.format(thr['alert']),
+            'The EC2 CPU credits balance ({0:.2f}) is below {1:.2f}'.format(balance, thr['alert']),
             timestamp,
             'CPU-credits'
         )
@@ -269,7 +269,7 @@ def check_cpu_credit_balance_task(context, state):
         _putnotif(
             context,
             SEVERITY_WARNING, 
-            'The EC2 CPU credits balance is below {0:.2f}'.format(thr['warning']),
+            'The EC2 CPU credits balance ({0:.2f}) is below {1:.2f}'.format(balance, thr['warning']),
             timestamp,
             'CPU-credits'
         )
@@ -277,7 +277,7 @@ def check_cpu_credit_balance_task(context, state):
         _putnotif(
             context,
             SEVERITY_OK, 
-            'The EC2 CPU credits balance is above {0:.2f}'.format(thr['ok']),
+            'The EC2 CPU credits balance ({0:.2f}) is above {1:.2f}'.format(balance, thr['ok']),
             timestamp,
             'CPU-credits'
         )

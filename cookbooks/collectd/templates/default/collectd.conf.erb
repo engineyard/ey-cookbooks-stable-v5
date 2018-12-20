@@ -14,6 +14,10 @@ BaseDir     "/var/lib/collectd"
 PIDFile     "/var/run/collectd.pid"
 PluginDir   "/usr/lib/collectd"
 Interval     30
+TypesDB "/usr/share/collectd/types.db"
+<% if @enable_credit_balances_monitoring %>
+TypesDB "/etc/engineyard/ec2credits.types.db"
+<% end %>
 
 # LOAD THESE PLUGINS
 
@@ -144,6 +148,9 @@ LoadPlugin threshold
   Exec "<%= @user %>" "/engineyard/bin/check_health_for" "ntpd"
   Exec "<%= @user %>" "/engineyard/bin/check_health_for" "fs-type"
   Exec "<%= @user %>" "/engineyard/bin/check_health_for" "primary-ebs"
+  <% if @enable_credit_balances_monitoring %>
+  Exec "<%= @user %>" "/engineyard/bin/check_for_ec2_credit_balances.py"
+  <% end %>
 </Plugin>
 <Plugin exec>
   NotificationExec "<%= @user %>" "<%= @alert_script %>"
