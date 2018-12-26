@@ -163,6 +163,7 @@
   end
 
   # Render passenger_monitor script
+  if version < "5.3.0"
   cookbook_file "/engineyard/bin/passenger_monitor" do
     source "passenger_monitor"
     owner node['owner_name']
@@ -170,6 +171,16 @@
     mode "0655"
     backup 0
   end
+else
+  cookbook_file "/engineyard/bin/passenger_monitor" do
+    source "passenger_monitor_530"
+    owner node['owner_name']
+    group node['owner_name']
+    mode "0655"
+    backup 0
+  end
+end
+
 
   # Reload monit after making changes
   execute "monit-reload" do
