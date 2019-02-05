@@ -55,7 +55,7 @@ Yard.
 All customizations go to `cookbooks/custom-cron/attributes/default.rb`.
 
 Add your cron jobs as an array of hashes in `default[:custom_crons]` You must
-specify a name, time, command and instance name or instance type. They following arguments are valid: `app`, `db`, `util`, `all`, or "instance_name".  The time value must be the
+specify a name, time, command and instance name or instance type. The following arguments are valid: `app`,`app_master`, `db`, `util`, `all`, or "instance_name".  The time value must be the
 full string containing minute, hour, day, month and weekday separated by spaces
 (eg: '* * * * *').
 

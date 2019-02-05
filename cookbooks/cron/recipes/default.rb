@@ -18,6 +18,9 @@ all_crons = node[:custom_crons].find_all {|c| c[:instance_name] == 'all' }
 # Find all cron jobs for Database instances
 db_crons = node[:custom_crons].find_all {|c| c[:instance_name] == 'db' }
 
+# Find all cron jobs for App_Master
+appmaster_crons = node[:custom_crons].find_all {|c| c[:instance_name] == 'app_master' }
+
 crons = all_crons + named_crons
 
 
@@ -31,6 +34,10 @@ end
 
 if node['dna']['instance_role'] == 'db_master' || node['dna']['instance_role'] == 'db_slave'
     crons = crons + db_crons
+end
+
+if node['dna']['instance_role'] == 'app_master'
+    crons = crons + appmaster_crons
 end
 
 crons.each do |cron|
