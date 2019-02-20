@@ -43,7 +43,7 @@ worker_count = if node[:dna][:instance_role] == 'solo'
                  when 't3.medium' then 2
                  when 't3.large' then 2
                  when 't3.xlarge' then 4
-                 when 't3.2xlarge' then 4
+                 when 't3.2xlarge' then 8
                  when 'm5.large' then 2
                  when 'm5.xlarge' then 4
                  when 'm5.2xlarge' then 8
