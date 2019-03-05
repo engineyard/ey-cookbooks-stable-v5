@@ -112,9 +112,9 @@ class Engineyard
         ECU_TO_VCPU_RATIO = 3.25
 
         # Amazon has a general conversion ration of 3.25 ECU per VCPU across all but the
-        # earliest instance types (as of September 2014). However, their published ECU 
-        # equivalencies sometimes vary from that. Where the ratio holds true, no specific 
-        # ECU count needs to be defined, and the resource object will simply calculate 
+        # earliest instance types (as of September 2014). However, their published ECU
+        # equivalencies sometimes vary from that. Where the ratio holds true, no specific
+        # ECU count needs to be defined, and the resource object will simply calculate
         # the value from the VCPU count using the defined ratio.
         # VCPU and ECU counts were pulled from:
         #   http://aws.amazon.com/ec2/previous-generation/  -- OLD INSTANCE TYPES
@@ -152,30 +152,36 @@ class Engineyard
         "c3.4xlarge"   => InstanceResource.new( 16,  55,  nil               ),
         "c3.8xlarge"   => InstanceResource.new( 32,  108, nil               ),
         "m3.medium"    => InstanceResource.new( 1,   3,   nil               ),
-        "m3.large"     => InstanceResource.new( 2,   nil, nil               ),
-        "m3.xlarge"    => InstanceResource.new( 4,   nil, nil               ),
-        "m3.2xlarge"   => InstanceResource.new( 8,   nil, nil               ),
-        "t2.micro"     => InstanceResource.new( 1,   nil, nil               ),
-        "t2.small"     => InstanceResource.new( 1,   nil, nil               ),
-        "t2.medium"    => InstanceResource.new( 2,   nil, nil               ),
-        "t2.large"     => InstanceResource.new( 2,   nil, nil               ),
-        "r3.large"     => InstanceResource.new( 2,   nil, nil               ),
-        "r3.xlarge"    => InstanceResource.new( 4,   nil, nil               ),
-        "r3.2xlarge"   => InstanceResource.new( 8,   nil, nil               ),
-        "r3.4xlarge"   => InstanceResource.new( 16,  nil, nil               ),
-        "r3.8xlarge"   => InstanceResource.new( 32,  nil, nil               ),
-        "c4.large"     => InstanceResource.new( 2,   nil, nil               ),
-        "c4.xlarge"    => InstanceResource.new( 4,   nil, nil               ),
-        "c4.2xlarge"   => InstanceResource.new( 8,   nil, nil               ),
-        "c4.4xlarge"   => InstanceResource.new( 16,  nil, nil               ),
-        "c4.8xlarge"   => InstanceResource.new( 36,  nil, nil               ),
-        "m4.large"     => InstanceResource.new( 2,   nil, nil               ),
-        "m4.xlarge"    => InstanceResource.new( 4,   nil, nil               ),
-        "m4.2xlarge"   => InstanceResource.new( 8,   nil, nil               ),
-        "m4.4xlarge"   => InstanceResource.new( 16,  nil, nil               ),
-        "m4.10xlarge"  => InstanceResource.new( 40,  nil, nil               ),
-        #Need to revisit and set all values for all instances, as ecu per vcpu is not the same on c,m and r instances
-	#Not pushing as yet as will result in worker count change on existing instances and so needs KB article and announcment
+        "m3.large"     => InstanceResource.new( 2,   6.5, nil               ),
+        "m3.xlarge"    => InstanceResource.new( 4,   13,  nil               ),
+        "m3.2xlarge"   => InstanceResource.new( 8,   25,  nil               ),
+        "t2.micro"     => InstanceResource.new( 1,   3.5, nil               ),
+        "t2.small"     => InstanceResource.new( 1,   3.5, nil               ),
+        "t2.medium"    => InstanceResource.new( 2,   7,   nil               ),
+        "t2.large"     => InstanceResource.new( 2,   7,   nil               ),
+        "t2.xlarge"    => InstanceResource.new( 4,   14,  nil               ),
+        "t2.2xlarge"   => InstanceResource.new( 8,   28,  nil               ),
+        "r3.large"     => InstanceResource.new( 2,   6.5, nil               ),
+        "r3.xlarge"    => InstanceResource.new( 4,   13,  nil               ),
+        "r3.2xlarge"   => InstanceResource.new( 8,   26,  nil               ),
+        "r3.4xlarge"   => InstanceResource.new( 16,  52,  nil               ),
+        "r3.8xlarge"   => InstanceResource.new( 32,  104, nil               ),
+        "c4.large"     => InstanceResource.new( 2,   8,   nil               ),
+        "c4.xlarge"    => InstanceResource.new( 4,   16,  nil               ),
+        "c4.2xlarge"   => InstanceResource.new( 8,   31,  nil               ),
+        "c4.4xlarge"   => InstanceResource.new( 16,  62,  nil               ),
+        "c4.8xlarge"   => InstanceResource.new( 36,  132, nil               ),
+        "m4.large"     => InstanceResource.new( 2,   6.5, nil               ),
+        "m4.xlarge"    => InstanceResource.new( 4,   13,  nil               ),
+        "m4.2xlarge"   => InstanceResource.new( 8,   26,  nil               ),
+        "m4.4xlarge"   => InstanceResource.new( 16,  53.5, nil               ),
+        "m4.10xlarge"  => InstanceResource.new( 40,  124.5, nil               ),
+        "r4.large"     => InstanceResource.new( 2,   7,   nil               ),
+        "r4.xlarge"    => InstanceResource.new( 4,   13.5, nil               ),
+        "r4.2xlarge"   => InstanceResource.new( 8,   27,  nil               ),
+        "r4.4xlarge"   => InstanceResource.new( 16,  53,  nil               ),
+        "r4.8xlarge"   => InstanceResource.new( 32,  99,  nil               ),
+        "r4.16xlarge"  => InstanceResource.new( 64,  195, nil               ),
         "t3.micro"     => InstanceResource.new( 2,   4,   nil               ),
         "t3.small"     => InstanceResource.new( 2,   8,   nil               ),
         "t3.medium"    => InstanceResource.new( 2,   8,   nil               ),
