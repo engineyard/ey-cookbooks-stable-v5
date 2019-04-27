@@ -16,7 +16,7 @@ end
 ruby_block "gems to install" do
   block do
     node.dna['gems_to_install'].each do |pkg|
-      command = "gem install #{pkg[:name]} --no-ri --no-rdoc"
+      command = "gem install #{pkg[:name]}"
       command << " -v #{pkg[:version]}" if pkg[:version]
 
       Array(pkg[:source]).each do |source|

@@ -35,7 +35,7 @@ def ensure_rubygems_version
              end
           end
         else
-          Mixlib::ShellOut.new('gem install rubygems-update -v #{rubygems} --no-ri --no-rdoc')
+          Mixlib::ShellOut.new('gem install rubygems-update -v #{rubygems}')
         end
       end
     end
@@ -45,7 +45,7 @@ def ensure_rubygems_version
     end
 
     execute "install rubygems #{rubygems}" do
-      command "gem install rubygems-update -v #{rubygems} --no-ri --no-rdoc"
+      command "gem install rubygems-update -v #{rubygems}"
     end
 
     execute "update rubygems to >= #{rubygems}" do
