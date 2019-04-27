@@ -12,7 +12,7 @@
   # Install gems required by Passenger standalone
   ruby_block "gems to install" do
     block do
-      system("gem install daemon_controller rack:1.6.4 --no-ri --no-rdoc")
+      system("gem install daemon_controller rack:1.6.4")
     end
   end
 

@@ -21,6 +21,11 @@ cookbook_file "/etc/gemrc" do
   source "gemrc"
 end
 
+# Add gemrc for the root user
+cookbook_file "/root/.gemrc" do
+  source "gemrc"
+end
+
 #
 # Require the right recipe to install the right flavor of ruby
 #
