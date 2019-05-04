@@ -1,6 +1,4 @@
-# CUSTOM HAPROXY SSLS
-
-This 
+# Custom HAProxy SSL certificates
 
 This example contains a `cookbooks/` directory with all the components for using custom/additional SSLs in HAProxy on the v5 stack.
 
