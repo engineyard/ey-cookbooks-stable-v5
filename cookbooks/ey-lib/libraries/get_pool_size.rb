@@ -154,7 +154,7 @@ class Engineyard
         "m3.medium"    => InstanceResource.new( 1,   3,   nil               ),
         "m3.large"     => InstanceResource.new( 2,   6.5, nil               ),
         "m3.xlarge"    => InstanceResource.new( 4,   13,  nil               ),
-        "m3.2xlarge"   => InstanceResource.new( 8,   25,  nil               ),
+        "m3.2xlarge"   => InstanceResource.new( 8,   26,  nil               ),
         "t2.micro"     => InstanceResource.new( 1,   3.5, nil               ),
         "t2.small"     => InstanceResource.new( 1,   3.5, nil               ),
         "t2.medium"    => InstanceResource.new( 2,   7,   nil               ),
