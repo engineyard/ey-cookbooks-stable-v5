@@ -1,4 +1,4 @@
-#Custom CA Certs
+# Custom CA Certificates
 
 This recipe allows for the addition of missing 3rd party intermediate/chain certificates as custom CA certificates, thus avoiding certificate verification failures.
 
