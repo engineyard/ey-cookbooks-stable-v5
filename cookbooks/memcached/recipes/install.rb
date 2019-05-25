@@ -43,28 +43,38 @@ if is_memcached_instance
   if !Dir.exist?("/data/monit.d")
 
 
-bash "migrate-monit.d-dir" do
-  code %Q{
-    mv /etc/monit.d /data/
-    ln -nfs /data/monit.d /etc/monit.d
-  }
+   bash "migrate-monit.d-dir" do
+    code %Q{
+      mv /etc/monit.d /data/
+      ln -nfs /data/monit.d /etc/monit.d
+    }
 
-  not_if 'file /etc/monit.d | grep "symbolic link"'
-end
+    not_if 'file /etc/monit.d | grep "symbolic link"'
+   end
 
-directory "/data/monit.d" do
-  owner "root"
-  group "root"
-  mode 0755
-end
+   directory "/data/monit.d" do
+    owner "root"
+    group "root"
+    mode 0755
+   end
 
-end
-  
+  end
+
+
+  if memcached_version < "1.4.39"
+    pid = "/var/run/memcached.pid"
+  else
+    pid = "/var/run/memcached-11211.pid"
+  end
+
   template '/data/monit.d/memcached.monitrc' do
     source 'memcached.monitrc'
     owner 'root'
     group 'root'
     mode 0644
+    variables({
+        :pid => pid
+    })
     notifies :run, 'execute[restart-monit]', :delayed
   end
 end
