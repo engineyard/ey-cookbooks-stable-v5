@@ -151,7 +151,7 @@ listen cluster
 
     listen clusterssl
     mode tcp
-    bind *:443 mss 1422 ssl <%= Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.collect {|pem| "crt #{pem}"}.join(" ") %>  alpn h2
+    bind *:443 mss 1422 ssl <%= @certificates.collect {|pem| "crt #{pem}"}.join(" ") %>  alpn h2
 
 
     use_backend nodes-http2 if { ssl_fc_alpn -i h2 }
@@ -187,9 +187,9 @@ listen cluster
     
 
 <% else %>
-    <% if Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.count > 0 %>
+    <% if @certificates.count > 0 %>
 listen clusterssl
-  bind *:443 mss 1422 ssl <%= Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}.collect {|pem| "crt #{pem}"}.join(" ") %>
+  bind *:443 mss 1422 ssl <%= @certificates.collect {|pem| "crt #{pem}"}.join(" ") %>
 # YT-CC-666 X-Forwarded-Port added
   http-request add-header X-Forwarded-Proto https
   http-request set-header X-Forwarded-Port %[dst_port]

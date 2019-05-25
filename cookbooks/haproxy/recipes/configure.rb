@@ -57,8 +57,8 @@ managed_template "/etc/haproxy.cfg" do
   mode 0644
   source "haproxy.cfg.erb"
   members = node.dna[:members] || []
-  variables({
-    :backends => node.engineyard.environment.app_servers,
+  variables( lazy{
+    {:backends => node.engineyard.environment.app_servers,
     :app_master_weight => members.size < 51 ? (50 - (members.size - 1)) : 0,
     :haproxy_user => node.dna[:haproxy][:username],
     :haproxy_pass => node.dna[:haproxy][:password],
@@ -66,7 +66,8 @@ managed_template "/etc/haproxy.cfg" do
     :https_bind_port => haproxy_https_port,
     :httpchk_host => haproxy_httpchk_host,
     :httpchk_path => haproxy_httpchk_path,
-    :http2 => use_http2
+    :http2 => use_http2,
+    :certificates => Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}}
   })
 
   # We need to reload to activate any changes to the config
