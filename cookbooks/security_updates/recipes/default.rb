@@ -4,13 +4,17 @@ package 'net-libs/gnutls' do
 end
 
 # YT-CC-1182
+# YT-CC-1351
+# YT-CC-1338
 package 'media-libs/tiff' do
-  version '4.0.8'
+  version '4.0.8-r1'
 end
 
 # YT-CC-1254
+# YT-CC-1351
+# YT-CC-1285
 package 'net-misc/curl' do
-  version '7.50.3-r2'
+  version '7.50.3-r3'
 end
 
 # YT-CC-1254
