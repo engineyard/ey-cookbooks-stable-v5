@@ -61,6 +61,7 @@ def ensure_rubygems_version
 end
 
 if node.engineyard.environment.ruby?
+  # TODO (jf): remove as we don't support jruby in stable-v5?
   if node.engineyard.environment.jruby?
     # If this is a JRuby instance and RubyGems is at version 1.5.2,
     # we have already overwritten the built-in gem with a lesser

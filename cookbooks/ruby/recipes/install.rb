@@ -34,12 +34,15 @@ end
 # For instance:
 #
 # ruby_193     => ruby
+# TODO (jf): remove this (see below)
 # jruby_187    => jruby
 # ree          => ree
 
+# TODO (jf): remove jruby and ree
 include_recipe "ruby::#{label.to_s[/([a-z]+).*/, 1]}"
 include_recipe "ruby::rubygems"
 
+# TODO (jf): find out why this is here - remove if possible
 require "digest/md5"
 # Remove the fakegem Rake wrapper
 cookbook_file "/usr/bin/rake" do
