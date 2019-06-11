@@ -27,9 +27,3 @@ ruby_dependencies.each do |dep, dep_version|
 end
 
 include_recipe 'ruby::common'
-
-# TODO (jf): remove this, not relevant on stable-v5 (Verify!!!!)
-execute "install-modern-rack" do
-  command "gem install rack -v 1.0.1"
-  only_if { component[:full_version] =~ /^ruby-1\.8\.6/ }
-end
