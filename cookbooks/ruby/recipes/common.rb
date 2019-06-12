@@ -11,7 +11,7 @@ enable_package component[:package] do
 end
 
 execute 'install ruby and its dependencies' do
-  command %Q{emerge -g -n --color n --nospinner --quiet #{package_atoms.join(' ')}}
+  command %Q{emerge --read-news=n -g -n --color n --nospinner --quiet #{package_atoms.join(' ')}}
   action :run
 end
 
