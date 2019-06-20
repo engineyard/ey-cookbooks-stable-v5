@@ -4,10 +4,7 @@ enable_package component[:package] do
   version component[:version]
 end
 
-package component[:package] do
-  version component[:version]
-end
-
+install_ruby_and_deps
 
 eselect component[:eselect_module] do
   slot 'ruby'

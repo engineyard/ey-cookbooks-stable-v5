@@ -26,23 +26,5 @@ cookbook_file "/root/.gemrc" do
   source "gemrc"
 end
 
-#
-# Require the right recipe to install the right flavor of ruby
-#
-# label        => recipe
-#
-# For instance:
-#
-# ruby_193     => ruby
-# jruby_187    => jruby
-# ree          => ree
-
-include_recipe "ruby::#{label.to_s[/([a-z]+).*/, 1]}"
+include_recipe "ruby::ruby"
 include_recipe "ruby::rubygems"
-
-require "digest/md5"
-# Remove the fakegem Rake wrapper
-cookbook_file "/usr/bin/rake" do
-  source "rake.txt"
-  only_if { File.exist?("/usr/bin/rake") and Digest::MD5.hexdigest(File.read("/usr/bin/rake")) == "5d1f39b09f7e5f4962676e772ff1cf63" }
-end
