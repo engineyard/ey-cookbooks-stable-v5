@@ -65,4 +65,21 @@ elsif ruby2x?(5, ruby_version)
     "dev-ruby/xmlrpc"       => "0.3.0",
     "virtual/rubygems"      => "13",
   }
+elsif ruby2x?(6, ruby_version)
+  default[:ruby_dependencies] = {
+    "dev-ruby/bundler"      => "1.17.3",
+    "dev-ruby/json"         => "2.0.3-r2",
+    "dev-ruby/racc"         => "1.4.14-r3",
+    "dev-ruby/rake"         => "12.3.2",
+    "dev-ruby/rdoc"         => "6.0.3-r1",
+    "dev-ruby/rubygems"     => "3.0.3",
+    "dev-ruby/did_you_mean" => "1.3.0",
+    "dev-ruby/minitest"     => "5.11.3",
+    "dev-ruby/net-telnet"   => "0.2.0",
+    "dev-ruby/power_assert" => "1.1.4",
+    "dev-ruby/test-unit"    => "3.2.9",
+    "dev-ruby/xmlrpc"       => "0.3.0-r1",
+    "dev-ruby/kpeg"         => "1.1.0-r2",
+    "virtual/rubygems"      => "14",
+  }
 end
