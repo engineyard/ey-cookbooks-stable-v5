@@ -2,13 +2,14 @@
 # Changes for Chef 12.7.2 and 12.10.24:
 # YT-CC-1236: Rewrite candidate_version determination for increased speed and reduced complexity/error-chance.
 # YT-CC-1244: Fix load_current_resource to correctly read version strings ending in a lower-case alpha character.
+# YT-CC-1352: Add support for rubygems 3.x by using the correct flags (`--no-ri --no-rdoc` or `--no-document`) based on the rubygems version.
 #
 
 require 'chef/provider/package/portage'
 
 ChefPatches = {
-  '12.7.2' => [:candidate_version, :install_package, :load_current_resource],
-  '12.10.24' => [:candidate_version, :install_package, :load_current_resource]
+  '12.7.2' => [:candidate_version, :install_package, :load_current_resource, :rubygems_3x_support],
+  '12.10.24' => [:candidate_version, :install_package, :load_current_resource, :rubygems_3x_support]
 }
 
 unless ChefPatches.has_key?(Chef::VERSION)
@@ -109,5 +110,59 @@ if ChefPatches[Chef::VERSION].include? :install_package
       shell_out_with_timeout!( "emerge -g -n --color n --nospinner --quiet#{expand_options(@new_resource.options)} #{pkg}" )
     end
 
+  end
+end
+
+if ChefPatches[Chef::VERSION].include? :rubygems_3x_support
+  class Chef::Provider::Package::Rubygems
+    class GemEnvironment
+      def rubygems_version
+        raise NotImplementedError
+      end
+    end
+
+    class CurrentGemEnvironment
+      def rubygems_version
+        Gem::VERSION
+      end
+    end
+
+    class AlternateGemEnvironment
+      def rubygems_version
+        @rubygems_version ||= shell_out!("#{@gem_binary_location} --version").stdout.chomp
+      end
+    end
+
+    def install_via_gem_command(name, version)
+      if @new_resource.source =~ /\.gem$/i
+        name = @new_resource.source
+        src = " --local" unless source_is_remote?
+      elsif @new_resource.clear_sources
+        src = " --clear-sources"
+        src << (@new_resource.source && " --source=#{@new_resource.source}" || "")
+      else
+        src = @new_resource.source && " --source=#{@new_resource.source} --source=#{Chef::Config[:rubygems_url]}"
+      end
+      if !version.nil? && version.length > 0
+        shell_out_with_timeout!("#{gem_binary_path} install #{name} -q #{rdoc_string} -v \"#{version}\"#{src}#{opts}",
+:env => nil)
+      else
+        shell_out_with_timeout!("#{gem_binary_path} install \"#{name}\" -q #{rdoc_string} #{src}#{opts}", :env => nil)
+      end
+    end
+
+    private
+
+    def rdoc_string
+      if needs_nodocument?
+        "--no-document"
+      else
+        "--no-rdoc --no-ri"
+      end
+    end
+    
+    def needs_nodocument?
+      Gem::Requirement.new(">= 3.0.0.beta1").satisfied_by?(Gem::Version.new(gem_env.rubygems_version))
+    end
   end
 end
