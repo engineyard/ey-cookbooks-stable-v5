@@ -81,7 +81,7 @@ module RubyHelpers
     end
     use_mask ruby_mask do
       mask_file "ruby"
-      only_if "ruby_mask"
+      only_if { ruby_mask }
     end
   end
 
