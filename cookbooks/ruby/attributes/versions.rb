@@ -1,5 +1,8 @@
 component = node.engineyard.environment.ruby
-ruby_version = component[:version]
+
+if node.engineyard.environment.ruby?
+  ruby_version = node.engineyard.environment.ruby[:version]
+end
 
 default[:ruby_dependencies] = {}
 default[:do_upgrade_eselect_ruby] = false
