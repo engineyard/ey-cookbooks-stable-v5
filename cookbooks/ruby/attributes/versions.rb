@@ -1,7 +1,7 @@
-component = node.engineyard.environment.ruby
-
 if node.engineyard.environment.ruby?
   ruby_version = node.engineyard.environment.ruby[:version]
+else
+  ruby_version = '' 
 end
 
 default[:ruby_dependencies] = {}
