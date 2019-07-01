@@ -26,4 +26,5 @@ ruby_dependencies.each do |dep, dep_version|
   end
 end
 
+include_recipe 'ruby::jemalloc'
 include_recipe 'ruby::common'
