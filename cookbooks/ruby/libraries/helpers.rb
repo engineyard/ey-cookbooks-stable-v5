@@ -1,4 +1,8 @@
 module RubyHelpers
+  def ruby_package_atom(package, version)
+    "=#{package}-#{version}"
+  end
+
   def ruby2x?(x, version_string)
     version_string =~ /^2\.#{x}\.[\d\.]*\b/
   end
@@ -98,7 +102,7 @@ module RubyHelpers
     })
     package_atoms = packages.map { |package_name, package_version| "=#{package_name}-#{package_version}" }
     execute 'install ruby and its dependencies' do
-      command %Q{emerge --read-news=n -g -n --color n --nospinner --quiet #{package_atoms.join(' ')}}
+      command %Q{emerge --read-news=n -g -n --changed-use --color n --nospinner --quiet #{package_atoms.join(' ')}}
       action :run
     end
   end
@@ -165,6 +169,16 @@ module RubyHelpers
       reinstall_rubygems_os_package
     end
   end
+
+  def is_ruby_jemalloc_enabled(app_data)
+    env_vars = fetch_environment_variables(app_data)
+    env_vars.each do |ev|
+      if /^EY_RUBY_JEMALLOC/.match(ev[:name]) && /TRUE/i.match(ev[:value])
+        return true
+      end
+    end
+    return false
+  end
 end
 
 class Chef::Recipe
@@ -172,5 +186,9 @@ class Chef::Recipe
 end
 
 class Chef::Node
+  include RubyHelpers
+end
+
+class Chef::Resource
   include RubyHelpers
 end

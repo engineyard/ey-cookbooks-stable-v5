@@ -6,6 +6,7 @@ end
 
 default[:ruby_dependencies] = {}
 default[:do_upgrade_eselect_ruby] = false
+default[:ruby_jemalloc_available] = false
 
 if ruby2x?(0, ruby_version)
   default[:ruby_dependencies] = {
@@ -51,6 +52,7 @@ elsif ruby2x?(4, ruby_version)
     "dev-ruby/xmlrpc"       => "0.2.1",
     "virtual/rubygems"      => "12",
   }
+  default[:ruby_jemalloc_available] = true
 elsif ruby2x?(5, ruby_version)
   default[:do_upgrade_eselect_ruby] = true
   default[:ruby_dependencies] = {
@@ -68,6 +70,7 @@ elsif ruby2x?(5, ruby_version)
     "dev-ruby/xmlrpc"       => "0.3.0",
     "virtual/rubygems"      => "13",
   }
+  default[:ruby_jemalloc_available] = true
 elsif ruby2x?(6, ruby_version)
   default[:ruby_dependencies] = {
     "dev-ruby/bundler"      => "1.17.3",
@@ -85,4 +88,5 @@ elsif ruby2x?(6, ruby_version)
     "dev-ruby/kpeg"         => "1.1.0-r2",
     "virtual/rubygems"      => "14",
   }
+  default[:ruby_jemalloc_available] = true
 end
