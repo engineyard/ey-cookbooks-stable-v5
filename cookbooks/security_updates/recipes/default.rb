@@ -1,6 +1,7 @@
 # YT-CC-924
+# FB-549
 package 'net-libs/gnutls' do
-  version '3.3.28'
+  version '3.3.30'
 end
 
 # YT-CC-1182
@@ -13,8 +14,9 @@ end
 # YT-CC-1254
 # YT-CC-1351
 # YT-CC-1285
+# FB-549
 package 'net-misc/curl' do
-  version '7.50.3-r3'
+  version '7.50.3-r4'
 end
 
 # YT-CC-1254
