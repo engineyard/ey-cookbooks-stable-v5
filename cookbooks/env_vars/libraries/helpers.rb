@@ -16,8 +16,17 @@ module EnvVars
       return [] unless metadata && metadata['environment_variables']
 
       variables = metadata['environment_variables'].map do |var_hash|
-        { :name => var_hash['name'], :value => ::Base64.strict_decode64(var_hash['value']) }
+        if variable_validator(var_hash[:name])
+          { :name => var_hash['name'], :value => escape_variable_value(::Base64.strict_decode64(var_hash['value'])).delete!("\n") }
+        else
+          Chef::Log.error('[COOKBOOK ENV_VARS] Variable name is not valid')
+        end
       end
+    end
+
+    # Function for variable name validation
+    def variable_validator(name)
+        !!name.match(/\A[a-zA-Z]\w*\z/)
     end
 
     # Escapes the value of variable to be correctly enclosed in double quotes. Enclosing characters
