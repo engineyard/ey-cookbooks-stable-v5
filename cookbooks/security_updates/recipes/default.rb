@@ -38,3 +38,9 @@ end
 package 'dev-libs/libyaml' do
   version '0.1.7'
 end
+
+# YT-CC-1320
+# FB-657
+package 'www-servers/nginx' do 
+  version '1.12.2'
+end
