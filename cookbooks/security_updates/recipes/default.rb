@@ -38,3 +38,9 @@ end
 package 'dev-libs/libyaml' do
   version '0.1.7'
 end
+
+# YT-CC-1266
+# FB-655
+package 'dev-libs/openssl' do
+  version '1.0.2r'
+end
