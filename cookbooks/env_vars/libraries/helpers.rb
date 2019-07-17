@@ -15,7 +15,7 @@ module EnvVars
       metadata = app_data['components'].find {|component| component['key'] == 'app_metadata'}
       return [] unless metadata && metadata['environment_variables']
 
-      variables = metadata['environment_variables'].map do |var_hash|
+      variables = metadata['environment_variables'].reject{|varname| varname[:name] =~ /^EY_/}.map do |var_hash|
         { :name => var_hash['name'], :value => ::Base64.strict_decode64(var_hash['value']) }
       end
     end
