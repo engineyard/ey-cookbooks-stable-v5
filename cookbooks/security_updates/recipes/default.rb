@@ -42,7 +42,6 @@ end
 # YT-CC-1308
 # FB-656
 package 'net-misc/openssh' do
-  action :nothing
   version '7.5_p1-r3'
   notifies :restart, 'service[sshd]'
 end
