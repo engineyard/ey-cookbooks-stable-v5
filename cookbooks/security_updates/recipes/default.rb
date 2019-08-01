@@ -38,11 +38,3 @@ end
 package 'dev-libs/libyaml' do
   version '0.1.7'
 end
-
-# YT-CC-1320
-# FB-657
-package 'www-servers/nginx' do 
-  action :nothing
-  version '1.12.2'
-  notifies :restart, 'service[nginx]'
-end
