@@ -38,3 +38,10 @@ end
 package 'dev-libs/libyaml' do
   version '0.1.7'
 end
+
+# YT-CC-1308
+# FB-656
+package 'net-misc/openssh' do
+  version '7.5_p1-r3'
+  notifies :restart, 'service[sshd]'
+end
