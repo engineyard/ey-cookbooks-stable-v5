@@ -1,0 +1,1 @@
+node.set['memcached']['version'] = '1.4.39-r1'
