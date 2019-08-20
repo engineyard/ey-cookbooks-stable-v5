@@ -1,15 +1,8 @@
-require 'base64'
+#require 'base64'
 require 'openssl'
 
 module CustomSSL
   module Helper
-    def encrypt(value, secret)
-      MessageCipher.new(secret).encrypt(value)
-    end
-
-    def decrypt(value, secret)
-      MessageCipher.new(secret).decrypt(value)
-    end
 
     def fetch_environment_variables(app_data)
       metadata = app_data['components'].find {|component| component['key'] == 'app_metadata'}
