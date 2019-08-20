@@ -1,6 +1,3 @@
-#require 'base64'
-require 'openssl'
-
 module CustomSSL
   module Helper
 
