@@ -7,7 +7,7 @@ default['memcached'].tap do |memcached|
 
   # Default: DO NOT install memcached
   # Override this to true to install memcached
-  memcached['perform_install'] = false
+  memcached['perform_install'] = true
 
   # Set to true if you want to install from source
   # Installing from the Gentoo package in the portage tree is faster,

@@ -15,15 +15,15 @@ default['memcached'].tap do |memcached|
   memcached['install_from_source'] = false
 
   # If you're installing from the portage tree, the latest available version is 1.4.25
-  memcached['version'] = '1.4.39-r1'
-  #memcached['download_url'] = 'https://memcached.org/files/memcached-1.4.39-r1.tar.gz'
+  memcached['version'] = '1.4.39'
+  memcached['download_url'] = 'https://memcached.org/files/memcached-1.4.39.tar.gz'
 
   # Install memcached on a utility instance named 'memcached'
-  memcached['install_type'] = 'NAMED_UTILS'
+  # memcached['install_type'] = 'NAMED_UTILS'
   memcached['utility_name'] = 'memcached'
 
   # Install memcached on all app instances, or on a solo instance
-  # memcached['install_type'] = 'ALL_APP_INSTANCES'
+  memcached['install_type'] = 'ALL_APP_INSTANCES'
 
   # Amount of memory in MB to be used by memcached
   memcached['memusage'] = 1024
