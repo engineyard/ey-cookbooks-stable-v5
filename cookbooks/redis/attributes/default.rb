@@ -2,7 +2,7 @@ default['redis'].tap do |redis|
   # Installing from the Gentoo package in the portage tree is the recommended approach.
   # Set install_from_source to true if you need a version that's not available from the
   # portage tree.
-  redis['install_from_source'] = true
+  redis['install_from_source'] = false
 
   # If you're installing from the portage tree, only the following versions are available:
   # 2.8.17-r1
@@ -17,13 +17,13 @@ default['redis'].tap do |redis|
   #
   # If you're installing from source, see http://download.redis.io/releases/ for the available versions
   # Beta versions will also work, e.g. 4.0-rc2. Make sure you set the download_url correctly.
-  # redis['version'] = '3.2.0'
-  # redis['download_url'] = "http://download.redis.io/releases/redis-#{redis['version']}.tar.gz"
+  redis['version'] = '3.2.0-r3'
+  redis['download_url'] = "http://download.redis.io/releases/redis-#{redis['version']}.tar.gz"
 
   # Redis Beta, if you really have to
   # Make sure you also set redis['install_from_source'] to true
-  redis['version'] = '3.2.0-rc3'
-  redis['download_url'] = 'https://github.com/antirez/redis/archive/3.2.0-rc3.tar.gz'
+  #redis['version'] = '4.0-rc2'
+  #redis['download_url'] = 'https://github.com/antirez/redis/archive/4.0-rc2.tar.gz'
 
   redis['force_upgrade'] = false
 
