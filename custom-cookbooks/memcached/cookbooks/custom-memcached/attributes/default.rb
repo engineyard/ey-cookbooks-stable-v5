@@ -12,10 +12,10 @@ default['memcached'].tap do |memcached|
   # Set to true if you want to install from source
   # Installing from the Gentoo package in the portage tree is faster,
   # but not all versions are available
-  memcached['install_from_source'] = true
+  memcached['install_from_source'] = false
 
-  # If you're installing from the portage tree, the latest available version is 1.4.25
-  memcached['version'] = '1.4.39'
+  # If you're installing from the portage tree, the latest available version is 1.4.39-r1
+  memcached['version'] = '1.4.39-r1'
   memcached['download_url'] = 'https://memcached.org/files/memcached-1.4.39.tar.gz'
 
   # Install memcached on a utility instance named 'memcached'
