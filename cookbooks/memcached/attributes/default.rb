@@ -12,7 +12,7 @@ default['memcached'].tap do |memcached|
   # Set to true if you want to install from source
   # Installing from the Gentoo package in the portage tree is faster,
   # but not all versions are available
-  memcached['install_from_source'] = false
+  memcached['install_from_source'] = true
 
   # If you're installing from the portage tree, the latest available version is 1.4.25
   memcached['version'] = '1.4.39'
