@@ -24,7 +24,7 @@ To use the `yarn` cookbook, you should copy this cookbook
     depends 'yarn'
 ```
 
-3. Copy `custom-cookbooks/timezone/cookbooks/yarn` to `cookbooks/`
+3. Copy `custom-cookbooks/yarn/cookbooks/yarn` to `cookbooks/`
 
 ```
     cd ~ # Change this to your preferred directory. Anywhere but inside the application
