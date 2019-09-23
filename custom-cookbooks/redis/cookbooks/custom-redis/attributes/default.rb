@@ -17,13 +17,13 @@ default['redis'].tap do |redis|
   #
   # If you're installing from source, see http://download.redis.io/releases/ for the available versions
   # Beta versions will also work, e.g. 4.0-rc2. Make sure you set the download_url correctly.
-  redis['version'] = '3.2.0'
+  redis['version'] = '3.2.0-r3'
   redis['download_url'] = "http://download.redis.io/releases/redis-#{redis['version']}.tar.gz"
 
   # Redis Beta, if you really have to
   # Make sure you also set redis['install_from_source'] to true
-  #redis['version'] = '4.0-rc2'
-  #redis['download_url'] = 'https://github.com/antirez/redis/archive/4.0-rc2.tar.gz'
+  # redis['version'] = '4.0-rc2'
+  # redis['download_url'] = 'https://github.com/antirez/redis/archive/4.0-rc2.tar.gz'
 
   redis['force_upgrade'] = false
 
