@@ -26,3 +26,14 @@ follow_paths.each do |path|
     not_if "le followed #{path}"
   end
 end
+
+node['le']['follow_app_paths'].each do |app_path|
+  parser = app_path.match(/\/data\/(\w+)\/shared\/log\/(\w+\.log)/)
+  log_name = "#{parser[1]}-#{parser[2]}"
+  execute "le follow #{app_path}" do
+    command "le follow #{app_path} --name #{log_name}"
+    ignore_failure true
+    action :run
+    not_if "le followed #{app_path}"
+  end
+end

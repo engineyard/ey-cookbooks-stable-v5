@@ -42,3 +42,7 @@ Edit this line:
 default['le']['le_api_key'] = 'YOUR_API_KEY_HERE'
 ```
 
+### Specify the specific application logs to follow
+
+By default system and Nginx logs are sent to Logentries. Application specific logs (e.g. application server and background job logs) can be added by either uncommenting or appending the `default['le']['follow_app_paths']` lines with the relevant log filenames. `#{app_name}` is a variable and should not be hard-coded, just left to handle multiple applications' logs if present.
+
