@@ -17,10 +17,10 @@ default['le']['follow_paths'] = [
 end
 
 #APPLICATION LEVEL LOGS TO FOLLOW SHOULD BE DEFINED HERE
-framework = node['dna']['environment']['framework_env']
+framework_env = node['dna']['environment']['framework_env']
 default['le']['follow_app_paths'] = []
 (node['dna']['applications'] || []).each do |app_name, app_info|
-  default['le']['follow_app_paths'] << "/data/#{app_name}/shared/log/#{framework}.log"
+  default['le']['follow_app_paths'] << "/data/#{app_name}/shared/log/#{framework_env}.log"
 #  default['le']['follow_app_paths'] << "/data/#{app_name}/shared/log/unicorn.log"
 #  default['le']['follow_app_paths'] << "/data/#{app_name}/shared/log/passenger.8000.log"
 #  default['le']['follow_app_paths'] << "/data/#{app_name}/shared/log/delayed_job.log"
