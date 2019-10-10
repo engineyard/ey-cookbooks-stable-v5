@@ -42,7 +42,15 @@ Edit this line:
 default['le']['le_api_key'] = 'YOUR_API_KEY_HERE'
 ```
 
-### Specify the specific application logs to follow
+### Specify the logs to follow
+
+The logs to follow are defined in three blocks:
+
+1. System logs - these are server logs, typically found in `/var/log` or logs in other locations which are unique, with only a single log per instance regardless of the number of applications running.
+2. Nginx logs - these are the Nginx logs, found in `/var/log/nginx`. Additional logs can be added for instances logging https connections to `ssl` Nginx logs.
+3. Application logs - these are the per application logs. Only logs stored in the `logs` directory of your application should be added here, as it uses the application name in the path to create a unique name for the log at LogEntries in order to prevent different applications' logs of the same name being logged to the same location at LE.
+
+To add or remove logs please add/un-comment or delete/comment-out the log file path in the relevent block. `#{app_name}` is a variable and should not be hard-coded, just left to handle multiple applications' logs if present.
 
 By default system and Nginx logs are sent to Logentries. Application specific logs (e.g. application server and background job logs) can be added by either uncommenting or appending the `default['le']['follow_app_paths']` lines with the relevant log filenames. `#{app_name}` is a variable and should not be hard-coded, just left to handle multiple applications' logs if present.
 
