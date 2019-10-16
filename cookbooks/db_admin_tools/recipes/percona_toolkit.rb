@@ -1,4 +1,4 @@
-toolkit_version = '2.2.17'
+toolkit_version = '2.2.20'
 
 unmask_package "dev-db/percona-toolkit" do
   version toolkit_version
