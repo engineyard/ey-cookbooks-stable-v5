@@ -22,7 +22,7 @@ if ['app_master', 'app', 'solo'].include?(node.dna['instance_role'])
     end
 
     # When a Rack process grows to a certain size, passenger_monitor will try to kill it:
-    max_megabytes = metadata_app_get_with_default(app_name, :worker_memory_size, 800)
+    max_megabytes = metadata_app_get_with_default(app_name, :worker_memory_size, 250)
 
     # We want to make sure there are at least this many Rack processes running on each app instance:
     min_rack_processes = (node[:dna][:environment][:framework_env] == 'production') ? 3 : 1
