@@ -10,8 +10,8 @@ if node['delayed_job4']['is_dj_instance']
     mode 0755
   end
 
-  template "/engineyard/custom/dj" do
-    source "dj.erb"
+  cookbook_file "/engineyard/custom/dj" do
+    source "dj.sh"
     owner "root"
     group "root"
     mode 0755
