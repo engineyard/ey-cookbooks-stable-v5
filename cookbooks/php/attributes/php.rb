@@ -6,9 +6,9 @@ default['php']['version'] = case attribute['dna']['engineyard']['environment']['
   when 'php_7'
     '7.0.33'
   when 'php_71'
-    '7.1.31'
+    '7.1.33'
   when 'php_72'
-    '7.2.21'
+    '7.2.24'
   else
    '5.6.40'
 end
