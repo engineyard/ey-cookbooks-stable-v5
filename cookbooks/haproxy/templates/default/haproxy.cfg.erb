@@ -23,7 +23,7 @@ global
   maxconn 65535
 
   # Logging to syslog facility local0
-  # log   127.0.0.1       local0
+  # log   <%= @solo %>       local0
 
   # Distribute the health checks with a bit of randomness
   spread-checks 5
@@ -141,7 +141,7 @@ listen cluster
       <% end %>
     <% else %>
       # It must be a solo.
-      server solo 127.0.0.1:8081 check inter 5000 fastinter 1000 fall 1 weight 50
+      server solo <%= @solo %>:8081 check inter 5000 fastinter 1000 fall 1 weight 50
     <% end %>
 <% end %>
 
@@ -163,14 +163,14 @@ listen cluster
 <% end -%>
 
   backend nodes-http
-     
+
       <% if @backends.any? %>
       <% @backends.each_with_index do |instance, i| %>
         server app-<%= i %> <%= instance['private_hostname'] %>:8089 check inter 5000 fastinter 1000 fall 1 weight <%= (instance['role'] == 'app_master') ? @app_master_weight : 50 %> # <%= instance['id'] %>
       <% end %>
       <% else %>
           # It must be a solo.
-          server solo 127.0.0.1:8089 check inter 5000 fastinter 1000 fall 1 weight 50
+          server solo <%= @solo %>:8089 check inter 5000 fastinter 1000 fall 1 weight 50
         <% end %>
 
  backend nodes-http2
@@ -182,9 +182,8 @@ listen cluster
       <% end %>
       <% else %>
           # It must be a solo.
-          server solo 127.0.0.1:8081 check inter 5000 fastinter 1000 fall 1 weight 50 send-proxy
+          server solo <%= @solo %>:8081 check inter 5000 fastinter 1000 fall 1 weight 50 send-proxy
         <% end %>
-    
 
 <% else %>
     <% if @certificates.count > 0 %>
@@ -205,7 +204,7 @@ listen clusterssl
         <% end %>
         <% else %>
             # It must be a solo.
-            server solo 127.0.0.1:8081 check inter 5000 fastinter 1000 fall 1 weight 50
+            server solo <%= @solo %>:8081 check inter 5000 fastinter 1000 fall 1 weight 50
           <% end %>
     <% else %>
 

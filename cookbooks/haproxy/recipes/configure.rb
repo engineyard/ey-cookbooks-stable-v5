@@ -51,6 +51,11 @@ unless haproxy_httpchk_path
 end
 
 use_http2 = node['haproxy'] && node['haproxy']['http2']
+
+
+solo = node.engineyard.environment.instances.select{ |i| 'solo' == i.role }.map{ |i| i.private_hostname}.first
+
+
 managed_template "/etc/haproxy.cfg" do
   owner 'root'
   group 'root'
@@ -67,7 +72,8 @@ managed_template "/etc/haproxy.cfg" do
     :httpchk_host => haproxy_httpchk_host,
     :httpchk_path => haproxy_httpchk_path,
     :http2 => use_http2,
-    :certificates => Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/}}
+    :certificates => Dir['/etc/nginx/ssl/*.pem'].reject {|filename| filename =~ /dhparam/},
+    :solo => solo}
   })
 
   # We need to reload to activate any changes to the config
