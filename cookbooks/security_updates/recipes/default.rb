@@ -48,11 +48,11 @@ end
 
 # FB-1200
 package 'sys-libs/glibc' do
-  version '2.25-r1'
+  action :upgrade
 end
 
 # FB-1200
 package 'net-dns/libidn' do
-  version '1.32-r3'
+  action :upgrade
 end
 
