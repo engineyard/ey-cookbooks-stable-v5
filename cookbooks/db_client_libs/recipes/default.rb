@@ -8,7 +8,7 @@
   #    - MySQL: /engineyard/portage/engineyard/dev-db/percona-server/*.ebuild
 install_packages=[
   {
-    :server => 'postgresql-server',   # postgresql-server or percona-server
+    :server => 'percona-server',   # postgresql-server or percona-server
     :version => '9.4.4',
     :default_slot => false,                   # postgres packages only, use true only with no_db environments, makes this package the system default
   },
