@@ -30,8 +30,9 @@ package 'dev-libs/libgcrypt' do
 end
 
 # CC-1187
+# FB-1619
 package 'app-admin/sudo' do
-  version '1.8.16-r1'
+  version '1.8.16-r2'
 end
 
 # YT-CC-1225
