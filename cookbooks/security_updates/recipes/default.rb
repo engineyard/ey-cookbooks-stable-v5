@@ -48,11 +48,11 @@ end
 
 # FB-1200
 package 'sys-libs/glibc' do
-  version: '2.22-r8'
+  version '2.22-r8'
 end
 
 # FB-1200
 package 'net-dns/libidn' do
-  version: '1.30-r2'
+  version '1.30-r2'
 end
 
