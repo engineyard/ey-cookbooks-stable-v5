@@ -46,3 +46,14 @@ package 'net-misc/openssh' do
   version '7.5_p1-r3'
   notifies :restart, 'service[sshd]'
 end
+
+# FB-1200
+package 'sys-libs/glibc' do
+  version '2.22-r8'
+end
+
+# FB-1200
+package 'net-dns/libidn' do
+  version '1.30-r2'
+end
+
