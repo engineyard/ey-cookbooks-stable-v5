@@ -10,6 +10,18 @@ PATH=/bin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:$PATH
 CURDIR=`pwd`
 export NEW_RELIC_DISPATCHER=delayed_job
 
+application=$1
+
+custom_env="/data/${application}/shared/config/env.custom"
+cloud_env="/data/${application}/shared/config/env.cloud"
+
+# Load the custom env if it exists
+[[ -f "${custom_env}" ]] && source "${custom_env}"
+
+# Load the cloud env if it exists
+[[ -f "${cloud_env}" ]] && source "${cloud_env}"
+
+
 usage() {
   echo "Usage: $0 <appname> {start|stop} enviroment [name maximum-priority minimum-priority]"
   exit 1
@@ -207,4 +219,3 @@ else
   echo "/data/$1/current doesn't exist."
   usage
 fi
-
