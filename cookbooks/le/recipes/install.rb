@@ -29,12 +29,12 @@ execute "ebuild le-#{le_version}.ebuild digest" do
 end
 
 enable_package 'dev-lang/python-exec' do
-  version '2.0.2'
+  version '2.7.17'
   unmask true
 end
 
 package 'dev-lang/python-exec' do
-  version '2.0.2'
+  version '2.7.17'
   action :install
 end
 
