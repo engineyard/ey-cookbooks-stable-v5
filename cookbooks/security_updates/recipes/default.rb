@@ -61,3 +61,8 @@ end
 package 'dev-lang/python' do
   version '2.7.17'
 end
+
+# FB-2128
+package 'dev-vcs/git' do
+  version '2.7.3-r4'
+end
