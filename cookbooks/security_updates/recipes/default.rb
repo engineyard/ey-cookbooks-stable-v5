@@ -57,3 +57,7 @@ package 'net-dns/libidn' do
   version '1.30-r2'
 end
 
+# FB-2128
+package 'dev-vcs/git' do
+  version '2.7.3-r4'
+end
