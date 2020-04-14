@@ -188,9 +188,9 @@ class Chef
           stack_name = @hash['db_stack_name'].gsub /[^a-z]+/, ''
           # see https://tickets.engineyard.com/issue/DATA-66 to  understand this
           case stack_name
-          when 'aurora', 'mariadb'
+          when 'aurora', 'mariadb', 'mysql'
             'mysql'
-          when 'postgres'
+          when 'postgres', 'aurorapostgresql'
             'postgresql'
           else
             stack_name
