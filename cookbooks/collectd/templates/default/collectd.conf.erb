@@ -123,11 +123,13 @@ LoadPlugin threshold
     <% if @db_type[/postgres9/] %>
       Exec "postgres" "/engineyard/bin/check_postgres_wrapper.sh" "connection"
       Exec "postgres" "/engineyard/bin/check_postgres_wrapper.sh" "backends"
-      Exec "postgres" "/engineyard/bin/check_postgres_wrapper.sh" "checkpoint" "--warn=20m" "--crit=30m" "--datadir /db/postgresql/<%= @short_version %>/data"
       Exec "postgres" "/engineyard/bin/check_postgres_wrapper.sh" "txn_idle" "--warn=15m" "--crit=30m"
       <% if @role == 'db_master' %>
         Exec "postgres" "/engineyard/bin/check_postgres_wrapper.sh" "autovac_freeze"
       <% end %>
+      <% if @role == 'db_slave' %>
+        Exec "postgres" "/engineyard/bin/check_postgres_wrapper.sh" "checkpoint" "--warn=20m" "--crit=30m" "--datadir /db/postgresql/<%= @short_version %>/data"
+      <% end %>	  
     <% end %>
     <% if @db_type[/mysql/] %>
       Exec "mysql" "/engineyard/bin/check_mysql.sh" "connections"
