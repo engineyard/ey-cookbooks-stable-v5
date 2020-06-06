@@ -1,4 +1,4 @@
-## custom-AddTrust
+## custom-addtrust
 
 This recipe removes the expired AddTrust_External_Root.crt and updates the ca-certificates. You can read more about it on [AddTrust External CA Root expiration causing SSL certificate verification failures](https://support.cloud.engineyard.com/hc/en-us/articles/360048762994-AddTrust-External-CA-Root-expiration-causing-SSL-certificate-verification-failures)
 
@@ -9,16 +9,16 @@ For simplicity, we recommend that you create the cookbooks directory at the root
 1. Edit `cookbooks/ey-custom/recipes/after-main.rb` and add
 
   ```
-  include_recipe 'custom-AddTrust'
+  include_recipe 'custom-addtrust'
   ```
 
 2. Edit `cookbooks/ey-custom/metadata.rb` and add
 
   ```
-  depends 'custom-AddTrust'
+  depends 'custom-addtrust'
   ```
 
-3. Copy `custom-cookbooks/packages/cookbooks/custom-AddTrust` to `cookbooks/`
+3. Copy `custom-cookbooks/packages/cookbooks/custom-addtrust` to `cookbooks/`
 
   ```
   cd ~ # Change this to your preferred directory. Anywhere but inside the application
