@@ -38,7 +38,7 @@ elsif ruby2x?(3, ruby_version)
   }
 elsif ruby2x?(4, ruby_version)
   default[:ruby_dependencies] = {
-    "dev-ruby/json"         => "2.0.3",
+    "dev-ruby/json"         => "2.3.0",
     "dev-ruby/racc"         => "1.4.14-r1",
     "dev-ruby/rake"         => "12.0.0",
     "dev-ruby/rdoc"         => "5.1.0",
@@ -56,9 +56,9 @@ elsif ruby2x?(4, ruby_version)
 elsif ruby2x?(5, ruby_version)
   default[:do_upgrade_eselect_ruby] = true
   default[:ruby_dependencies] = {
-    "dev-ruby/json"         => "2.0.3-r1",
+    "dev-ruby/json"         => "2.3.0",
     "dev-ruby/racc"         => "1.4.14-r2",
-    "dev-ruby/rake"         => "12.3.0",
+    "dev-ruby/rake"         => "12.3.3",
     "dev-ruby/rdoc"         => "6.0.3",
     "dev-ruby/rubygems"     => "2.7.9",
     "dev-ruby/did_you_mean" => "1.2.0",
@@ -74,9 +74,9 @@ elsif ruby2x?(5, ruby_version)
 elsif ruby2x?(6, ruby_version)
   default[:ruby_dependencies] = {
     "dev-ruby/bundler"      => "1.17.3",
-    "dev-ruby/json"         => "2.0.3-r2",
+    "dev-ruby/json"         => "2.3.0",
     "dev-ruby/racc"         => "1.4.14-r3",
-    "dev-ruby/rake"         => "12.3.2",
+    "dev-ruby/rake"         => "12.3.3",
     "dev-ruby/rdoc"         => "6.0.3-r1",
     "dev-ruby/rubygems"     => "3.0.3",
     "dev-ruby/did_you_mean" => "1.3.0",
