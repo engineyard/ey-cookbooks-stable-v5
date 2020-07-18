@@ -75,7 +75,7 @@ end
  end
 
 # For use with custom_nodejs recipe, ensures that the following only runs for non-custom nodejs installs
-currently_installed_node = `node -v`.strip.gsub("v","")
+currently_installed_node = `node -v`.strip.gsub("v","") if File.exists?("/usr/bin/node")
 
 if ( node['nodejs']['available_versions'].include? currently_installed_node ) || (currently_installed_node == nil)
 
