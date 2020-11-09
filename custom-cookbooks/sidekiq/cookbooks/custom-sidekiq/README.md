@@ -173,7 +173,7 @@ hook similar to:
 On the other hand, if you'r running Sidekiq on a dedicated utility instance, the
 deploy hook should be like:
 
-    on_utilities :sidekiq do
+    on_utilities("sidekiq") do
       sudo "monit -g #{config.app}_sidekiq restart all"
     end
 
