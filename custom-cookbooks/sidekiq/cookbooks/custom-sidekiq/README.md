@@ -92,6 +92,8 @@ Sidekiq.configure_client do |config|
 end
 ``` 
 
+Note: The use of `:namespace` requires the usage of the redis-namespace gem.
+
 The reference to the Redis instance works because the Redis recipe adds a `redis-instance` entry in `/etc/hosts`.
 
 More information on setting the location of your server can be found at: 
@@ -170,7 +172,7 @@ hook similar to:
       sudo "monit -g #{config.app}_sidekiq restart all"
     end
 
-On the other hand, if you'r running Sidekiq on a dedicated utility instance, the
+On the other hand, if you're running Sidekiq on a dedicated utility instance, the
 deploy hook should be like:
 
     on_utilities("sidekiq") do
