@@ -3,20 +3,40 @@ ey_cloud_report "processing php composer.rb" do
   message "processing php - composer"
 end
 
-# Download newrelic PHP at specified version
-remote_file "/tmp/composer_install.php" do
-  source "https://getcomposer.org/installer"
+node['dna']['engineyard']['environment']['apps'].each do |app_data|
+  app_env_vars = fetch_environment_variables(app_data)
+    app_env_vars.each do |ev|
+      if ev[:name] =~ /^EY_COMPOSER/
+        custom_composer = ev[:value]
+
+        template "/tmp/composer-install.sh" do
+          owner node["owner_name"]
+          group node["owner_name"]
+          mode "0644"
+          source "composer.erb"
+          variables({
+            :user => node.engineyard.environment.ssh_username,
+            :composer => custom_composer
+          })
+      end
+    end
+  end
 end
 
-bash "install_phpcomposer" do
-  user 'root'
-  code <<-EOH
-mkdir /usr/lib/php_composer
-php -d allow_url_fopen=On /tmp/composer_install.php -- --install-dir=/usr/lib/php_composer
-chown -R #{node["owner_name"]}:#{node["owner_name"]} /usr/lib/php_composer
-chmod -R 755 /usr/lib/php_composer
-  EOH
-  action :run
+template "/tmp/composer-install.sh" do
+  owner node["owner_name"]
+  group node["owner_name"]
+  mode "0644"
+  source "composer.erb"
+  variables({
+    :user => node.engineyard.environment.ssh_username,
+    :composer => ""
+  })
+  not_if { ::File.exists?("/tmp/composer-install.sh") }
+end
+
+execute "install composer" do
+  command "sh /tmp/composer-install.sh && rm /tmp/composer-install.sh"
 end
 
 cookbook_file "/usr/bin/composer" do

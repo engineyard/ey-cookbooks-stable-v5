@@ -1,0 +1,15 @@
+EXPECTED_CHECKSUM="$(wget -q -O - https://composer.github.io/installer.sig)"
+php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');"
+ACTUAL_CHECKSUM="$(php -r "echo hash_file('sha384', '/tmp/composer-setup.php');")"
+CUSTOM_COMPOSER=<%= @composer %>
+mkdir /usr/lib/php_composer
+if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]
+then
+>&2 echo 'ERROR: Invalid installer checksum'
+rm /tmp/composer-setup.php
+exit 1
+fi
+if [ ! -z "$CUSTOM_COMPOSER" ]; then php -d allow_url_fopen=On /tmp/composer-setup.php --version=$CUSTOM_COMPOSER --install-dir=/usr/lib/php_composer; else php -d allow_url_fopen=On /tmp/composer-setup.php --version=1.10.6 --install-dir=/usr/lib/php_composer; fi
+chown -R <%= @user %>:<%= @user %> /usr/lib/php_composer
+chmod -R 755 /usr/lib/php_composer
+rm /tmp/composer-setup.php
