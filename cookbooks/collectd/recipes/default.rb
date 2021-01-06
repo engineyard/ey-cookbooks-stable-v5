@@ -18,6 +18,7 @@ package 'dev-ruby/rrdtool-bindings' do
 end
 
 include_recipe 'collectd::httpd'
+include_recipe 'collectd::ec2_credit_balances'
 
 template "/engineyard/bin/ey-alert.rb" do
   owner 'root'
@@ -121,7 +122,8 @@ managed_template "/etc/engineyard/collectd.conf" do
         :load_failure => node['collectd']['load']['failure'],
         :swap_thresholds => SwapThresholds.new,
         :short_version => short_version,
-        :disk_thresholds => DiskThresholds.new
+        :disk_thresholds => DiskThresholds.new,
+        :enable_credit_balances_monitoring => node['collectd']['enable_credit_balances_monitoring']
       }
     }
   )
