@@ -3,7 +3,7 @@ ey_cloud_report "haproxy" do
 end
 
 execute 'fix_loadbalancers' do
-  command 'ethtool -K eth0 sg on'
+  command 'ethtool -K eth0 tso on sg on'
 end
 
 # We do the configure first so we get the correct config.
