@@ -12,3 +12,4 @@ when /^db/
   include_recipe "db-ssl::setup" if is_db_master
 end
 include_recipe "ssh_keys" # CC-691 - update ssh whitelist after takeovers
+include_recipe "ey-hosts"
