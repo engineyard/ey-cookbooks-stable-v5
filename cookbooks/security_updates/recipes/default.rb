@@ -31,8 +31,9 @@ end
 
 # CC-1187
 # FB-1619
+# FB-5297
 package 'app-admin/sudo' do
-  version '1.8.16-r2'
+  version '1.9.6_p1-r2'
 end
 
 # YT-CC-1225
