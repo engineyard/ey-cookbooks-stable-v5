@@ -41,7 +41,7 @@ execute "Extract deb file" do
 end
 
 execute "Install data.tar.gz" do
-  command "tar zxvf #{local_tar_path} -C /"
+  command "tar zxvfh #{local_tar_path} -C /"
   cwd local_work_path
   user "root"
   action :run
