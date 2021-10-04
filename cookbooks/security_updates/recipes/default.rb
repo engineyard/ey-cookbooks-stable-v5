@@ -74,6 +74,7 @@ end
 
 package 'app-misc/ca-certificates' do
   version '20210119.3.66'
+  action :upgrade
 end
 
 execute "update-ca-certificates --fresh" do
