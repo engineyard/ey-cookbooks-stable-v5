@@ -1,0 +1,354 @@
+#!/usr/bin/env python3
+import json
+from datetime import datetime, timedelta
+import os
+import sys
+import socket
+import subprocess
+import time
+import requests
+import boto3
+
+import resource
+# Give it max 50MB
+max_pages = int((50 * 1024*1024) / resource.getpagesize())
+resource.setrlimit(resource.RLIMIT_RSS, (max_pages, max_pages))
+
+STATE_FILEPATH='/tmp/check_ec2_credit_balances/state.json'
+def load_state():
+    try:
+        os.mkdir(os.path.dirname(STATE_FILEPATH))
+    except:
+        pass
+    try:
+        with open(STATE_FILEPATH, 'r') as f:
+            return json.load(f)
+    except:
+        return {
+            'prev_cpu_credits': None,
+            'prev_vol_burst_balances': {}
+        }
+
+def save_state(state):
+    try:
+        os.mkdir(os.path.dirname(STATE_FILEPATH))
+    except:
+        pass
+    try:
+        with open(STATE_FILEPATH, 'w') as f:
+            json.dump(state, f)
+    except:
+        pass
+
+def get_prev_cpu_credits(state):
+    return state.get('prev_cpu_credits', None)
+
+def set_prev_cpu_credits(state, value):
+    state['prev_cpu_credits'] = value
+    return state
+
+def get_prev_vol_burst_balance(state, volume_id):
+    vols = state.get('prev_vol_burst_balances', {})
+    return vols.get(volume_id, None)
+
+def set_prev_vol_burst_balance(state, volume_id, value):
+    vols = state.get('prev_vol_burst_balances', {})
+    vols[volume_id] = value
+    state['prev_vol_burst_balances'] = vols
+    return state
+
+def remove_old_vols_from_state(state, current_volume_ids):
+    vols = state.get('prev_vol_burst_balances', {})
+    vids = list(current_volume_ids.values())
+    vols = {k: v for k, v in vols.items() if k in vids}
+    state['prev_vol_burst_balances'] = vols
+    return state
+
+def get_instance_meta():
+    response = requests.get('http://169.254.169.254/latest/dynamic/instance-identity/document')
+    return json.loads(response.text)
+
+def _sudo_cat_dna():
+    return subprocess.check_output(['sudo', 'cat', '/etc/chef/dna.json']).decode('utf-8')
+
+def set_instance_credentials(meta):
+    # dna = json.loads(open('/etc/chef/dna.json', 'r').read())
+    dna = json.loads(_sudo_cat_dna())
+    os.environ['AWS_ACCESS_KEY_ID'] = dna['dna']['aws_secret_id']
+    os.environ['AWS_SECRET_ACCESS_KEY'] = dna['dna']['aws_secret_key']
+    os.environ['AWS_DEFAULT_REGION'] = meta['region']
+
+def get_cpu_thresholds():
+    return {
+        'ok': float(<%= @ec2_thresholds.cpu_credit_ok %>),
+        'warning': float(<%= @ec2_thresholds.cpu_credit_warn %>),
+        'alert': float(<%= @ec2_thresholds.cpu_credit_alert %>)
+    }
+
+def get_volume_burst_balance_thresholds():
+    return {
+        'ok': float(<%= @ec2_thresholds.vol_burst_ok %>),
+        'warning': float(<%= @ec2_thresholds.vol_burst_warn %>),
+        'alert': float(<%= @ec2_thresholds.vol_burst_alert %>)
+    }
+
+def get_interval_seconds():
+    return 300 # int(os.environ.get('COLLECTD_INTERVAL', 300))
+
+def get_cloudwatch():
+    return boto3.client('cloudwatch')
+
+def get_ec2():
+    return boto3.client('ec2')
+
+def _translate_device_name(device_name):
+    if device_name.startswith('/dev/'):
+        device_name = device_name[5:]
+    if device_name.startswith('sd'):
+        device_letter = device_name[2:]
+    elif device_name.startswith('xvd'):
+        device_letter = device_name[3:]
+    else:
+        raise Exception('Invalid device name: {}'.format(device_name))
+    return '/dev/xvd{0:s}'.format(device_letter)
+
+def _get_device_mount_point(device_name):
+    try:
+        mount_point = subprocess.check_output(['findmnt', '-cfn', '-o', 'TARGET', '--source', device_name]).decode('utf-8')
+        mount_point = mount_point.strip()
+        if not mount_point.startswith('/'):
+            return None
+        else:
+            return mount_point
+    except:
+        return None
+
+def describe_instance(ec2, meta):
+    resp = ec2.describe_instances(InstanceIds=[meta['instanceId']])
+    return resp['Reservations'][0]['Instances'][0]
+
+def get_volume_ids(description):
+    bdms = description['BlockDeviceMappings']
+    ebs_bdms = list(filter(lambda dm: dm.get('Ebs') and dm['Ebs']['Status'] == 'attached', bdms))
+    return dict(map(
+        lambda dm: (_translate_device_name(dm['DeviceName']), dm['Ebs']['VolumeId']),
+        ebs_bdms
+    ))
+
+def _get_start_end_time(period_seconds):
+    end_time = datetime.utcnow()
+    start_time = end_time - timedelta(seconds=600+2*period_seconds)
+    return (start_time, end_time)
+
+def _get_latest_average_cw_metric(cloudwatch, namespace, metric_name, 
+                                  dimension_name, dimension_value, period_seconds):
+    start_time, end_time = _get_start_end_time(period_seconds)
+    resp = cloudwatch.get_metric_statistics(
+        Namespace=namespace,
+        MetricName=metric_name,
+        Dimensions=[{ 'Name': dimension_name, 'Value': dimension_value }],
+        Statistics=['Average'],
+        StartTime=start_time,
+        EndTime=end_time,
+        Period=period_seconds
+    )
+    metrics = list(sorted(resp['Datapoints'], key=lambda dp: dp['Timestamp'], reverse=True))
+    if len(metrics) == 0:
+        return None, None
+    else:
+        latest_metric = metrics[0]
+        return latest_metric['Timestamp'], latest_metric['Average']
+
+def get_cpu_credit_balance(cloudwatch, meta, period_seconds=60):
+    return _get_latest_average_cw_metric(
+        cloudwatch, 'AWS/EC2', 'CPUCreditBalance',
+        'InstanceId', meta['instanceId'], period_seconds
+    )
+
+def get_cpu_credit_usage(cloudwatch, meta, period_seconds=60):
+    return _get_latest_average_cw_metric(
+        cloudwatch, 'AWS/EC2', 'CPUCreditUsage',
+        'InstanceId', meta['instanceId'], period_seconds
+    )
+
+def get_cpu_surplus_credit_balance(cloudwatch, meta, period_seconds=60):
+    return _get_latest_average_cw_metric(
+        cloudwatch, 'AWS/EC2', 'CPUSurplusCreditBalance',
+        'InstanceId', meta['instanceId'], period_seconds
+    )
+
+def get_cpu_surplus_credits_charged(cloudwatch, meta, period_seconds=60):
+    return _get_latest_average_cw_metric(
+        cloudwatch, 'AWS/EC2', 'CPUSurplusCreditsCharged',
+        'InstanceId', meta['instanceId'], period_seconds
+    )
+
+def get_volume_burst_balance(cloudwatch, volume_id, period_seconds=60):
+    return _get_latest_average_cw_metric(
+        cloudwatch, 'AWS/EBS', 'BurstBalance',
+        'VolumeId', volume_id, period_seconds
+    )
+
+def initialize_context():
+    meta = get_instance_meta()
+    set_instance_credentials(meta)
+    cloudwatch = get_cloudwatch()
+    ec2 = get_ec2()
+    description = describe_instance(ec2, meta)
+    volume_ids = get_volume_ids(description)
+    interval = get_interval_seconds()
+    hostname = os.environ.get('COLLECTD_HOSTNAME', socket.gethostname())
+    return {
+        'meta': meta,
+        'cloudwatch': cloudwatch,
+        'ec2': ec2,
+        'description': description,
+        'volume_ids': volume_ids,
+        'interval': interval,
+        'hostname': hostname
+    }
+
+def _putval(context, plugin, type_name, timestamp, values, interval_seconds):
+    timestamp_str = '{0:d}'.format(int(timestamp.timestamp())) if timestamp is not None else 'N'
+    value_strs = ['{0:.2f}'.format(v) if type(v) is float or type(v) is int else 'U' for v in values]
+    print('PUTVAL {0:s}/{1:s}/{2:s} interval={3:d} {4:s}:{5:s}'.format(
+        context['hostname'],
+        plugin,
+        type_name,
+        interval_seconds,
+        timestamp_str,
+        ':'.join(value_strs)
+    ))
+    sys.stdout.flush()
+
+SEVERITY_FAILURE='FAILURE'
+SEVERITY_WARNING='WARNING'
+SEVERITY_OK='OKAY'
+
+def _putnotif(context, severity, message, timestamp, notif_type):
+    hostname = context['hostname']
+    opts = ' '.join(
+        map(lambda t: '='.join(t), [
+            ('Host', hostname),
+            ('Time', str(int(timestamp.timestamp()))),
+            ('Severity', severity),
+            ('Type', 'custom-{0:s}'.format(notif_type)),
+            ('Message', '"raw_message: {0:s} {1:s}"'.format(timestamp.strftime('%H:%M:%S'), message))
+        ])
+    )
+    print('PUTNOTIF {0:s}'.format(opts))
+    sys.stdout.flush()
+
+def did_cross_below(prev_val, val, thr):
+    return prev_val > thr and val <= thr
+
+def did_cross_above(prev_val, val, thr):
+    return prev_val < thr and val >= thr
+
+def check_cpu_credit_balance_task(context, state):
+    period_seconds = context['interval']
+    thr = get_cpu_thresholds()
+    timestamp, balance = get_cpu_credit_balance(context['cloudwatch'], context['meta'], period_seconds)
+    _, usage = get_cpu_credit_usage(context['cloudwatch'], context['meta'], period_seconds)
+    if balance is None:
+        return state
+    _putval(context, 'ec2', 'cpu_credits', timestamp, [balance, usage], period_seconds)
+    prev_balance = get_prev_cpu_credits(state)
+    state = set_prev_cpu_credits(state, balance)
+    if prev_balance is None:
+        return state
+    if did_cross_below(prev_balance, balance, thr['alert']):
+        _putnotif(
+            context,
+            SEVERITY_FAILURE, 
+            'The EC2 CPU credits balance ({0:.2f}) is below {1:.2f}'.format(balance, thr['alert']),
+            timestamp,
+            'CPU-credits'
+        )
+    elif did_cross_below(prev_balance, balance, thr['warning']):
+        _putnotif(
+            context,
+            SEVERITY_WARNING, 
+            'The EC2 CPU credits balance ({0:.2f}) is below {1:.2f}'.format(balance, thr['warning']),
+            timestamp,
+            'CPU-credits'
+        )
+    elif did_cross_above(prev_balance, balance, thr['ok']):
+        _putnotif(
+            context,
+            SEVERITY_OK, 
+            'The EC2 CPU credits balance ({0:.2f}) is above {1:.2f}'.format(balance, thr['ok']),
+            timestamp,
+            'CPU-credits'
+        )
+    return state
+
+def check_cpu_surplus_credit_balance_task(context, state):
+    period_seconds = context['interval']
+    timestamp, balance = get_cpu_surplus_credit_balance(context['cloudwatch'], context['meta'], period_seconds)
+    _, charged = get_cpu_surplus_credits_charged(context['cloudwatch'], context['meta'], period_seconds)
+    _putval(context, 'ec2', 'cpu_surplus_credits', timestamp, [balance, charged], period_seconds)
+    return state
+
+def check_volume_burst_balances_task(context, state):
+    period_seconds = context['interval']
+    thr = get_volume_burst_balance_thresholds()
+    for device_name, volume_id in context['volume_ids'].items():
+        timestamp, balance = get_volume_burst_balance(context['cloudwatch'], volume_id, period_seconds)
+        if balance is None:
+            continue
+        mount_point = _get_device_mount_point(device_name)
+        if mount_point is None:
+            mount_point = device_name
+        plugin = 'ebs-{0:s}'.format(mount_point.replace('/', '\\'))[0:64]
+        _putval(context, plugin, 'ebs_iops_burst', timestamp, [balance], period_seconds)
+        prev_balance = get_prev_vol_burst_balance(state, volume_id)
+        state = set_prev_vol_burst_balance(state, volume_id, balance)
+        if prev_balance is None:
+            continue
+        if did_cross_below(prev_balance, balance, thr['alert']):
+            _putnotif(
+                context,
+                SEVERITY_FAILURE, 
+                'The EBS burst balance for {0:s}: {1:.2f} is below {2:.2f}'.format(mount_point, balance, thr['alert']),
+                timestamp,
+                'IOPS-Credits-{0:s}'.format(mount_point)
+            )
+        elif did_cross_below(prev_balance, balance, thr['warning']):
+            _putnotif(
+                context,
+                SEVERITY_WARNING, 
+                'The EBS burst balance for {0:s}: {1:.2f} is below {2:.2f}'.format(mount_point, balance, thr['warning']),
+                timestamp,
+                'IOPS-Credits-{0:s}'.format(mount_point)
+            )
+        elif did_cross_above(prev_balance, balance, thr['ok']):
+            _putnotif(
+                context,
+                SEVERITY_OK, 
+                'The EBS burst balance for {0:s}: {1:.2f} is above {2:.2f}'.format(mount_point, balance, thr['ok']),
+                timestamp,
+                'IOPS-Credits-{0:s}'.format(mount_point)
+            )
+    state = remove_old_vols_from_state(state, context['volume_ids'])
+    return state
+
+def perform_checks():
+    context = initialize_context()
+    state = load_state()
+    state = check_cpu_credit_balance_task(context, state)
+    state = check_cpu_surplus_credit_balance_task(context, state)
+    state = check_volume_burst_balances_task(context, state)
+    save_state(state)
+
+def run_checks_loop():
+    while True:
+        period = get_interval_seconds()
+        start = time.monotonic()
+        perform_checks()
+        end = time.monotonic()
+        to_sleep = period - (end - start)
+        time.sleep(max(0, to_sleep))
+
+if __name__ == '__main__':
+    run_checks_loop()
