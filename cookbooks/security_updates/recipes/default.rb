@@ -67,16 +67,3 @@ end
 package 'dev-vcs/git' do
   version '2.7.3-r4'
 end
-
-enable_package 'app-misc/ca-certificates' do
-  version '20210119.3.66'
-end
-
-package 'app-misc/ca-certificates' do
-  version '20210119.3.66'
-end
-
-execute "update-ca-certificates --fresh" do
- action :nothing
- subscribes :run, 'package[app-misc/ca-certificates]', :delayed
-end

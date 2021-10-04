@@ -139,6 +139,22 @@ execute "remove framework_env from /etc/profile" do
 end
 
 
+# TODO: move to security-updates or its own recipe
+# Upgrade ca-certificates to the newest bundle.
+enable_package "app-misc/ca-certificates" do
+  version "20140325-r1 ~amd64"
+end
+
+package "app-misc/ca-certificates" do
+  version "20140325-r1"
+  action :upgrade
+end
+
+execute "update-ca-certificates --fresh" do
+ action :nothing
+ subscribes :run, 'package[app-misc/ca-certificates]', :delayed
+end
+
 # all roles get these recipes
 include_recipe 'ey-cron'
 include_recipe "ey-env"
