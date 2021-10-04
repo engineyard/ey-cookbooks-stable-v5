@@ -1,6 +1,14 @@
-check process <%= @worker_name %>
-  with pidfile /var/run/engineyard/dj/<%= @app_name %>/dj_<%= @worker_name %>.pid
-  start program = "/engineyard/custom/dj <%= @app_name %> start <%= @framework_env %> <%= @worker_name %>" with timeout 90 seconds
-  stop program = "/engineyard/custom/dj <%= @app_name %> stop <%= @framework_env %> <%= @worker_name %>" with timeout 90 seconds
-  if totalmem is greater than <%= @worker_memory %> MB then restart # eating up memory?
-  group dj_<%= @app_name %>
+<% @queues.each do |queue_name, workers| %>
+
+   <% for count in 1..workers do %>
+    check process <%= queue_name %>_<%= count %>
+    with pidfile /var/run/engineyard/dj/<%= @app_name %>/dj_<%= queue_name %>_<%= count %>.pid
+    start program = "/usr/bin/env QUEUES=<%= queue_name %> /engineyard/custom/dj <%= @app_name %> start <%= @framework_env %> <%= queue_name %>_<%= count %>" with timeout 90 seconds
+    stop program = "/engineyard/custom/dj <%= @app_name %> stop <%= @framework_env %> <%= queue_name %>" with timeout 90 seconds
+    if totalmem is greater than <%= @worker_memory %> MB then restart # eating up memory?
+    group dj_<%= @app_name %>
+  <% end %>
+
+<% end %>
+
+
