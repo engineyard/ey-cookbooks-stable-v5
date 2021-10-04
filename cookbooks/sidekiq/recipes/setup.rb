@@ -55,7 +55,7 @@ if node['sidekiq']['is_sidekiq_instance']
         mode 0644
         source "sidekiq.yml.erb"
         backup false
-        variables(node['sidekiq'])
+        variables(node['sidekiq'].merge(count: count))
         notifies :run, "execute[restart-sidekiq-for-#{app_name}]"
       end
     end
