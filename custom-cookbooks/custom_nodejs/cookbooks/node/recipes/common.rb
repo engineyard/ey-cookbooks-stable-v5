@@ -117,7 +117,7 @@ execute "env-update" do
 end
 
 # Leave a .json with the node versions we provide
-["/opt" "/opt/nodejs"].each do |dir|
+["/opt", "/opt/nodejs"].each do |dir|
   directory dir do
     owner 'root'
     group 'root'
