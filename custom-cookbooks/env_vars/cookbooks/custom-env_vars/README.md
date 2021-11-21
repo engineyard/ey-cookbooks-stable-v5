@@ -28,7 +28,7 @@ Our main recipes have the `env_vars` recipe but it is not included by default. T
 
       git clone https://github.com/engineyard/ey-cookbooks-stable-v5
       cd ey-cookbooks-stable-v5
-      cp custom-cookbooks/fail2ban/cookbooks/custom-env_vars /path/to/app/cookbooks/
+      cp custom-cookbooks/env_vars/cookbooks/custom-env_vars /path/to/app/cookbooks/
       ```
 
 4. Download the ey-core gem on your local machine and upload the recipes
