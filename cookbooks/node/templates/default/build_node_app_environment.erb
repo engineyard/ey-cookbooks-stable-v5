@@ -105,6 +105,7 @@ possible_commands.each do |command|
 #!/bin/sh
 source #{config_dir}/env
 source #{config_dir}/env.custom
+source #{config_dir}/env.cloud
 cd #{current_dir}
 exec #{npm_command}
       SCRIPT
