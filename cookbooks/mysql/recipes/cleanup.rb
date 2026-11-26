@@ -1,5 +1,5 @@
 template "/tmp/mysql-cleanup.sql" do
-  mysql_hostname = node['ec2'] ? node['ec2']['local_hostname'].split(".").first : `hostname`.split(".").first
+  mysql_hostname = (node['ec2'] && node['ec2']['local_hostname']) ? node['ec2']['local_hostname'].split(".").first : `hostname`.split(".").first
   mysql_hostname_variant = `hostname`
 
   owner 'root'

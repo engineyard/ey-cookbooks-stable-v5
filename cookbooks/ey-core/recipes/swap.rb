@@ -18,5 +18,5 @@ bash "use-ec2-swap-partition" do
     swapon /dev/xvda3
     echo "/dev/xvda3 swap swap sw 0 0" >> /etc/fstab
   EOH
-  only_if { File.exists?("/dev/xvda3") && %w(c1.medium m1.small).include?(node['ec2']['instance_type']) && !system("grep -q xvda3 /etc/fstab") }
+  only_if { File.exists?("/dev/xvda3") && %w(c1.medium m1.small).include?(node['ec2'] && node['ec2']['instance_type']) && !system("grep -q xvda3 /etc/fstab") }
 end

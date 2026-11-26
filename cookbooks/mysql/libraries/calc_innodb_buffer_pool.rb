@@ -4,7 +4,10 @@ class Chef
       solo = ["solo"].include?( node.dna['instance_role'] )
       total_memory = `cat /proc/meminfo`.scan(/^MemTotal:\s+(\d+)\skB$/).flatten.first.to_i * 1024
       total_memory_mb = (total_memory / 1024/1024)
-      instance_role = open("http://169.254.169.254/latest/meta-data/instance-type").read
+      # Fetch via IMDSv2 token handshake with IMDSv1 fallback (see ey-lib
+      # libraries/imds.rb). Use the fully-qualified ::EY::IMDS: a bare `EY::IMDS`
+      # inside `class Chef` resolves to the non-existent `Chef::EY::IMDS`.
+      instance_role = ::EY::IMDS.get("latest/meta-data/instance-type")
       if mem = Engineyard::PoolSize.instance_resources(instance_role).innodb_pool
         solo ? mem.first : mem.last
       else
