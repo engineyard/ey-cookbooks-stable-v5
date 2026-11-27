@@ -12,7 +12,7 @@ Please use this repository:
 
 ### 3. As a reference for implementing custom cookbooks ###
  * [Customizing your environment with Chef](#customize-your-environment-with-custom-chef)
- * Use the [redis](custom-cookbooks/redis) or [hello_world](custom-cookbooks/hello_world) examples for a quick reference.
+ * Use the [redis](../custom-cookbooks/redis) or [hello_world](../custom-cookbooks/hello_world) examples for a quick reference.
 
 ### 4. As a way to contribute back. ###
  * Bugs fixes, New features, or basic hooks to simplify your own customizations are all welcome.
@@ -36,7 +36,7 @@ Throw out your existing understanding of how it works! Previous versions (and th
 
 Engine Yard's Chef stack provides the platform upon which your applications run. Based on the configuration options you choose when creating your environment, Chef will do the work of setting up things like: haproxy, nginx, mysql, and unicorn. We call this setup an "Apply". Whenever you make a configuration change such as adding an SSL certificate, you must "Apply" those changes into reality on your instances. The Chef run may create or modify files and install or upgrade software packages as a result.
 
-The file `/etc/dna.json` is the main input to the Chef run, telling the cookbooks what kind of instance they are running on (such as app or DB), and what other servers and services are connected. This repository, and specifically the `cookbooks` folder comprise the main program passed to `chef-solo`.
+The file `/etc/chef/dna.json` is the main input to the Chef run, telling the cookbooks what kind of instance they are running on (such as app or DB), and what other servers and services are connected. This repository, and specifically the `cookbooks` folder comprise the main program passed to `chef-solo`.
 
 ## Customize your environment with Custom Chef ##
 

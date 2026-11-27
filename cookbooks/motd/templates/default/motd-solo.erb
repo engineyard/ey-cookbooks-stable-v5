@@ -47,4 +47,4 @@ sudo gem install tins -v 1.6.0                               # For Ruby 1.9.3 or
 sudo gem list --no-installed bundler && gem install bundler  # Install bundler if not installed yet
 sudo gem install jazor
 sudo jazor /etc/chef/dna.json
-sudo jazor /etc/chef/dna.json 'applications.map {|app, data| [app, data.keys]}'
+sudo jazor /etc/chef/dna.json 'dna.applications.map {|app, data| [app, data.keys]}'
