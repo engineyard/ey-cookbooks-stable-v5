@@ -29,8 +29,8 @@ case "$1" in
     if [ -n $NGINX_PID ]; then
       if [ ! -z $PASSENGER_PID ]; then
         if [ ! -f $PIDFILE ]; then
-          echo $PASSENGER_PID > $PIDFILE
-          echo "Passenger: PIDFILE $PIDFILE was recreated with PID $PASSENGER_PID"
+          echo $NGINX_PID > $PIDFILE
+          echo "Passenger: PIDFILE $PIDFILE was recreated with PID $NGINX_PID"
         fi
       else
         echo "Passenger: Nginx is running with PID $NGINX_PID, but the standalone Passenger process is missing."
