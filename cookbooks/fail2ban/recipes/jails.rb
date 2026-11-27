@@ -4,14 +4,56 @@
 #
 #
 
-# We're going to need net/http to initiate an HTTP request to AWS.
+# We need net/http (token PUT) and open-uri (fail-loud GET) for IMDS.
 require 'net/http'
+require 'open-uri'
+require 'timeout'
+
+# Fetch an EC2 instance metadata value using IMDSv2 (token handshake) with a
+# plain-GET fallback. Under HttpTokens=required a plain unauthenticated IMDSv1
+# GET returns 401. If the token PUT fails we fall back to an unauthenticated
+# GET. Mirrors the Stack v8 ey-fail2ban helper, using OpenURI.open_uri because
+# URI.open needs Ruby 2.5+ and this stack runs Ruby 2.2.
+#
+# IMPORTANT: this MUST fail loud on an error response. The fetched value flows
+# into fail2ban's `ignoreip` allow-list; Net::HTTP.get (used here before)
+# returns the body whatever the status, so a 401 error page would have been
+# written into config. OpenURI raises OpenURI::HTTPError on any non-2xx. A 404
+# is treated as legitimate absence (no public IPv4 assigned) and returns nil.
+def imds_get(path)
+  base = 'http://169.254.169.254'
+  token = begin
+    uri = URI("#{base}/latest/api/token")
+    req = Net::HTTP::Put.new(uri.request_uri)
+    req['X-aws-ec2-metadata-token-ttl-seconds'] = '21600'
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.open_timeout = 5
+    http.read_timeout = 5
+    res = http.start { |connection| connection.request(req) }
+    res.is_a?(Net::HTTPSuccess) && !res.body.to_s.empty? ? res.body : nil
+  rescue StandardError
+    nil
+  end
+  headers = token ? { 'X-aws-ec2-metadata-token' => token } : {}
+  headers[:read_timeout] = 5
+  Timeout.timeout(5) do
+    OpenURI.open_uri("#{base}/#{path}", headers) { |io| io.read }
+  end
+rescue OpenURI::HTTPError => e
+  # 404 = key legitimately absent. Anything else (401/403, 5xx) is a real
+  # error we must NOT swallow into config.
+  return nil if e.io.status.first == '404'
+  raise
+end
 
 ey_cloud_report "Fail2Ban-filter-action" do
   message "Fail2Ban action & filter"
 end
 
-public_ip = Net::HTTP.get(URI('http://169.254.169.254/latest/meta-data/public-ipv4'))
+public_ip = imds_get('latest/meta-data/public-ipv4').to_s.strip
+# Basic IPv4 sanity check, so a malformed value can never reach `ignoreip`.
+# An empty value means no public IPv4 is assigned (404 above).
+raise "fail2ban: IMDS returned a malformed public-ipv4 (#{public_ip.inspect})" unless public_ip.empty? || public_ip =~ /\A\d{1,3}(?:\.\d{1,3}){3}\z/
 
 def pushFile(fileList, type)
 	refPath = "#{Chef::Config['file_cache_path']}cookbooks/fail2ban/files"

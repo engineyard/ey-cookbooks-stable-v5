@@ -1,7 +1,7 @@
 worker_count = if node[:dna][:instance_role] == 'solo'
                  1
                else
-                 case node['ec2']['instance_type']
+                 case ((node['ec2'] && node['ec2']['instance_type']) || node[:dna][:environment][:instance_size])
                  when 'm3.medium' then 2
                  when 'm3.large' then 4
                  when 'm3.xlarge' then 8
