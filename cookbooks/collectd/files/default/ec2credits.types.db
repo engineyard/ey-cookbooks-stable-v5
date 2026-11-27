@@ -1,0 +1,3 @@
+cpu_credits             balance:GAUGE:0:U, usage:GAUGE:0:U
+cpu_surplus_credits     balance:GAUGE:0:U, charged:GAUGE:0:U
+ebs_iops_burst          balance:GAUGE:0:100.1
