@@ -10,6 +10,8 @@ This cookbook will not install cron jobs for the root user, it must be modified
 if this is required.  Cron jobs are installed for the default application user,
 typically called `deploy`.
 
+For Chef compatibility it is recommended to only use numbers (not names) for days/months while specifying cronjobs .
+
 ## Installation
 
 For simplicity, we recommend that you create the cookbooks directory at the root
@@ -57,7 +59,7 @@ All customizations go to `cookbooks/custom-cron/attributes/default.rb`.
 Add your cron jobs as an array of hashes in `default[:custom_crons]` You must
 specify a name, time, command and instance name or instance type. The following arguments are valid: `app`,`app_master`, `db`, `util`, `all`, or "instance_name".  The time value must be the
 full string containing minute, hour, day, month and weekday separated by spaces
-(eg: '* * * * *').
+(eg: ‘ * * * * *’), using numbers rather than names.
 
 ```
 default[:custom_crons] = [
